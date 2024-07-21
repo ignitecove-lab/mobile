@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "810851447663",
+    "project_id": "ignitecove",
+    "storage_bucket": "ignitecove.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810851447663:android:c977e1408a71a3056b2e9a",
+        "android_client_info": {
+          "package_name": "host.exp.ignitecove"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "810851447663-s64phvm0hdvlasmhfbmajm2rkaoh3rl2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "host.exp.ignitecove",
+            "certificate_hash": "6f72f176ac158909bf13a3bc3a6b346e702aa33e"
+          }
+        },
+        {
+          "client_id": "810851447663-sbisv56g4pt9dj16ujvf8asv6kbotsl7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "host.exp.ignitecove",
+            "certificate_hash": "11182baedaa918c12a7fc1fca934a9c9a10dc311"
+          }
+        },
+        {
+          "client_id": "810851447663-8n592ict69u02ulk0780em7135e98thv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp_QDWkhzdWGypovnd594DiHOWkMHPBEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "810851447663-1vrovpdvfu78fdvtqubfliibdtvvfvbr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "810851447663-3sasg51dj77t8roppp8bmj3lvp9nb85g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "host.exp.ignitecove"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

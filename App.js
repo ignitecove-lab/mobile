@@ -1,20 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from "@react-navigation/native";
+import { MenuProvider } from "react-native-popup-menu";
+import StackNavigator from "./StackNavigator";
+import { StatusBar } from "expo-status-bar";
+import { AuthProvider } from "./useAuth";
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <MenuProvider>
+      <NavigationContainer>
+        <AuthProvider>
+          <StatusBar
+            style="dark" // Options: "auto", "inverted", "light", "dark"
+            backgroundColor="#ffffff"
+            translucent={false}
+            hidden={false}
+          />
+          <StackNavigator />
+        </AuthProvider>
+      </NavigationContainer>
+    </MenuProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

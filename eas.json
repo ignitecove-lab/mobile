@@ -1,0 +1,22 @@
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "ASSET_BUNDLE_PATTERNS": "assets/**"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "ASSET_BUNDLE_PATTERNS": "assets/**"
+      }
+    },
+    "production": {
+      "env": {
+        "ASSET_BUNDLE_PATTERNS": "assets/**"
+      }
+    }
+  }
+}
