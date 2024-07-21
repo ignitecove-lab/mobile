@@ -79,7 +79,24 @@ const HomeScreen = ({}) => {
       initializeSwiper();
     }, [showPhoneNumUi])
   );
-
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: isVIP ? "Ignitecove Pro" : "Ignitecove",
+      headerStyle: {
+        backgroundColor: "white",
+      },
+      headerTitleStyle: { color: isVIP ? "#007bff" : "black" },
+      headerRight: () => (
+        <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
+          <Image
+            style={tw("h-10 w-10 rounded-full")}
+            source={{ uri: user.imageURL }}
+          />
+        </TouchableOpacity>
+      ),
+    });
+  }, []);
   useEffect(() => {
     const profileUpdate = AppState.addEventListener(
       "change",
@@ -207,25 +224,7 @@ const HomeScreen = ({}) => {
 
   return (
     <SafeAreaView style={tw("flex-1")}>
-      <View style={tw("flex-row items-center justify-between z-20 px-2 mt-2")}>
-        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-          <Image
-            style={tw("h-10 w-10 rounded-full")}
-            source={{ uri: user.imageURL }}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
-          <Image style={tw("h-12 w-12")} source={require("../logo.png")} />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setExitModalVisible(true)}>
-          <AntDesign name="poweroff" size={28} color="red" />
-        </TouchableOpacity>
-      </View>
-      {/* End of Header */}
-
-      <View style={tw("flex-row")}></View>
+      <View style={tw("flex-row ")}></View>
       {!loading ? (
         profiles && profiles.length > 0 ? (
           <>
@@ -264,7 +263,7 @@ const HomeScreen = ({}) => {
                 renderCard={(card) => (
                   <View
                     key={card.id}
-                    style={tw("relative bg-white h-3/4 rounded-xl")}
+                    style={tw("relative bg-white h-5/6 rounded-xl")}
                   >
                     <Image
                       style={tw("absolute top-0 h-full w-full rounded-xl")}
@@ -373,10 +372,10 @@ const HomeScreen = ({}) => {
                                 style={[
                                   styles.tag,
                                   {
-                                    paddingVertical: 4,
+                                    paddingVertical: 2,
                                     paddingHorizontal: 12,
-                                    borderRadius: 8,
-                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    borderWidth: 0.5,
                                     borderColor: "white",
                                     backgroundColor: user.accountTags?.some(
                                       (accountTag) =>
@@ -548,7 +547,7 @@ const styles = StyleSheet.create({
   tag: {
     borderRadius: 15,
     padding: 6,
-    margin: 5,
+    margin: 4,
   },
   tagText: {
     color: "white",

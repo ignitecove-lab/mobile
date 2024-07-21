@@ -83,35 +83,10 @@ const StackNavigator = () => {
                 }
               }
             />
-            <Stack.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={
-                isVIP && {
-                  headerRight: () => (
-                    <FontAwesome
-                      name="tag"
-                      size={10}
-                      color="white"
-                      style={{
-                        backgroundColor: "#3944bc",
-                        padding: 10,
-                        borderRadius: 8,
-                      }}
-                    >
-                      <Text> VIP</Text>
-                    </FontAwesome>
-                  ),
-                  headerRightContainerStyle: {
-                    paddingRight: 15,
-                  },
-                }
-              }
-            />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Profile View" component={ViewProfileScreen} />
             <Stack.Screen name="PayWall" component={PaywallScreen} />
             <Stack.Screen name="Search" component={SearchScreen} />
-            {/* TODO */}
             <Stack.Screen name="SearchResult" component={SearchResult} />
             <Stack.Screen name="Search Result" component={SearchResult} />
             <Stack.Screen name="PayStatus" component={PayStatus} />
@@ -119,8 +94,6 @@ const StackNavigator = () => {
               name="MyProfile"
               component={Profile}
               options={{
-                headerTitle: "",
-                headerLeft: () => <HeaderLeft />,
                 headerRight: isVIP
                   ? () => (
                       <FontAwesome

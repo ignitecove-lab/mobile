@@ -9,7 +9,7 @@ import React, {
 import API_BASE_URL from "./lib/constants/baseUrl";
 import messaging from "@react-native-firebase/messaging";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Linking, AppState } from "react-native";
+import { Alert, Linking, AppState, Platform } from "react-native";
 import VersionCheck from "react-native-version-check";
 
 const AuthContext = createContext();

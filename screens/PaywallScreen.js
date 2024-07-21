@@ -98,7 +98,8 @@ const PaywallScreen = ({ route }) => {
 
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-  const { fcmToken, notificationData, authState, authContext } = useAuth();
+  const { fcmToken, notificationData, authState, authContext, isVIP } =
+    useAuth();
 
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight =
@@ -127,6 +128,10 @@ const PaywallScreen = ({ route }) => {
       .then((data) => {
         if (isUpgrade) {
           const plans = data?.find((obj) => obj.name === "BRONZE");
+          setPlans([plans]);
+        }
+        if (!isVIP) {
+          const plans = data?.find((obj) => obj.name === "SILVER");
           setPlans([plans]);
         } else {
           setPlans(data);

@@ -3,58 +3,71 @@ import {
   Text,
   Image,
   StyleSheet,
+  Dimensions,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useLayoutEffect,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "../lib/constants/baseUrl";
 import { Ionicons } from "@expo/vector-icons";
 import useAuth from "../useAuth";
-
-const FeatureCard = ({ icon, color, title, subtitle }) => {
-  return (
-    <View style={styles.card}>
-      <Ionicons name={icon} size={40} color={color} />
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
-    </View>
-  );
-};
-
-const FeatureSection = () => {
-  return (
-    <View style={styles.Infocontainer}>
-      {/* <FeatureCard
-        icon="star"
-        title={`${Math.floor(Math.random() * 20) + 1} Likes`}
-        subtitle=""
-        color="#B026FF"
-      />
-      <FeatureCard
-        icon="mail-unread"
-        title="Messages"
-        subtitle=""
-        color="#603FEF"
-      />
-      <FeatureCard
-        icon="flame"
-        title="Viewed Numbers"
-        subtitle="VIEW MORE"
-        color="#ef4444"
-      /> */}
-    </View>
-  );
-};
+import tw from "tailwind-rn";
+import Modal from "react-native-modal";
 
 const ProfileScreen = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [exitModalVisible, setExitModalVisible] = useState(false);
 
-  const { user, authState, isVIP, setIsVIP } = useAuth();
+  const { authContext, user, authState, isVIP, setIsVIP } = useAuth();
+  const { logout } = authContext;
   const navigation = useNavigation();
+  const deviceWidth = Dimensions.get("window").width;
+  const deviceHeight =
+    Platform.OS === "ios"
+      ? Dimensions.get("window").height
+      : require("react-native-extra-dimensions-android").get(
+          "REAL_WINDOW_HEIGHT"
+        );
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: "Profile",
+      headerStyle: {
+        backgroundColor: "white",
+      },
+      headerTitleStyle: { color: isVIP ? "#007bff" : "black" },
 
+      headerRight: () => (
+        <Menu>
+          <MenuTrigger>
+            <Icon name="more-vert" size={25} color="black" />
+          </MenuTrigger>
+          <MenuOptions>
+            <MenuOption onSelect={() => setExitModalVisible(true)}>
+              <Text style={{ padding: 10 }}>Logout</Text>
+            </MenuOption>
+          </MenuOptions>
+        </Menu>
+      ),
+      headerTitleStyle: { color: "black" },
+    });
+  }, []);
   const fetchUser = useCallback(async () => {
     if (!user?.id) return;
 
@@ -76,6 +89,7 @@ const ProfileScreen = () => {
       })
       .then((data) => {
         setUserData(data);
+        console.log(userData);
         setLoading(false);
       })
       .catch((err) => {
@@ -124,23 +138,94 @@ const ProfileScreen = () => {
               />
 
               <View style={styles.editIconContainer}>
-                <Ionicons name="pencil" size={24} color="#000" />
+                <Ionicons name="pencil" size={20} padding={4} color="#fff" />
               </View>
             </TouchableOpacity>
-
-            <View style={styles.profileInfo}>
+            <View style={styles.profileDetails}>
+              <Text style={styles.profileName}>{`${userData.firstName}`}</Text>
               <Text
-                style={styles.profileName}
-              >{`${userData.firstName}, ${userData.age}`}</Text>
+                style={styles.profileText}
+              >{`${userData.age}, ${userData.gender}`}</Text>
+              <Text
+                style={styles.profileText}
+              >{`${userData.phoneNumber}`}</Text>
+              <Text style={styles.profileText}>{`${userData.location}`}</Text>
             </View>
           </View>
+          {/*Tags Section */}
+          {userData?.accountTags && userData?.accountTags.length > 0 && (
+            <View style={tw("p-4")}>
+              <Text style={tw("text-lg font-bold mb-2")}>Tags:</Text>
+              <View style={tw("flex-row flex-wrap")}>
+                {userData.accountTags?.map((tag, index) => (
+                  <View
+                    key={index}
+                    style={tw("bg-blue-200 px-4 py-2 rounded-lg m-1")}
+                  >
+                    <Text style={tw("text-black font-bold")}>{tag.tag}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
 
           <FeatureSection />
+          <Modal
+            style={styles.modalContainer}
+            isVisible={exitModalVisible}
+            hasBackdrop={true}
+            deviceWidth={deviceWidth}
+            deviceHeight={deviceHeight}
+            backdropColor={"#00000031"}
+          >
+            <View style={styles.modalBody}>
+              <Text style={styles.modalTextHeader}>Exit</Text>
+
+              <Text style={styles.modalText}>Would you like to logout? </Text>
+
+              <View style={tw("flex-row justify-center items-center")}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setExitModalVisible(false);
+                  }}
+                  style={tw(
+                    "bg-indigo-600 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
+                  )}
+                >
+                  <Text
+                    onPress={() => {
+                      setExitModalVisible(false);
+                    }}
+                    style={tw("text-white py-2 px-2  font-medium")}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    //     close the app
+                    setExitModalVisible(false);
+                    logout();
+                  }}
+                  style={tw(
+                    "bg-red-500 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
+                  )}
+                >
+                  <Text style={tw("text-white py-2 px-2 font-medium")}>
+                    Proceed
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
 
           <View style={styles.premiumSection}>
             <Text style={styles.premiumText}>Ignitecove Premium</Text>
             <Text style={styles.premiumDetails}>
-              {!isVIP ? `Upgrade and get seen and see premium users only` : `We are sorry to see you leave`}
+              {!isVIP
+                ? `Upgrade and get seen and see premium users only`
+                : `We are sorry to see you leave`}
             </Text>
             {isVIP ? (
               <TouchableOpacity
@@ -170,12 +255,46 @@ const ProfileScreen = () => {
   );
 };
 
+const FeatureCard = ({ icon, color, title, subtitle }) => {
+  return (
+    <View style={styles.card}>
+      <Ionicons name={icon} size={40} color={color} />
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
+    </View>
+  );
+};
+const FeatureSection = () => {
+  return (
+    <View style={styles.Infocontainer}>
+      {/* <FeatureCard
+        icon="star"
+        title={`${Math.floor(Math.random() * 20) + 1} Likes`}
+        subtitle=""
+        color="#B026FF"
+      />
+      <FeatureCard
+        icon="mail-unread"
+        title="Messages"
+        subtitle=""
+        color="#603FEF"
+      />
+      <FeatureCard
+        icon="flame"
+        title="Viewed Numbers"
+        subtitle="VIEW MORE"
+        color="#ef4444"
+      /> */}
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   editIconContainer: {
     position: "absolute",
-    top: 40,
-    left: 180,
-    backgroundColor: "#f5f5f5",
+    top: 80,
+    left: 80,
+    backgroundColor: "#007bff",
     borderRadius: 20,
     padding: 6,
   },
@@ -221,23 +340,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   profileHeader: {
-    flexDirection: "column",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
   },
   profileImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    flex: 1,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   profileInfo: {
     flex: 1,
     marginLeft: 16,
-    marginTop: 15,
+    marginTop: 16,
   },
   profileName: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  profileDetails: {
+    marginHorizontal: 16,
+    flex: 3,
+  },
+  profileText: {
+    fontSize: 16,
   },
   premiumSection: {
     padding: 16,
@@ -265,6 +393,28 @@ const styles = StyleSheet.create({
   },
   upgradeButtonText: {
     color: "#ffffff",
+  },
+  modalContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+  modalBody: {
+    flex: 1,
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 10,
+    maxHeight: "30%",
+    width: "98%",
+  },
+  modalTextHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
 
