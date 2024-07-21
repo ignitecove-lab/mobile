@@ -129,8 +129,7 @@ const PaywallScreen = ({ route }) => {
         if (isUpgrade) {
           const plans = data?.find((obj) => obj.name === "BRONZE");
           setPlans([plans]);
-        }
-        if (!isVIP) {
+        } else if (!isVIP && !isUpgrade) {
           const plans = data?.find((obj) => obj.name === "SILVER");
           setPlans([plans]);
         } else {
