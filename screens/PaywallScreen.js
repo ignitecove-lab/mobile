@@ -253,50 +253,53 @@ const PaywallScreen = ({ route }) => {
     }
   };
 
-  const radioData = [
-    {
-      label: (
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View style={{ width: 100, height: 70 }}>
-            <Image
-              source={require("../lipa_na_mpesa.png")}
-              style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-            />
+  const radioData = plans &&
+    plans?.length > 0 && [
+      {
+        label: (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ width: 100, height: 70 }}>
+              <Image
+                source={require("../lipa_na_mpesa.png")}
+                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+              />
+            </View>
+            <Text
+              style={{ marginLeft: 10 }}
+            >{`Lipa na Mpesa ${new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "KES",
+            }).format(
+              plans?.find((plan) => plan?.id === planId)?.planDetails[0]
+                ?.price || 0
+            )}`}</Text>
           </View>
-          <Text
-            style={{ marginLeft: 10 }}
-          >{`Lipa na Mpesa ${new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "KES",
-          }).format(
-            plans?.find((plan) => plan.id === planId)?.planDetails[0]?.price
-          )}`}</Text>
-        </View>
-      ),
-      value: "lipa_na_mpesa",
-    },
-    {
-      label: (
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View style={{ width: 100, height: 50 }}>
-            <Image
-              source={require("../pay_by_card.webp")}
-              style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-            />
+        ),
+        value: "lipa_na_mpesa",
+      },
+      {
+        label: (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ width: 100, height: 50 }}>
+              <Image
+                source={require("../pay_by_card.webp")}
+                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+              />
+            </View>
+            <Text
+              style={{ marginLeft: 10 }}
+            >{`Pay By card ${new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(
+              plans?.find((plan) => plan?.id === planId)?.planDetails[1]
+                ?.price || 0
+            )}`}</Text>
           </View>
-          <Text
-            style={{ marginLeft: 10 }}
-          >{`Pay By card ${new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          }).format(
-            plans?.find((plan) => plan.id === planId)?.planDetails[1]?.price
-          )}`}</Text>
-        </View>
-      ),
-      value: "pay_by_card",
-    },
-  ];
+        ),
+        value: "pay_by_card",
+      },
+    ];
 
   const getCheckoutURL = async () => {
     const authURL = await fetch(
