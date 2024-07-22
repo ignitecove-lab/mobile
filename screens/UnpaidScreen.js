@@ -37,20 +37,6 @@ const App = () => {
     { id: "4", src: require("../persons/4.jpg") },
     { id: "5", src: require("../persons/5.jpg") },
     { id: "6", src: require("../persons/6.jpg") },
-    { id: "7", src: require("../persons/7.jpg") },
-    { id: "8", src: require("../persons/8.jpg") },
-    { id: "9", src: require("../persons/9.jpg") },
-    { id: "10", src: require("../persons/10.jpg") },
-    { id: "11", src: require("../persons/11.jpg") },
-    { id: "12", src: require("../persons/12.jpg") },
-    { id: "13", src: require("../persons/13.jpg") },
-    { id: "14", src: require("../persons/14.jpg") },
-    { id: "15", src: require("../persons/15.jpg") },
-    { id: "16", src: require("../persons/16.jpg") },
-    { id: "17", src: require("../persons/17.jpg") },
-    { id: "18", src: require("../persons/18.jpg") },
-    { id: "19", src: require("../persons/19.jpg") },
-    { id: "20", src: require("../persons/20.jpg") },
   ];
 
   useEffect(() => {

@@ -24,11 +24,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "buildProperties": {
-        "gradle.properties": {
-          "firebaseMessagingEnabled": true
-        }
-      }
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "@react-native-firebase/app",
@@ -50,6 +48,16 @@
     ],
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "owner": "charlesncn",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/998a2585-4a51-404e-b384-42e709c6ce6c"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e7a0fabe-84f8-4dd5-8eb4-d6fbba74727f"
+      }
     }
   }
 }

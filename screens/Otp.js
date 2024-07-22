@@ -1,6 +1,6 @@
 import React, {useLayoutEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, Button, Text } from "react-native";
-import OTPInputView from "@twotalltotems/react-native-otp-input";
+import { OtpInput } from "react-native-otp-entry";
 import useAuth from '../useAuth';
 
 
@@ -28,17 +28,25 @@ const Otp = ({ route, navigation }) => {
           title="Edit Phone Number"
           onPress={() => navigation.replace("PhoneNumber")}
         />
-        <OTPInputView
-          style={{ width: "80%", height: 200 }}
-          pinCount={6}
-          autoFocusOnLoad={true}
-          codeInputFieldStyle={styles.underlineStyleBase}
-          codeInputHighlightStyle={styles.underlineStyleHighLighted}
-          onCodeFilled={(code) => {
-            checkVerification(phoneNumber, countryCode, code);
+        <OtpInput
+          numberOfDigits={6}
+          focusColor="green"
+          focusStickBlinkingDuration={500}
+          onTextChange={(text) => console.log(text)}
+          onFilled={(text) => {
+             checkVerification(phoneNumber, countryCode, text);
+            console.log(`OTP is ${text}`)}}
+          textInputProps={{
+            accessibilityLabel: "One-Time Password",
+          }}
+          theme={{
+            containerStyle: styles.container,
+            pinCodeContainerStyle: styles.pinCodeContainer,
+            pinCodeTextStyle: styles.pinCodeText,
+            focusStickStyle: styles.focusStick,
+            focusedPinCodeContainerStyle: styles.activePinCodeContainer,
           }}
         />
-        {invalidCode && <Text style={styles.error}>Incorrect code.</Text>}
       </SafeAreaView>
     );
   };
@@ -79,6 +87,11 @@ const Otp = ({ route, navigation }) => {
     error: {
       color: "red",
     },
+  container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
   });
 
   export default Otp;
