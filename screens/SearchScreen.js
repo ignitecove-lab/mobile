@@ -67,36 +67,8 @@ const SearchScreen = () => {
         }
     };
 
-    const renderLabel = () => {
-        if (value || isFocus) {
-            return (
-                <Text style={[styles.label, isFocus && styles.labelFocused]}>
-                    Location
-                </Text>
-            );
-        }
-        return null;
-    };
-
     return (
         <SafeAreaView style={tw("flex-1")}>
-            <View style={tw("flex-row items-center justify-between px-5")}>
-                <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-                    <Image
-                        style={tw("h-10 w-10 rounded-full")}
-                        source={{uri: user.imageURL}}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => navigation.navigate("Modal")}>
-                    <Image style={tw("h-14 w-14")} source={require("../logo.png")}/>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={logout}>
-                    <FontAwesome name="power-off" size={24} color="red"/>
-                </TouchableOpacity>
-            </View>
-            {/* End of Header */}
 
             <View style={tw("h-full items-center p-12 pt-40")}>
                 <Text style={tw("text-xl font-semibold text-red-500 p-4")}>
@@ -106,7 +78,6 @@ const SearchScreen = () => {
                 <Text style={tw("text-center p-4 font-bold text-red-400")}>
                     Step 1: Select Location{" "}
                 </Text>
-                {renderLabel()}
                 <Dropdown
                     style={[
                         tw("items-center pt-1"),
