@@ -21,7 +21,6 @@ import React, {
 } from "react";
 import { useNavigation } from "@react-navigation/core";
 import useAuth from "../useAuth";
-import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "tailwind-rn";
 import { AntDesign, Entypo, FontAwesome } from "@expo/vector-icons";
 import Swiper from "react-native-deck-swiper";
@@ -32,7 +31,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
 
-const HomeScreen = ({}) => {
+const HomeScreen = ({ }) => {
   const navigation = useNavigation();
   const { user, authState, justLoggedIn, setJustLoggedIn, isVIP, setIsVIP } =
     useAuth();
@@ -56,8 +55,8 @@ const HomeScreen = ({}) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
 
   useLayoutEffect(() => {
     if (!authState.isProfileComplete) {
@@ -223,197 +222,158 @@ const HomeScreen = ({}) => {
   };
 
   return (
-    <SafeAreaView style={tw("flex-1")}>
-      <View style={tw("flex-row ")}></View>
+    <View style={tw("flex-1")}>
       {!loading ? (
         profiles && profiles.length > 0 ? (
-          <>
-            <View style={tw("flex-1 z-0 -mt-8 ")}>
-              <Swiper
-                ref={swipeRef}
-                containerStyle={{ backgroundColor: "transparent" }}
-                cards={profiles}
-                key={cardIndex}
-                stackSize={2}
-                cardIndex={0}
-                animateCardOpacity
-                verticalSwipe={false}
-                overlayLabels={{
-                  left: {
-                    title: "NOPE",
-                    style: {
-                      labale: {
-                        textAlign: "right",
-                        color: "red",
-                      },
+          <View style={tw("flex-1 flex-col-reverse z-0 -mt-12")}>
+            <Swiper
+              ref={swipeRef}
+              containerStyle={{ backgroundColor: "transparent" }}
+              cards={profiles}
+              key={cardIndex}
+              stackSize={2}
+              cardIndex={0}
+              animateCardOpacity
+              verticalSwipe={false}
+              overlayLabels={{
+                left: {
+                  title: "NOPE",
+                  style: {
+                    label: {
+                      textAlign: "right",
+                      color: "red",
                     },
                   },
-                  right: {
-                    title: "MATCH",
-                    style: {
-                      labale: {
-                        textAlign: "right",
-                        color: "#4DED30",
-                      },
+                },
+                right: {
+                  title: "MATCH",
+                  style: {
+                    label: {
+                      textAlign: "right",
+                      color: "#4DED30",
                     },
                   },
-                }}
-                onSwiped={(index) => console.log(index)}
-                onSwipedAll={async () => setPage((prevPage) => prevPage + 1)}
-                renderCard={(card) => (
-                  <View
-                    key={card.id}
-                    style={tw("relative bg-white h-5/6 rounded-xl")}
-                  >
+                },
+              }}
+              onSwiped={(index) => console.log(index)}
+              onSwipedAll={async () => setPage((prevPage) => prevPage + 1)}
+              renderCard={(card) => (
+                <View key={card.id} style={tw("bg-white h-5/6 rounded-xl")}>
+                  <Image style={tw("h-full w-full rounded-xl")} source={{ uri: card.imageURL }} />
+
+                  {card?.premium && (
                     <Image
-                      style={tw("absolute top-0 h-full w-full rounded-xl")}
-                      source={{ uri: card.imageURL }}
+                      source={VIPBadge}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        width: 70,
+                        height: 70,
+                        overflow: "hidden",
+                        borderRadius: 8,
+                        borderTopRightRadius: 9,
+                      }}
                     />
+                  )}
 
-                    {card?.premium && (
-                      <Image
-                        source={VIPBadge}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          right: 0,
-                          width: 70,
-                          height: 70,
-                          overflow: "hidden",
-                          borderRadius: 8,
-                          borderTopRightRadius: 9,
-                        }}
-                      />
-                    )}
-
-                    <LinearGradient
-                      colors={["rgba(0, 0, 0, 0.5)", "rgba(0, 0, 0, 0.5)"]}
-                      style={[
-                        {
-                          flex: 1,
-                          borderBottomLeftRadius: 12,
-                          borderBottomRightRadius: 12,
-                          maxHeight: 180,
-                        },
-                        tw("absolute w-full px-6 py-2 bottom-0"),
-                      ]}
-                    >
-                      <View style={[tw("flex-col justify-between")]}>
-                        <View>
-                          <Text style={tw("text-lg text-white")}>
-                            {card.firstName}, {card.age}{" "}
-                          </Text>
-                        </View>
-                        <View>
-                          <Text style={tw("text-sm text-white mb-2")}>
-                            {card.location}
-                          </Text>
-                        </View>
-
-                        <View style={tw("flex flex-row flex-wrap")}>
-                          {card.phoneNumberVisible ||
-                          (showPhoneNumUi.id === card.id &&
-                            showPhoneNumUi.visible) ? (
-                            <View style={tw("flex-1")}>
-                              <Text
-                                selectable={true}
-                                style={tw("text-lg text-white")}
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                              >
-                                {card.phoneNumber}
-                              </Text>
-                            </View>
-                          ) : (
-                            <View style={tw("flex-1")}>
-                              <TouchableOpacity
-                                style={tw("rounded-md bg-red-500 p-2")}
-                                onPress={() => {
-                                  setShowPhoneNumUi({});
-                                  checkSubscription(
-                                    card.id,
-                                    card.phoneNumber
-                                  ).then((r) => {
-                                    if (r.status === 0) {
-                                      setShowPhoneNumUi({
-                                        id: card.id,
-                                        visible: true,
-                                      });
-                                    } else {
-                                      setShowPhoneNumUi({});
-                                    }
-                                  });
-                                }}
-                              >
-                                <Text style={tw("text-white text-center")}>
-                                  View Phone Number
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                          )}
-                        </View>
+                  <LinearGradient
+                    colors={["rgba(0, 0, 0, 0.5)", "rgba(0, 0, 0, 0.5)"]}
+                    style={[
+                      {
+                        flex: 1,
+                        borderBottomLeftRadius: 12,
+                        borderBottomRightRadius: 12,
+                        maxHeight: 180,
+                      },
+                      tw("absolute w-full px-6 py-2 bottom-0"),
+                    ]}
+                  >
+                    <View style={[tw("flex-col justify-between")]}>
+                      <View>
+                        <Text style={tw("text-lg text-white")}>{card.firstName}, {card.age}</Text>
+                      </View>
+                      <View>
+                        <Text style={tw("text-sm text-white mb-2")}>{card.location}</Text>
                       </View>
 
-                      {card.accountTags && (
-                        <ScrollView
-                          style={{
-                            flex: 1,
-                            maxHeight: 180,
-                          }} // Set the maxHeight for the ScrollView
-                        >
-                          <View
-                            style={tw(
-                              "flex-row justify-center items-center w-full flex-wrap mt-2"
-                            )}
-                          >
-                            {card.accountTags?.map((tag) => (
-                              <TouchableOpacity
-                                key={tag.tagId}
-                                style={[
-                                  styles.tag,
-                                  {
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 12,
-                                    borderRadius: 4,
-                                    borderWidth: 0.5,
-                                    borderColor: "white",
-                                    backgroundColor: user.accountTags?.some(
-                                      (accountTag) =>
-                                        accountTag.tagId === tag.tagId
-                                    ),
-                                  },
-                                ]}
-                              >
-                                <Text style={styles.tagText}>{tag.tag}</Text>
-                              </TouchableOpacity>
-                            ))}
+                      <View style={tw("flex flex-row flex-wrap")}>
+                        {card.phoneNumberVisible || (showPhoneNumUi.id === card.id && showPhoneNumUi.visible) ? (
+                          <View style={tw("flex-1")}>
+                            <Text
+                              selectable={true}
+                              style={tw("text-lg text-white")}
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                            >
+                              {card.phoneNumber}
+                            </Text>
                           </View>
-                        </ScrollView>
-                      )}
-                    </LinearGradient>
-                  </View>
-                )}
-              />
-            </View>
+                        ) : (
+                          <View style={tw("flex-1")}>
+                            <TouchableOpacity
+                              style={tw("rounded-md bg-red-500 p-2")}
+                              onPress={() => {
+                                setShowPhoneNumUi({});
+                                checkSubscription(card.id, card.phoneNumber).then((r) => {
+                                  if (r.status === 0) {
+                                    setShowPhoneNumUi({ id: card.id, visible: true });
+                                  } else {
+                                    setShowPhoneNumUi({});
+                                  }
+                                });
+                              }}
+                            >
+                              <Text style={tw("text-white text-center")}>View Phone Number</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    </View>
 
-            <View style={tw("flex flex-row justify-evenly mb-4")}>
+                    {card.accountTags && (
+                      <ScrollView style={{ flex: 1, maxHeight: 180 }}>
+                        <View style={tw("flex-row justify-center items-center w-full flex-wrap mt-2")}>
+                          {card.accountTags?.map((tag) => (
+                            <TouchableOpacity
+                              key={tag.tagId}
+                              style={[
+                                styles.tag,
+                                {
+                                  paddingVertical: 2,
+                                  paddingHorizontal: 12,
+                                  borderRadius: 4,
+                                  borderWidth: 0.5,
+                                  borderColor: "white",
+                                  backgroundColor: user.accountTags?.some((accountTag) => accountTag.tagId === tag.tagId),
+                                },
+                              ]}
+                            >
+                              <Text style={styles.tagText}>{tag.tag}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </ScrollView>
+                    )}
+                  </LinearGradient>
+                </View>
+              )}
+            />
+
+            <View style={tw("flex-row justify-evenly mb-8")}>
               <TouchableOpacity
                 onPress={() => {
                   swipeRef.current.swipeLeft();
                   setShowPhoneNumUi({});
                 }}
-                style={tw(
-                  "items-center justify-center rounded-full w-14 h-14  bg-white"
-                )}
+                style={tw("items-center justify-center rounded-full w-14 h-14 bg-white")}
               >
                 <Entypo name="cross" size={24} color="red" />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => navigation.navigate("Search")}
-                style={tw(
-                  "items-center justify-center rounded-full w-14 h-14  bg-white"
-                )}
+                style={tw("items-center justify-center rounded-full w-14 h-14 bg-white")}
               >
                 <FontAwesome name="search" size={24} color="blue" />
               </TouchableOpacity>
@@ -423,43 +383,27 @@ const HomeScreen = ({}) => {
                   swipeRef.current.swipeRight();
                   setShowPhoneNumUi({});
                 }}
-                style={tw(
-                  "items-center justify-center rounded-full w-14 h-14 bg-white"
-                )}
+                style={tw("items-center justify-center rounded-full w-14 h-14 bg-white")}
               >
                 <AntDesign name="heart" size={24} color="green" />
               </TouchableOpacity>
             </View>
-          </>
+          </View>
         ) : (
-          <View
-            style={tw(
-              "relative bg-white h-2/3 rounded-xl justify-center items-center"
-            )}
-          >
-            <Text style={tw("font-bold pb-5")}> No More Profiles </Text>
-            <Image
-              style={tw("h-20 w-full")}
-              height={100}
-              width={100}
-              source={{ uri: "https://links.papareact.com/6gb" }}
-            />
+          <View style={tw("relative bg-white h-2/3 rounded-xl justify-center items-center")}>
+            <Text style={tw("font-bold pb-5")}>No More Profiles</Text>
+            <Image style={tw("h-20 w-full")} height={100} width={100} source={{ uri: "https://links.papareact.com/6gb" }} />
           </View>
         )
       ) : (
-        <View
-          style={tw(
-            "relative bg-white h-4/5 rounded-xl justify-center items-center"
-          )}
-        >
-          <Text style={tw("font-bold pb-5")}>
-            Hang in there as we fetch Profiles!
-          </Text>
+        <View style={tw("relative bg-white h-4/5 rounded-xl justify-center items-center")}>
+          <Text style={tw("font-bold pb-5")}>Hang in there as we fetch Profiles!</Text>
           <View style={styles.loading}>
             <ActivityIndicator size="large" color="#7CDB8A" />
           </View>
         </View>
       )}
+
 
       {/*modal to logout*/}
 
@@ -533,7 +477,7 @@ const HomeScreen = ({}) => {
           <Text style={styles.modalText}>{modalText}</Text>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 };
 
