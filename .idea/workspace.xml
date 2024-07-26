@@ -6,17 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="84e6e917-aebf-4472-aa2c-96a0fd9b005e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/igniteintcove.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/igniteintcove.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/igniteintcove.xcodeproj/xcshareddata/xcschemes/igniteintcove.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/ios/igniteintcove.xcodeproj/xcshareddata/xcschemes/igniteintcove.xcscheme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/igniteintcove/GoogleService-Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/igniteintcove/GoogleService-Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/igniteintcove/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/igniteintcove/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/igniteintcove/igniteintcove.entitlements" beforeDir="false" afterPath="$PROJECT_DIR$/ios/igniteintcove/igniteintcove.entitlements" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/screens/SearchScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/SearchScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/PaywallScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/PaywallScreen.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
