@@ -14,6 +14,8 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  forwardRef,
+  useRef,
 } from "react";
 import {
   Menu,
@@ -21,6 +23,7 @@ import {
   MenuOption,
   MenuTrigger,
 } from "react-native-popup-menu";
+import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "../lib/constants/baseUrl";
@@ -28,11 +31,13 @@ import { Ionicons } from "@expo/vector-icons";
 import useAuth from "../useAuth";
 import tw from "tailwind-rn";
 import Modal from "react-native-modal";
+import * as Clipboard from "expo-clipboard";
 
 const ProfileScreen = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [exitModalVisible, setExitModalVisible] = useState(false);
+  const bottomSheetRef = useRef(null);
 
   const { authContext, user, authState, isVIP, setIsVIP } = useAuth();
   const { logout } = authContext;
@@ -68,6 +73,7 @@ const ProfileScreen = () => {
       headerTitleStyle: { color: "black" },
     });
   }, []);
+
   const fetchUser = useCallback(async () => {
     if (!user?.id) return;
 
@@ -89,7 +95,7 @@ const ProfileScreen = () => {
       })
       .then((data) => {
         setUserData(data);
-        console.log(userData);
+        // console.log("userData", data);
         setLoading(false);
       })
       .catch((err) => {
@@ -121,6 +127,9 @@ const ProfileScreen = () => {
         console.log("downgrade error", err);
       });
   };
+
+  const handleOpenSheet = () => bottomSheetRef?.current?.present();
+  const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
 
   useEffect(() => {
     fetchUser();
@@ -169,7 +178,20 @@ const ProfileScreen = () => {
             </View>
           )}
 
-          <FeatureSection />
+          <FeatureSection
+            handleOpenSheet={handleOpenSheet}
+            userData={userData}
+          />
+
+          <View style={{ flex: 1 }}>
+            <CustomBottomSheetModal ref={bottomSheetRef}>
+              <ReferralScreen
+                handleCloseSheet={handleCloseSheet}
+                userData={userData}
+              />
+            </CustomBottomSheetModal>
+          </View>
+
           <Modal
             style={styles.modalContainer}
             isVisible={exitModalVisible}
@@ -264,32 +286,190 @@ const FeatureCard = ({ icon, color, title, subtitle }) => {
     </View>
   );
 };
-const FeatureSection = () => {
+
+const FeatureSection = ({ handleOpenSheet, userData }) => {
   return (
     <View style={styles.Infocontainer}>
-      {/* <FeatureCard
+      <FeatureCard
         icon="star"
         title={`${Math.floor(Math.random() * 20) + 1} Likes`}
         subtitle=""
         color="#B026FF"
       />
       <FeatureCard
-        icon="mail-unread"
-        title="Messages"
-        subtitle=""
-        color="#603FEF"
-      />
-      <FeatureCard
         icon="flame"
         title="Viewed Numbers"
-        subtitle="VIEW MORE"
+        subtitle={userData?.viewCount || 0}
         color="#ef4444"
-      /> */}
+      />
+      {userData && userData.role === "Marketer" && (
+        <TouchableOpacity onPress={() => handleOpenSheet()}>
+          <FeatureCard
+            icon="cash-outline"
+            title="Referrals"
+            subtitle=""
+            color="#603FEF"
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
+const ReferralScreen = ({ handleCloseSheet, userData }) => {
+  const copyToClipboard = async () =>
+    await Clipboard.setStringAsync(userData?.referral?.referralCode);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#D8434E",
+      padding: 20,
+    },
+    backIcon: {
+      marginBottom: 10,
+    },
+    title: {
+      color: "white",
+      fontSize: 18,
+      textAlign: "center",
+    },
+    subtitle: {
+      color: "white",
+      fontSize: 24,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginVertical: 10,
+    },
+    iconsContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      marginVertical: 10,
+      padding: 5,
+    },
+    iconItem: {
+      alignItems: "center",
+    },
+    iconText: {
+      color: "white",
+      textAlign: "center",
+      marginTop: 10,
+    },
+    referralContainer: {
+      backgroundColor: "#fff",
+      borderRadius: 10,
+      padding: 20,
+      alignItems: "center",
+    },
+    referralLabel: {
+      color: "#D8434E",
+      fontSize: 14,
+      marginBottom: 10,
+    },
+    referralCodeContainer: {
+      borderWidth: 1,
+      borderColor: "#D8434E",
+      borderStyle: "dashed",
+      borderRadius: 10,
+      padding: 10,
+      width: "100%",
+      alignItems: "center",
+    },
+    referralCode: {
+      color: "#D8434E",
+      fontSize: 20,
+      marginBottom: 5,
+    },
+    copyText: {
+      color: "#A9A9A9",
+    },
+  });
+
+  return (
+    <>
+      {userData && (
+        <View style={styles.container}>
+          <Ionicons
+            name="close-outline"
+            size={24}
+            color="white"
+            style={styles.backIcon}
+            onPress={handleCloseSheet}
+          />
+          <Text style={styles.title}>Earn unlimited FREE money!</Text>
+          <Text style={styles.subtitle}>1 Referral = 10%</Text>
+          <View style={styles.iconsContainer}>
+            <View style={styles.iconItem}>
+              <Ionicons name="share-social-outline" size={40} color="white" />
+              {/* <Text style={styles.iconText}>Refer your Friend</Text> */}
+            </View>
+            <View style={styles.iconItem}>
+              <Ionicons name="thumbs-up-outline" size={40} color="white" />
+              {/* <Text style={styles.iconText}>$5 for your friend</Text> */}
+            </View>
+            <View style={styles.iconItem}>
+              <Ionicons name="cash-outline" size={40} color="white" />
+              {/* <Text style={styles.iconText}>$5 for you after their purchase</Text> */}
+            </View>
+          </View>
+
+          <View>
+            <Text
+              style={{ color: "white", textAlign: "center", marginBottom: 10 }}
+            >
+              Refer your Friend and each time they pay you earn 10% of what they
+              pay
+            </Text>
+          </View>
+
+          <View style={styles.referralContainer}>
+            <Text style={styles.referralLabel}>REFERRAL CODE</Text>
+            <TouchableOpacity
+              style={styles.referralCodeContainer}
+              onPress={copyToClipboard}
+            >
+              <Text style={styles.referralCode}>
+                {userData?.referral?.referralCode}
+              </Text>
+              <Text style={styles.copyText}>Tap to copy</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={[styles.title, { marginTop: 20 }]}>My Referrals</Text>
+          <Text style={styles.subtitle}>{userData?.referral?.count || 0}</Text>
+        </View>
+      )}
+    </>
+  );
+};
+
+const CustomBottomSheetModal = forwardRef(
+  ({ snapPoints = ["50%", "70%"], onChange, children }, ref) => {
+    return (
+      <View style={styles.container}>
+        <BottomSheetModal
+          ref={ref}
+          snapPoints={snapPoints}
+          onChange={onChange}
+          enablePanDownToClose={true}
+          backgroundStyle={{
+            backgroundColor: "#D8434E",
+          }}
+        >
+          <BottomSheetView style={styles.bottomContentContainer}>
+            {children}
+          </BottomSheetView>
+        </BottomSheetModal>
+      </View>
+    );
+  }
+);
+
 const styles = StyleSheet.create({
+  bottomContentContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
   editIconContainer: {
     position: "absolute",
     top: 80,

@@ -43,7 +43,8 @@
     "react-native-vector-icons": "^10.1.0",
     "react-native-version-check": "^3.4.7",
     "react-native-webview": "13.8.6",
-    "tailwind-rn": "^3.0.1"
+    "tailwind-rn": "^3.0.1",
+    "expo-clipboard": "~6.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
