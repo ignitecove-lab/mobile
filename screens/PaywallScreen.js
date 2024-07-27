@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+} from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -10,17 +16,19 @@ import {
   View,
   Image,
   FlatList,
+  TextInput,
 } from "react-native";
+import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import PhoneInput from "react-native-phone-number-input";
 import { useNavigation } from "@react-navigation/native";
-import useAuth from "../useAuth";
-import Modal from "react-native-modal";
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import messaging from "@react-native-firebase/messaging";
 import RadioButtonRN from "radio-buttons-react-native";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
+import Modal from "react-native-modal";
+import useAuth from "../useAuth";
 
 const CLOSE_URL = `https://standard.paystack.co/close`;
 const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
@@ -65,6 +73,26 @@ const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
   );
 };
 
+const CustomBottomSheetModal = forwardRef(
+  ({ snapPoints = ["70%", "90%"], onChange, children }, ref) => {
+    return (
+      <View style={styles.container}>
+        <BottomSheetModal
+          ref={ref}
+          snapPoints={snapPoints}
+          onChange={onChange}
+          enablePanDownToClose={true}
+          keyboardBehavior="fillParent"
+        >
+          <BottomSheetView style={styles.contentContainer}>
+            {children}
+          </BottomSheetView>
+        </BottomSheetModal>
+      </View>
+    );
+  }
+);
+
 const LoadingIndicator = ({ size = "large", color = "#007bff" }) => {
   return (
     <View
@@ -84,14 +112,17 @@ const PaywallScreen = ({ route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [formattedValue, setFormattedValue] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [codeError, setCodeError] = useState(null);
   const [modalText, setModalText] = useState("");
   const [planId, setPlanId] = useState(null);
   const [value, setValue] = useState("");
   const [plans, setPlans] = useState([]);
   const [next, setNext] = useState(false);
   const { isUpgrade } = route.params;
+  const bottomSheetRef = useRef(null);
 
   const phoneInput = useRef(null);
   const navigation = useNavigation();
@@ -106,8 +137,8 @@ const PaywallScreen = ({ route }) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+          "REAL_WINDOW_HEIGHT"
+        );
 
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
@@ -129,11 +160,9 @@ const PaywallScreen = ({ route }) => {
         if (isUpgrade) {
           const plans = data?.find((obj) => obj.name === "BRONZE");
           setPlans([plans]);
-        }
-        else if (authState?.user.paywall) {
+        } else if (authState?.user.paywall) {
           setPlans(data);
-        }
-        else if (!isVIP && !isUpgrade) {
+        } else if (!isVIP && !isUpgrade) {
           const plans = data?.find((obj) => obj.name === "SILVER");
           setPlans([plans]);
         } else {
@@ -174,7 +203,7 @@ const PaywallScreen = ({ route }) => {
           } else {
             console.log(
               "Message does not contain the keyword!" +
-              remoteMessage.notification?.body
+                remoteMessage.notification?.body
             );
           }
         }
@@ -202,7 +231,7 @@ const PaywallScreen = ({ route }) => {
           } else {
             console.log(
               "Initial notification does not contain the keyword!" +
-              remoteMessage.notification?.body
+                remoteMessage.notification?.body
             );
           }
         }
@@ -216,8 +245,6 @@ const PaywallScreen = ({ route }) => {
   }, [fcmToken, notificationData]);
 
   const initiatePayment = async (phoneNumber, fcmToken) => {
-    console.log("this is the phone number: " + phoneNumber);
-    console.log("fcmToken: " + fcmToken);
     setModalVisible(true);
 
     try {
@@ -228,6 +255,7 @@ const PaywallScreen = ({ route }) => {
         PhoneNumber: phoneNumber,
         FCMToken: fcmToken,
         AccountToSubscribe: null,
+        referralCode,
       });
       const response = await fetch(`${API_BASE_URL}/v1/mps/lipa-na-mpesa`, {
         method: "POST",
@@ -319,6 +347,7 @@ const PaywallScreen = ({ route }) => {
           callback_url: ps_callback,
           cancel_url: ps_cancel_url,
           planId: parseInt(planId),
+          referralCode,
         }),
       }
     )
@@ -376,6 +405,41 @@ const PaywallScreen = ({ route }) => {
     return regex.test(url);
   }
 
+  const handleOpenSheet = () => {
+    if (bottomSheetRef.current) {
+      bottomSheetRef.current?.present();
+    }
+  };
+
+  const handleReferralCodeChange = async (code) => {
+    setReferralCode(code);
+
+    const valid = await fetch(
+      `${API_BASE_URL}/v1/referral/validate?code=${code}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authState.userToken}`,
+        },
+      }
+    )
+      .then(async (response) => {
+        const data = await response.json();
+        if (response.ok) {
+          return data.valid;
+        }
+        throw new Error(data.error);
+      })
+      .catch((err) => {
+        console.log("error", err.message);
+      });
+
+    setCodeError(valid ? "" : "Invalid Referral Code");
+  };
+
+  const handleClosePress = () => bottomSheetRef.current.dismiss();
+
   return (
     <View style={styles.container}>
       {isLoading && <LoadingIndicator />}
@@ -395,6 +459,8 @@ const PaywallScreen = ({ route }) => {
             onPress={() => {
               setNext(false);
               setPlanId(null);
+              setPaymentMethod(null);
+              handleClosePress();
             }}
           >
             <Ionicons name="arrow-back" size={24} color="black" />
@@ -403,109 +469,158 @@ const PaywallScreen = ({ route }) => {
 
           <RadioButtonRN
             data={radioData}
-            selectedBtn={(e) => setPaymentMethod(e.value)}
+            selectedBtn={(e) => {
+              setPaymentMethod(e.value);
+              handleOpenSheet();
+            }}
           />
         </>
       )}
 
-      <SafeAreaView style={styles.wrapper}>
-        {paymentMethod === "lipa_na_mpesa" && (
-          <>
-            <View style={styles.welcome}>
-              <Text>MPESA NUMBER</Text>
-            </View>
-            <PhoneInput
-              ref={phoneInput}
-              defaultValue={value}
-              defaultCode="KE"
-              layout="first"
-              onChangeText={(text) => {
-                setValue(text);
-              }}
-              onChangeFormattedText={(text) => {
-                setFormattedValue(text);
-              }}
-              countryPickerProps={{ withAlphaFilter: true }}
-              withShadow
-              autoFocus
+      <View style={{ flex: 1 }}>
+        <CustomBottomSheetModal ref={bottomSheetRef} snapPoints={["70%"]}>
+          <View style={styles.welcome}>
+            <Text style={styles.referralLabel}>Referral Code</Text>
+            <TextInput
+              style={styles.referralInput}
+              placeholder="IGC-XXXX"
+              onChangeText={handleReferralCodeChange}
             />
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                let formattedPhoneNum =
-                  phoneInput.current?.getNumberAfterPossiblyEliminatingZero()
-                    .formattedNumber;
-                initiatePayment(formattedPhoneNum, fcmToken).then((result) => {
-                  console.log("this is the result ... " + result);
-                });
-              }}
-            >
-              <Text style={styles.buttonText}>Initiate Payment</Text>
-            </TouchableOpacity>
-            <Modal
-              style={styles.modalContainer}
-              isVisible={isModalVisible}
-              hasBackdrop={true}
-              deviceWidth={deviceWidth}
-              deviceHeight={deviceHeight}
-              backdropColor={"#00000031"}
-            >
-              <View style={styles.modalBody}>
-                <Text style={styles.modalTextHeader}>M-Pesa Payment</Text>
-                <View style={styles.loading}>
-                  <ActivityIndicator size="large" color="#7CDB8A" />
-                </View>
-                <Text style={styles.modalText}>{modalText}</Text>
+
+            {codeError ? (
+              <Text style={styles.labelErrorText}>{codeError}</Text>
+            ) : null}
+          </View>
+
+          {paymentMethod === "lipa_na_mpesa" && (
+            <>
+              <View style={styles.welcome}>
+                <Text>MPESA NUMBER</Text>
               </View>
-            </Modal>
-          </>
-        )}
-
-        {paymentMethod === "pay_by_card" && (
-          <>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                await getCheckoutURL();
-              }}
-            >
-              <Text style={styles.buttonText}>Initiate Payment</Text>
-            </TouchableOpacity>
-
-            {authorizationUrl && showModal && (
-              <Modal
-                style={{ flex: 1 }}
-                visible={showModal}
-                animationType="slide"
-                transparent={false}
+              <PhoneInput
+                ref={phoneInput}
+                defaultValue={value}
+                defaultCode="KE"
+                layout="first"
+                onChangeText={(text) => {
+                  setValue(text);
+                }}
+                onChangeFormattedText={(text) => {
+                  setFormattedValue(text);
+                }}
+                countryPickerProps={{ withAlphaFilter: true }}
+                withShadow
+                autoFocus
+              />
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  let formattedPhoneNum =
+                    phoneInput.current?.getNumberAfterPossiblyEliminatingZero()
+                      .formattedNumber;
+                  initiatePayment(formattedPhoneNum, fcmToken).then(
+                    (result) => {
+                      console.log("this is the result ... " + result);
+                    }
+                  );
+                }}
               >
-                <SafeAreaView style={{ flex: 1 }}>
-                  <WebView
-                    style={[{ flex: 1 }]}
-                    source={{ uri: authorizationUrl }}
-                    onLoadStart={() => setIsLoading(true)}
-                    onLoadEnd={() => setIsLoading(false)}
-                    onNavigationStateChange={onNavigationStateChange}
-                    cacheEnabled={false}
-                    cacheMode={"LOAD_NO_CACHE"}
-                  />
-
-                  {isLoading && (
-                    <View>
-                      <ActivityIndicator size="large" color={"green"} />
-                    </View>
-                  )}
-                </SafeAreaView>
+                <Text style={styles.buttonText}>Initiate Payment</Text>
+              </TouchableOpacity>
+              <Modal
+                style={styles.modalContainer}
+                isVisible={isModalVisible}
+                hasBackdrop={true}
+                deviceWidth={deviceWidth}
+                deviceHeight={deviceHeight}
+                backdropColor={"#00000031"}
+              >
+                <View style={styles.modalBody}>
+                  <Text style={styles.modalTextHeader}>M-Pesa Payment</Text>
+                  <View style={styles.loading}>
+                    <ActivityIndicator size="large" color="#7CDB8A" />
+                  </View>
+                  <Text style={styles.modalText}>{modalText}</Text>
+                </View>
               </Modal>
-            )}
-          </>
-        )}
-      </SafeAreaView>
+            </>
+          )}
+
+          {paymentMethod === "pay_by_card" && (
+            <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  await getCheckoutURL();
+                }}
+              >
+                <Text style={styles.buttonText}>Initiate Payment</Text>
+              </TouchableOpacity>
+
+              {authorizationUrl && showModal && (
+                <Modal
+                  style={{ flex: 1 }}
+                  visible={showModal}
+                  animationType="slide"
+                  transparent={false}
+                >
+                  <SafeAreaView style={{ flex: 1 }}>
+                    <WebView
+                      style={[{ flex: 1 }]}
+                      source={{ uri: authorizationUrl }}
+                      onLoadStart={() => setIsLoading(true)}
+                      onLoadEnd={() => setIsLoading(false)}
+                      onNavigationStateChange={onNavigationStateChange}
+                      cacheEnabled={false}
+                      cacheMode={"LOAD_NO_CACHE"}
+                    />
+
+                    {isLoading && (
+                      <View>
+                        <ActivityIndicator size="large" color={"green"} />
+                      </View>
+                    )}
+                  </SafeAreaView>
+                </Modal>
+              )}
+            </>
+          )}
+        </CustomBottomSheetModal>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  referralInput: {
+    marginTop: 8,
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 10,
+    borderRadius: 10,
+    fontSize: 16,
+    lineHeight: 20,
+    padding: 8,
+    width: Dimensions.get("window").width - 50,
+    backgroundColor: "rgba(151, 151, 151, 0.25)",
+  },
+  referralLabel: {
+    marginLeft: 15,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  labelErrorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 15,
+  },
+  contentContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
   backButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -644,7 +759,7 @@ const styles = StyleSheet.create({
   },
 
   welcome: {
-    padding: 20,
+    padding: 10,
     marginBottom: 10,
   },
 
