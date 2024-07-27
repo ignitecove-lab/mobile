@@ -479,18 +479,22 @@ const PaywallScreen = ({ route }) => {
 
       <View style={{ flex: 1 }}>
         <CustomBottomSheetModal ref={bottomSheetRef} snapPoints={["70%"]}>
-          <View style={styles.welcome}>
-            <Text style={styles.referralLabel}>Referral Code</Text>
-            <TextInput
-              style={styles.referralInput}
-              placeholder="IGC-XXXX"
-              onChangeText={handleReferralCodeChange}
-            />
+          {plans &&
+            plans.length > 0 &&
+            plans?.find((obj) => obj.name === "BRONZE") && (
+              <View style={styles.welcome}>
+                <Text style={styles.referralLabel}>Referral Code</Text>
+                <TextInput
+                  style={styles.referralInput}
+                  placeholder="IGC-XXXX"
+                  onChangeText={handleReferralCodeChange}
+                />
 
-            {codeError ? (
-              <Text style={styles.labelErrorText}>{codeError}</Text>
-            ) : null}
-          </View>
+                {codeError ? (
+                  <Text style={styles.labelErrorText}>{codeError}</Text>
+                ) : null}
+              </View>
+            )}
 
           {paymentMethod === "lipa_na_mpesa" && (
             <>
