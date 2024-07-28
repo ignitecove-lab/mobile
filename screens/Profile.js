@@ -23,7 +23,7 @@ import {
   MenuOption,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "../lib/constants/baseUrl";
@@ -38,6 +38,7 @@ const ProfileScreen = () => {
   const [loading, setLoading] = useState(false);
   const [exitModalVisible, setExitModalVisible] = useState(false);
   const bottomSheetRef = useRef(null);
+  const numberSheetRef = useRef(null);
 
   const { authContext, user, authState, isVIP, setIsVIP } = useAuth();
   const { logout } = authContext;
@@ -47,8 +48,8 @@ const ProfileScreen = () => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+          "REAL_WINDOW_HEIGHT"
+        );
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -130,6 +131,8 @@ const ProfileScreen = () => {
 
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
   const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
+  const openNumberSheet = () => numberSheetRef?.current?.present();
+  const closeNumberSheet = () => numberSheetRef?.current?.dismiss();
 
   useEffect(() => {
     fetchUser();
@@ -178,12 +181,13 @@ const ProfileScreen = () => {
             </View>
           )}
 
-          <Text style={tw("text-lg font-bold mb-2 mx-4")}>Referral:</Text>
-          <ReferralCard
+          <FeatureSection
             handleOpenSheet={handleOpenSheet}
+            openNumberSheet={openNumberSheet}
             userData={userData}
           />
 
+          {/* Referrals bottom sheet */}
           <View style={{ flex: 1 }}>
             <CustomBottomSheetModal ref={bottomSheetRef}>
               <ReferralScreen
@@ -192,6 +196,16 @@ const ProfileScreen = () => {
               />
             </CustomBottomSheetModal>
           </View>
+
+          {/* viewed numbers bottom sheet */}
+          <CustomBottomSheetModal ref={numberSheetRef}>
+            <NumberSheet
+              handleCloseSheet={closeNumberSheet}
+              userData={userData}
+              authState={authState}
+              navigation={navigation}
+            />
+          </CustomBottomSheetModal>
 
           <Modal
             style={styles.modalContainer}
@@ -281,46 +295,41 @@ const ProfileScreen = () => {
 const FeatureCard = ({ icon, color, title, subtitle }) => {
   return (
     <View style={styles.card}>
-      <Ionicons name={icon} size={20} color={color} />
+      <Ionicons name={icon} size={30} color={color} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
 };
 
-const ReferralCard = ({ handleOpenSheet, userData }) => {
+const FeatureSection = ({ handleOpenSheet, openNumberSheet, userData }) => {
   return (
-    <View style={styles.card}>
+    <View style={styles.Infocontainer}>
+
       {userData && userData.role === "Marketer" && (
-        <TouchableOpacity onPress={() => handleOpenSheet()}>
-          <View style={styles.cardItems}>
-            <Text>Refer a friend and earn  </Text>
-            <Icon name="arrow-forward-ios" size={25} color="black" />
-          </View>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity onPress={() => openNumberSheet()}>
+            <FeatureCard
+              icon="flame"
+              title="Viewed Numbers"
+              subtitle={userData?.viewCount || 0}
+              color="#ef4444"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => handleOpenSheet()}>
+            <FeatureCard
+              icon="cash-outline"
+              title="Referrals"
+              subtitle=""
+              color="#603FEF"
+            />
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );
 };
-
-//const FeatureSection = ({ handleOpenSheet, userData }) => {
-//  return (
-//    <View style={styles.Infocontainer}>
-////      <FeatureCard
-////        icon="star"
-////        title={`${Math.floor(Math.random() * 20) + 1} Likes`}
-////        subtitle=""
-////        color="#B026FF"
-////      />
-////      <FeatureCard
-////        icon="flame"
-////        title="Viewed Numbers"
-////        subtitle={userData?.viewCount || 0}
-////        color="#ef4444"
-////      />
-//    </View>
-//  );
-//};
 
 const ReferralScreen = ({ handleCloseSheet, userData }) => {
   const copyToClipboard = async () =>
@@ -404,7 +413,9 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
           />
           <Text style={styles.title}>Earn unlimited FREE money!</Text>
           <Text style={styles.subtitle}>1 Referral = 10%</Text>
+          <View style={styles.iconsContainer}>
 
+          </View>
 
           <View>
             <Text
@@ -436,6 +447,136 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
   );
 };
 
+const NumberSheet = ({ handleCloseSheet, userData, authState, navigation }) => {
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#D8434E",
+      padding: 5,
+      position: "relative",
+    },
+    contentContainer: {
+      backgroundColor: "white",
+    },
+    itemContainer: {
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 8,
+      backgroundColor: "#D88343",
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    closeIcon: {
+      position: "absolute",
+      top: 0,
+      right: 5,
+      zIndex: 1,
+    },
+    image: {
+      width: 50,
+      height: 50,
+      borderRadius: 20,
+      marginRight: 10,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    nameAge: {
+      fontSize: 16,
+      color: "#fff",
+    },
+    number: {
+      fontSize: 14,
+      color: "#fff",
+    },
+    loading: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });
+
+  const fetchProfiles = useCallback(() => {
+    setLoading(true);
+
+    fetch(`${API_BASE_URL}/v1/account/paid`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + authState.userToken,
+      },
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        const text = await response.json();
+        throw new Error(text.message);
+      })
+      .then((data) => {
+        setProfiles(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log("fetchProfiles error", err);
+      });
+  }, []);
+
+  const renderItem = useCallback(
+    (item) => (
+      <TouchableOpacity
+        style={styles.itemContainer}
+        onPress={() => handlePressItem(item)}
+        key={item?.id}
+      >
+        <Image source={{ uri: item?.imageURL }} style={styles.image} />
+        <View style={styles.textContainer}>
+          <Text style={styles.nameAge}>
+            {item?.firstName}, {item?.age}
+          </Text>
+          <Text style={styles.number}>{item?.location}</Text>
+          <Text style={styles.number}>{item?.phoneNumber}</Text>
+        </View>
+      </TouchableOpacity>
+    ),
+    []
+  );
+
+  const handlePressItem = (item) => {
+    handleCloseSheet();
+    navigation.navigate("Profile View", { userData: item });
+  };
+
+  useEffect(() => {
+    fetchProfiles();
+  }, [fetchProfiles]);
+
+  return (
+    <View style={styles.container}>
+      {userData && !loading ? (
+        <>
+          <View style={{ marginBottom: 20 }}>
+            <Ionicons
+              name="close-outline"
+              size={24}
+              color="white"
+              style={styles.closeIcon}
+              onPress={handleCloseSheet}
+            />
+          </View>
+          {profiles && profiles.length > 0 && profiles.map(renderItem)}
+        </>
+      ) : (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color="#7CDB8A" />
+        </View>
+      )}
+    </View>
+  );
+};
+
 const CustomBottomSheetModal = forwardRef(
   ({ snapPoints = ["50%", "70%"], onChange, children }, ref) => {
     return (
@@ -449,9 +590,12 @@ const CustomBottomSheetModal = forwardRef(
             backgroundColor: "#D8434E",
           }}
         >
-          <BottomSheetView style={styles.bottomContentContainer}>
+          <BottomSheetScrollView
+            style={styles.bottomContentContainer}
+            refreshing={false}
+          >
             {children}
-          </BottomSheetView>
+          </BottomSheetScrollView>
         </BottomSheetModal>
       </View>
     );
@@ -461,7 +605,6 @@ const CustomBottomSheetModal = forwardRef(
 const styles = StyleSheet.create({
   bottomContentContainer: {
     flex: 1,
-    alignItems: "center",
   },
   editIconContainer: {
     position: "absolute",
@@ -478,29 +621,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   Infocontainer: {
-    flexDirection: "column",
-    justifyContent: "space-around",
+    flexDirection: "row",
+    justifyContent: "start",
     padding: 5,
   },
   card: {
-    flex: 1,
-    height: 40,
-    alignItems: "center",
-    flexDirection: "row",
-    marginHorizontal: 16,
+    height: 140,
+    width: 140,
     backgroundColor: "#f5f5f5",
     borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    elevation: 0,
-  },
-  cardItems: {
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    elevation: 2,
+    position: "relative",
+    marginHorizontal: 5,
   },
   title: {
     fontSize: 14,
@@ -546,25 +684,25 @@ const styles = StyleSheet.create({
   },
   premiumSection: {
     padding: 16,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fc6a03",
     alignItems: "center",
-    borderRadius: 10,
-    margin: 16,
+    borderRadius: 20,
+    margin: 10,
   },
   premiumText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#ffffff",
   },
   premiumDetails: {
     marginTop: 8,
     textAlign: "center",
-    color: "#000000",
+    color: "#ffffff",
   },
   upgradeButton: {
     marginTop: 16,
     backgroundColor: "#007bff",
-    paddingVertical: 12,
+    paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 25,
   },

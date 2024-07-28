@@ -198,6 +198,7 @@ const PaywallScreen = ({ route }) => {
 
             authContext.updatePaywallState(false);
             setModalVisible(false);
+            bottomSheetRef.current.dismiss();
 
             navigation.navigate("PayStatus", navigationParams);
           } else {
@@ -228,6 +229,7 @@ const PaywallScreen = ({ route }) => {
               phoneNumber: formattedValue,
               redirectScreen: "ModalScreen",
             });
+            bottomSheetRef.current.dismiss();
           } else {
             console.log(
               "Initial notification does not contain the keyword!" +
@@ -377,6 +379,7 @@ const PaywallScreen = ({ route }) => {
       setShowModal(false);
       setAuthorizationUrl(null);
       setIsLoading(false);
+      bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
       });
@@ -392,6 +395,7 @@ const PaywallScreen = ({ route }) => {
       setShowModal(false);
       setIsLoading(false);
       setAuthorizationUrl(null);
+      bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
       });
