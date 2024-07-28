@@ -47,8 +47,8 @@ const ProfileScreen = () => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -178,7 +178,8 @@ const ProfileScreen = () => {
             </View>
           )}
 
-          <FeatureSection
+          <Text style={tw("text-lg font-bold mb-2 mx-4")}>Referral:</Text>
+          <ReferralCard
             handleOpenSheet={handleOpenSheet}
             userData={userData}
           />
@@ -280,41 +281,46 @@ const ProfileScreen = () => {
 const FeatureCard = ({ icon, color, title, subtitle }) => {
   return (
     <View style={styles.card}>
-      <Ionicons name={icon} size={40} color={color} />
+      <Ionicons name={icon} size={20} color={color} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
 };
 
-const FeatureSection = ({ handleOpenSheet, userData }) => {
+const ReferralCard = ({ handleOpenSheet, userData }) => {
   return (
-    <View style={styles.Infocontainer}>
-      <FeatureCard
-        icon="star"
-        title={`${Math.floor(Math.random() * 20) + 1} Likes`}
-        subtitle=""
-        color="#B026FF"
-      />
-      <FeatureCard
-        icon="flame"
-        title="Viewed Numbers"
-        subtitle={userData?.viewCount || 0}
-        color="#ef4444"
-      />
+    <View style={styles.card}>
       {userData && userData.role === "Marketer" && (
         <TouchableOpacity onPress={() => handleOpenSheet()}>
-          <FeatureCard
-            icon="cash-outline"
-            title="Referrals"
-            subtitle=""
-            color="#603FEF"
-          />
+          <View style={styles.cardItems}>
+            <Text>Refer a friend and earn  </Text>
+            <Icon name="arrow-forward-ios" size={25} color="black" />
+          </View>
         </TouchableOpacity>
       )}
     </View>
   );
 };
+
+//const FeatureSection = ({ handleOpenSheet, userData }) => {
+//  return (
+//    <View style={styles.Infocontainer}>
+////      <FeatureCard
+////        icon="star"
+////        title={`${Math.floor(Math.random() * 20) + 1} Likes`}
+////        subtitle=""
+////        color="#B026FF"
+////      />
+////      <FeatureCard
+////        icon="flame"
+////        title="Viewed Numbers"
+////        subtitle={userData?.viewCount || 0}
+////        color="#ef4444"
+////      />
+//    </View>
+//  );
+//};
 
 const ReferralScreen = ({ handleCloseSheet, userData }) => {
   const copyToClipboard = async () =>
@@ -398,20 +404,7 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
           />
           <Text style={styles.title}>Earn unlimited FREE money!</Text>
           <Text style={styles.subtitle}>1 Referral = 10%</Text>
-          <View style={styles.iconsContainer}>
-            <View style={styles.iconItem}>
-              <Ionicons name="share-social-outline" size={40} color="white" />
-              {/* <Text style={styles.iconText}>Refer your Friend</Text> */}
-            </View>
-            <View style={styles.iconItem}>
-              <Ionicons name="thumbs-up-outline" size={40} color="white" />
-              {/* <Text style={styles.iconText}>$5 for your friend</Text> */}
-            </View>
-            <View style={styles.iconItem}>
-              <Ionicons name="cash-outline" size={40} color="white" />
-              {/* <Text style={styles.iconText}>$5 for you after their purchase</Text> */}
-            </View>
-          </View>
+
 
           <View>
             <Text
@@ -485,25 +478,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   Infocontainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-around",
     padding: 5,
   },
   card: {
     flex: 1,
-    width: 100,
-    height: 140,
+    height: 40,
+    alignItems: "center",
+    flexDirection: "row",
+    marginHorizontal: 16,
     backgroundColor: "#f5f5f5",
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    elevation: 2,
-    position: "relative",
-    marginHorizontal: 5,
+    elevation: 0,
+  },
+  cardItems: {
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 14,
@@ -549,25 +546,25 @@ const styles = StyleSheet.create({
   },
   premiumSection: {
     padding: 16,
-    backgroundColor: "#fc6a03",
+    backgroundColor: "#f5f5f5",
     alignItems: "center",
-    borderRadius: 20,
-    margin: 10,
+    borderRadius: 10,
+    margin: 16,
   },
   premiumText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#ffffff",
+    color: "#000000",
   },
   premiumDetails: {
     marginTop: 8,
     textAlign: "center",
-    color: "#ffffff",
+    color: "#000000",
   },
   upgradeButton: {
     marginTop: 16,
     backgroundColor: "#007bff",
-    paddingVertical: 15,
+    paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 25,
   },
