@@ -305,27 +305,24 @@ const FeatureCard = ({ icon, color, title, subtitle }) => {
 const FeatureSection = ({ handleOpenSheet, openNumberSheet, userData }) => {
   return (
     <View style={styles.Infocontainer}>
+      <TouchableOpacity onPress={() => openNumberSheet()}>
+        <FeatureCard
+          icon="flame"
+          title="Viewed Numbers"
+          subtitle={userData?.viewCount || 0}
+          color="#ef4444"
+        />
+      </TouchableOpacity>
 
       {userData && userData.role === "Marketer" && (
-        <>
-          <TouchableOpacity onPress={() => openNumberSheet()}>
-            <FeatureCard
-              icon="flame"
-              title="Viewed Numbers"
-              subtitle={userData?.viewCount || 0}
-              color="#ef4444"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => handleOpenSheet()}>
-            <FeatureCard
-              icon="cash-outline"
-              title="Referrals"
-              subtitle=""
-              color="#603FEF"
-            />
-          </TouchableOpacity>
-        </>
+        <TouchableOpacity onPress={() => handleOpenSheet()}>
+          <FeatureCard
+            icon="cash-outline"
+            title="Referrals"
+            subtitle=""
+            color="#603FEF"
+          />
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -413,9 +410,7 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
           />
           <Text style={styles.title}>Earn unlimited FREE money!</Text>
           <Text style={styles.subtitle}>1 Referral = 10%</Text>
-          <View style={styles.iconsContainer}>
-
-          </View>
+          <View style={styles.iconsContainer}></View>
 
           <View>
             <Text
