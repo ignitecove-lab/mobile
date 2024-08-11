@@ -542,10 +542,11 @@ const HomeScreen = ({}) => {
             <GooglePlacesAutocomplete
               placeholder="Search location"
               disableScroll={true}
-              fetchDetails={true}
+              fetchDetails={false}
+              value={location}
               onPress={(data, details = null) => {
-                // console.log(details);
-                setLocation(data.description);
+                // console.log(data.structured_formatting.main_text);
+                setLocation(data.structured_formatting.main_text);
               }}
               query={{
                 key: "AIzaSyBy61yd9aWrx4XhVvsujA_4aSA_sDINB_s",
