@@ -25,6 +25,7 @@ import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import messaging from "@react-native-firebase/messaging";
 import RadioButtonRN from "radio-buttons-react-native";
+import { getCurrencies } from "react-native-localize";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
@@ -74,7 +75,7 @@ const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
 };
 
 const CustomBottomSheetModal = forwardRef(
-  ({ snapPoints = ["70%", "90%"], onChange, children }, ref) => {
+  ({ snapPoints = ["50%", "70%", "90%"], onChange, children }, ref) => {
     return (
       <View style={styles.container}>
         <BottomSheetModal
@@ -287,7 +288,18 @@ const PaywallScreen = ({ route }) => {
     }
   };
 
-  const radioData = plans &&
+  const start_button_currencies = [
+    "NGN",
+    "GHS",
+    "ZAR",
+    "UGX",
+    "TZS",
+    "RWF",
+    "USD",
+    "KES",
+  ];
+
+  let radioData = plans &&
     plans?.length > 0 && [
       {
         label: (
@@ -335,6 +347,32 @@ const PaywallScreen = ({ route }) => {
       //      },
     ];
 
+  start_button_currencies.includes(getCurrencies()[0]) &&
+    plans.length > 0 &&
+    radioData.push({
+      label: (
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ width: 100, height: 50 }}>
+            <Image
+              source={require("../start-button.png")}
+              style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+            />
+          </View>
+          <Text style={{ marginLeft: 10 }}>{`Pay Now ${new Intl.NumberFormat(
+            "en-US",
+            {
+              style: "currency",
+              currency: getCurrencies()[0],
+            }
+          ).format(
+            plans?.find((plan) => plan?.id === planId)?.planDetails[1]?.price ||
+              0
+          )}`}</Text>
+        </View>
+      ),
+      value: "pay_by_start_button",
+    });
+
   const getCheckoutURL = async () => {
     const authURL = await fetch(
       `${API_BASE_URL}/v1/paystack/init-transaction`,
@@ -356,6 +394,38 @@ const PaywallScreen = ({ route }) => {
       .then(async (response) => {
         const data = await response.json();
         if (response.ok) {
+          return data.authorization_url;
+        }
+        throw new Error(data.error);
+      })
+      .catch((err) => {
+        console.log("error", err.message);
+      });
+
+    if (authURL) {
+      setAuthorizationUrl(authURL);
+      setShowModal(true);
+    }
+  };
+
+  const getStartButtonURL = async () => {
+    const authURL = await fetch(`${API_BASE_URL}/v1/start-button/init-txn`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authState.userToken}`,
+      },
+      body: JSON.stringify({
+        email: `${authState?.user?.phoneNumber}@ignitecove.com`,
+        planId: parseInt(planId),
+        currency: getCurrencies()[0],
+        referralCode,
+      }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (response.ok) {
+          console.log("start button", data);
           return data.authorization_url;
         }
         throw new Error(data.error);
@@ -482,7 +552,7 @@ const PaywallScreen = ({ route }) => {
       )}
 
       <View style={{ flex: 1 }}>
-        <CustomBottomSheetModal ref={bottomSheetRef} snapPoints={["70%"]}>
+        <CustomBottomSheetModal ref={bottomSheetRef}>
           {plans &&
             plans.length > 0 &&
             plans?.find((obj) => obj.name === "BRONZE") && (
@@ -551,6 +621,55 @@ const PaywallScreen = ({ route }) => {
                   <Text style={styles.modalText}>{modalText}</Text>
                 </View>
               </Modal>
+            </>
+          )}
+
+          {paymentMethod === "pay_by_start_button" && (
+            <>
+              <View style={{ width: 100, height: 50 }}>
+                <Image
+                  source={require("../start-button.png")}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    resizeMode: "contain",
+                  }}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => await getStartButtonURL()}
+              >
+                <Text style={styles.buttonText}>Initiate Payment</Text>
+              </TouchableOpacity>
+
+              {authorizationUrl && showModal && (
+                <Modal
+                  style={{ flex: 1 }}
+                  visible={showModal}
+                  animationType="slide"
+                  transparent={false}
+                >
+                  <SafeAreaView style={{ flex: 1 }}>
+                    <WebView
+                      style={[{ flex: 1 }]}
+                      source={{ uri: authorizationUrl }}
+                      onLoadStart={() => setIsLoading(true)}
+                      onLoadEnd={() => setIsLoading(false)}
+                      onNavigationStateChange={onNavigationStateChange}
+                      cacheEnabled={false}
+                      cacheMode={"LOAD_NO_CACHE"}
+                    />
+
+                    {isLoading && (
+                      <View>
+                        <ActivityIndicator size="large" color={"green"} />
+                      </View>
+                    )}
+                  </SafeAreaView>
+                </Modal>
+              )}
             </>
           )}
 
