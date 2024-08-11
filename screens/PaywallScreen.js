@@ -17,6 +17,8 @@ import {
   Image,
   FlatList,
   TextInput,
+  Linking,
+  Button,
 } from "react-native";
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -75,7 +77,10 @@ const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
 };
 
 const CustomBottomSheetModal = forwardRef(
-  ({ snapPoints = ["50%", "70%", "90%"], onChange, children }, ref) => {
+  (
+    { snapPoints = ["50%", "70%", "90%"], onChange, children, bottomView },
+    ref
+  ) => {
     return (
       <View style={styles.container}>
         <BottomSheetModal
@@ -87,6 +92,8 @@ const CustomBottomSheetModal = forwardRef(
         >
           <BottomSheetView style={styles.contentContainer}>
             {children}
+
+            <View style={styles.bottomViewContainer}>{bottomView}</View>
           </BottomSheetView>
         </BottomSheetModal>
       </View>
@@ -512,6 +519,14 @@ const PaywallScreen = ({ route }) => {
     setCodeError(valid ? "" : "Invalid Referral Code");
   };
 
+  const handlePaymentInquiry = () => {
+    const subject = "Ignitecove Payment Inquiry";
+    const recipient = "support@ignitecove.co.ke";
+    const email = `mailto:${recipient}?subject=${encodeURIComponent(subject)}`;
+
+    Linking.openURL(email).catch((err) => console.error("Error:", err));
+  };
+
   const handleClosePress = () => bottomSheetRef.current.dismiss();
 
   return (
@@ -552,7 +567,16 @@ const PaywallScreen = ({ route }) => {
       )}
 
       <View style={{ flex: 1 }}>
-        <CustomBottomSheetModal ref={bottomSheetRef}>
+        <CustomBottomSheetModal
+          ref={bottomSheetRef}
+          bottomView={
+            <View>
+              <TouchableOpacity onPress={handlePaymentInquiry}>
+                <Text>Click here to contact us for payment inquiries</Text>
+              </TouchableOpacity>
+            </View>
+          }
+        >
           {plans &&
             plans.length > 0 &&
             plans?.find((obj) => obj.name === "BRONZE") && (
@@ -719,6 +743,10 @@ const PaywallScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  bottomViewContainer: {
+    padding: 16,
+    marginTop: 30,
+  },
   referralInput: {
     marginTop: 8,
     marginLeft: 15,
