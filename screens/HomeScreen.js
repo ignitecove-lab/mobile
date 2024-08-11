@@ -452,15 +452,6 @@ const HomeScreen = ({}) => {
                 <Entypo name="cross" size={24} color="red" />
               </TouchableOpacity>
 
-              {/* <TouchableOpacity
-                onPress={() => navigation.navigate("Search")}
-                style={tw(
-                  "items-center justify-center rounded-full w-14 h-14 bg-white"
-                )}
-              >
-                <FontAwesome name="search" size={24} color="blue" />
-              </TouchableOpacity> */}
-
               <TouchableOpacity
                 onPress={() => {
                   swipeRef.current.swipeRight();
