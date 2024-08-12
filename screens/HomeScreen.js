@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
   AppState,
+  Pressable,
 } from "react-native";
 import React, {
   useCallback,
@@ -528,6 +529,7 @@ const HomeScreen = ({}) => {
         {/* location filter */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Location</Text>
+          <Text style={styles.sliderValue}>{location}</Text>
 
           <View style={styles.sliderRow}>
             <GooglePlacesAutocomplete
@@ -545,6 +547,25 @@ const HomeScreen = ({}) => {
               }}
             />
           </View>
+        </View>
+
+        <View style={styles.filterBtnContainer}>
+          <Pressable
+            style={[styles.button, styles.clearButton]}
+            onPress={() => {
+              setLocation(null);
+              setAgeRange([18, 100]);
+              handleCloseSheet();
+            }}
+          >
+            <Text style={styles.buttonTextClear}>Clear Filters</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.button, styles.applyButton]}
+            onPress={handleCloseSheet}
+          >
+            <Text style={styles.buttonText}>Apply Filters</Text>
+          </Pressable>
         </View>
       </CustomBottomSheetModal>
 
@@ -625,6 +646,42 @@ const HomeScreen = ({}) => {
 };
 
 const styles = StyleSheet.create({
+  filterBtnContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    padding: 16,
+    gap: 16,
+  },
+  button: {
+    padding: 12,
+    borderRadius: 20,
+    width: 120,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3, // For shadow on Android
+    shadowColor: "#000", // For shadow on iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  clearButton: {
+    backgroundColor: "#E6E6E6",
+  },
+  applyButton: {
+    backgroundColor: "#007bff",
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  buttonTextClear: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+  },
   section: {
     backgroundColor: "#FFF",
     padding: 16,
