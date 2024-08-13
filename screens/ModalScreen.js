@@ -118,7 +118,11 @@ const ModalScreen = () => {
 
         if (response.ok) {
           const resp = await response.json();
-          setImage(resp.imageUrl);
+          let imageUrl = resp.imageUrl;
+          if (imageUrl.startsWith("http://")) {
+            imageUrl = imageUrl.replace("http://", "https://");
+          }
+          setImage(imageUrl);
         } else {
           throw new Error(
             `Network response was not ok: ${response.statusText}`

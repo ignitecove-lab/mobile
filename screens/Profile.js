@@ -48,8 +48,8 @@ const ProfileScreen = () => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -145,7 +145,11 @@ const ProfileScreen = () => {
           <View style={styles.profileHeader}>
             <TouchableOpacity onPress={() => navigation.navigate("Modal")}>
               <Image
-                source={{ uri: userData.imageURL }}
+                source={{
+                  uri: userData.imageURL.startsWith("http://")
+                    ? userData.imageURL.replace("http://", "https://")
+                    : userData.imageURL
+                }}
                 style={styles.profileImage}
               />
 
@@ -526,7 +530,14 @@ const NumberSheet = ({ handleCloseSheet, userData, authState, navigation }) => {
         onPress={() => handlePressItem(item)}
         key={item?.id}
       >
-        <Image source={{ uri: item?.imageURL }} style={styles.image} />
+        <Image
+          source={{
+            uri: item?.imageURL.startsWith("http://")
+              ? item.imageURL.replace("http://", "https://")
+              : item?.imageURL
+          }}
+          style={styles.image}
+        />
         <View style={styles.textContainer}>
           <Text style={styles.nameAge}>
             {item?.firstName}, {item?.age}

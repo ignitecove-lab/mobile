@@ -34,7 +34,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
 
-const HomeScreen = ({}) => {
+const HomeScreen = ({ }) => {
   const navigation = useNavigation();
   const { user, authState, justLoggedIn, setJustLoggedIn, isVIP, setIsVIP } =
     useAuth();
@@ -64,8 +64,8 @@ const HomeScreen = ({}) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
 
   useLayoutEffect(() => {
     if (!authState.isProfileComplete) {
@@ -110,8 +110,13 @@ const HomeScreen = ({}) => {
           <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
             <Image
               style={tw("h-10 w-10 rounded-full")}
-              source={{ uri: user.imageURL }}
+              source={{
+                uri: user.imageURL.startsWith("http://")
+                  ? user.imageURL.replace("http://", "https://")
+                  : user.imageURL
+              }}
             />
+
           </TouchableOpacity>
         </>
       ),
@@ -351,8 +356,8 @@ const HomeScreen = ({}) => {
 
                         <View style={tw("flex flex-row flex-wrap")}>
                           {card.phoneNumberVisible ||
-                          (showPhoneNumUi.id === card.id &&
-                            showPhoneNumUi.visible) ? (
+                            (showPhoneNumUi.id === card.id &&
+                              showPhoneNumUi.visible) ? (
                             <View style={tw("flex-1")}>
                               <Text
                                 selectable={true}
