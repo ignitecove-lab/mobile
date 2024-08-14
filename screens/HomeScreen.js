@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
   AppState,
@@ -27,7 +28,6 @@ import Swiper from "react-native-deck-swiper";
 import Modal from "react-native-modal";
 import CustomBottomSheetModal from "../components/BottomSheet";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import { useFocusEffect } from "@react-navigation/native";
@@ -155,7 +155,7 @@ const HomeScreen = ({ }) => {
           url = url + `&minAge=${minAge}`;
         }
         if (maxAge) {
-          url = url + `&minAge=${maxAge}`;
+          url = url + `&maxAge=${maxAge}`;
         }
         if (location) {
           url = url + `&location=${location}`;
@@ -537,19 +537,11 @@ const HomeScreen = ({ }) => {
           <Text style={styles.sliderValue}>{location}</Text>
 
           <View style={styles.sliderRow}>
-            <GooglePlacesAutocomplete
-              placeholder="Search location"
-              disableScroll={true}
-              fetchDetails={false}
+            <TextInput
               value={location}
-              onPress={(data, details = null) => {
-                // console.log(data.structured_formatting.main_text);
-                setLocation(data.structured_formatting.main_text);
-              }}
-              query={{
-                key: "AIzaSyBy61yd9aWrx4XhVvsujA_4aSA_sDINB_s",
-                language: "en",
-              }}
+              onChangeText={setLocation}
+              style={styles.input}
+              placeholder="Search location"
             />
           </View>
         </View>
