@@ -26,15 +26,15 @@ import tw from "tailwind-rn";
 import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import Swiper from "react-native-deck-swiper";
 import Modal from "react-native-modal";
+import { Dropdown } from "react-native-element-dropdown";
 import CustomBottomSheetModal from "../components/BottomSheet";
-import MultiSlider from "@ptomasroos/react-native-multi-slider";
 
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
 
-const HomeScreen = ({ }) => {
+const HomeScreen = ({}) => {
   const navigation = useNavigation();
   const { user, authState, justLoggedIn, setJustLoggedIn, isVIP, setIsVIP } =
     useAuth();
@@ -59,13 +59,18 @@ const HomeScreen = ({ }) => {
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
   const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
 
+  const ageRanges = Array.from({ length: 100 - 18 + 1 }, (_, index) => {
+    const value = 18 + index;
+    return { label: value.toString(), value };
+  });
+
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight =
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+          "REAL_WINDOW_HEIGHT"
+        );
 
   useLayoutEffect(() => {
     if (!authState.isProfileComplete) {
@@ -113,10 +118,9 @@ const HomeScreen = ({ }) => {
               source={{
                 uri: user.imageURL.startsWith("http://")
                   ? user.imageURL.replace("http://", "https://")
-                  : user.imageURL
+                  : user.imageURL,
               }}
             />
-
           </TouchableOpacity>
         </>
       ),
@@ -257,10 +261,6 @@ const HomeScreen = ({ }) => {
     }
   };
 
-  const handleAgeRangeChange = (value) => {
-    setAgeRange(value);
-  };
-
   const handleSheetChanges = useCallback(
     (index) => {
       if (index === -1) {
@@ -356,8 +356,8 @@ const HomeScreen = ({ }) => {
 
                         <View style={tw("flex flex-row flex-wrap")}>
                           {card.phoneNumberVisible ||
-                            (showPhoneNumUi.id === card.id &&
-                              showPhoneNumUi.visible) ? (
+                          (showPhoneNumUi.id === card.id &&
+                            showPhoneNumUi.visible) ? (
                             <View style={tw("flex-1")}>
                               <Text
                                 selectable={true}
@@ -513,20 +513,32 @@ const HomeScreen = ({ }) => {
           >{`${ageRange[0]} - ${ageRange[1]}`}</Text>
 
           <View style={styles.sliderRow}>
-            <MultiSlider
-              values={ageRange}
-              min={18}
-              max={100}
-              step={1}
-              allowOverlap={false}
-              snapped={true}
-              markerStyle={{
-                backgroundColor: "#FF5252",
-                height: 20,
-                width: 20,
-              }}
-              selectedStyle={{ backgroundColor: "#FF5252" }}
-              onValuesChange={handleAgeRangeChange}
+            <Dropdown
+              style={[tw("items-center pt-1"), styles.dropdown]}
+              data={ageRanges}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              autoScroll={true}
+              value={ageRange[0]}
+              onChange={(item) =>
+                setAgeRange((prevState) => [item.value, prevState[1]])
+              }
+            />
+
+            <Text style={styles.longText}>-</Text>
+
+            <Dropdown
+              style={[tw("items-center pt-1"), styles.dropdown]}
+              data={ageRanges}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              autoScroll={true}
+              value={ageRange[1]}
+              onChange={(item) =>
+                setAgeRange((prevState) => [prevState[0], item.value])
+              }
             />
           </View>
         </View>
@@ -643,6 +655,19 @@ const HomeScreen = ({ }) => {
 };
 
 const styles = StyleSheet.create({
+  longText: {
+    fontSize: 40,
+    width: 20,
+    textAlign: "center",
+  },
+  dropdown: {
+    height: 50,
+    width: "45%",
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
   filterBtnContainer: {
     flex: 1,
     justifyContent: "center",
