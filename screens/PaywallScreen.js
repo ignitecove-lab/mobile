@@ -42,14 +42,17 @@ const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
     <View style={styles.planContainer}>
       <Text style={styles.planName}>{item.name}</Text>
       {item.planDetails &&
-        item.planDetails.map((price, index) => (
-          <Text key={index} style={styles.planPrice}>
-            {new Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: price.currency === "$" ? "USD" : "KES",
-            }).format(price.price)}
-          </Text>
-        ))}
+        item.planDetails.map(
+          (price, index) =>
+            price.currency === getCurrencies()[0] && (
+              <Text key={index} style={styles.planPrice}>
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: price?.currency?.toString(),
+                }).format(price.price)}
+              </Text>
+            )
+        )}
 
       <TouchableOpacity
         style={styles.chooseButton}
@@ -431,11 +434,10 @@ const PaywallScreen = ({ route }) => {
     })
       .then(async (response) => {
         const data = await response.json();
-        if (response.ok) {
-          console.log("start button", data);
-          return data.authorization_url;
+        if (response.ok && data.status === 0) {
+          return data.url;
         }
-        throw new Error(data.error);
+        throw new Error(data.message);
       })
       .catch((err) => {
         console.log("error", err.message);
