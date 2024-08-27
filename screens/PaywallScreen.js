@@ -320,15 +320,22 @@ const PaywallScreen = ({ route }) => {
                 style={{ width: "100%", height: "100%", resizeMode: "contain" }}
               />
             </View>
-            <Text
-              style={{ marginLeft: 10 }}
-            >{`Lipa na Mpesa ${new Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "KES",
-            }).format(
-              plans?.find((plan) => plan?.id === planId)?.planDetails[0]
-                ?.price || 0
-            )}`}</Text>
+            <Text style={{ marginLeft: 10 }}>
+              {(() => {
+                const targetCurrency = getCurrencies()[0];
+                const plan = plans?.find((plan) => plan?.id === planId);
+                if (!plan) return "Plan not found";
+                const planDetail = plan.planDetails.find(
+                  (detail) => detail.currency === targetCurrency
+                );
+                if (!planDetail) return "Price not available";
+
+                return `Lipa na Mpesa ${new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: targetCurrency,
+                }).format(planDetail.price)}`;
+              })()}
+            </Text>
           </View>
         ),
         value: "lipa_na_mpesa",
@@ -368,16 +375,22 @@ const PaywallScreen = ({ route }) => {
               style={{ width: "100%", height: "100%", resizeMode: "contain" }}
             />
           </View>
-          <Text style={{ marginLeft: 10 }}>{`Pay Now ${new Intl.NumberFormat(
-            "en-US",
-            {
-              style: "currency",
-              currency: getCurrencies()[0],
-            }
-          ).format(
-            plans?.find((plan) => plan?.id === planId)?.planDetails[1]?.price ||
-              0
-          )}`}</Text>
+          <Text style={{ marginLeft: 10 }}>
+            {(() => {
+              const targetCurrency = getCurrencies()[0];
+              const plan = plans?.find((plan) => plan?.id === planId);
+              if (!plan) return "Plan not found";
+              const planDetail = plan.planDetails.find(
+                (detail) => detail.currency === targetCurrency
+              );
+              if (!planDetail) return "Price not available";
+
+              return `Pay Now ${new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: targetCurrency,
+              }).format(planDetail.price)}`;
+            })()}
+          </Text>
         </View>
       ),
       value: "pay_by_start_button",
