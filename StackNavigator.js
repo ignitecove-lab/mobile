@@ -54,10 +54,6 @@ const StackNavigator = () => {
       {authState?.tokenValid ? (
         <>
           <Stack.Group>
-            {authState?.user.paywall && (
-              <Stack.Screen name="Ignitecove" component={Unpaid} />
-            )}
-
             <Stack.Screen
               name="Home"
               component={HomeScreen}
@@ -115,6 +111,7 @@ const StackNavigator = () => {
                 },
               }}
             />
+            <Stack.Screen name="Ignitecove" component={Unpaid} />
           </Stack.Group>
 
           <Stack.Group screenOptions={{ presentation: "modal" }}>

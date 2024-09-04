@@ -140,6 +140,11 @@ const HomeScreen = ({}) => {
             console.log("profile not complete profileUpdate");
             navigation.navigate("Modal");
           }
+
+          if (authState?.user.paywall) {
+            console.log("User not paid");
+            navigation.navigate("Ignitecove");
+          }
         }
 
         appState.current = nextAppState;
