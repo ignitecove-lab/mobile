@@ -26,7 +26,7 @@ const { width, height } = Dimensions.get("window");
 const App = () => {
   const [shuffledProfiles, setShuffledProfiles] = useState([]);
   const [blurKey, setBlurKey] = useState(0);
-  const { authState } = useAuth();
+  const { authState, authContext } = useAuth();
 
   const navigation = useNavigation();
 
@@ -58,6 +58,7 @@ const App = () => {
         const paywall = json.data.paywall;
 
         if (!paywall) {
+          authContext.updatePaywallState(false);
           navigation.navigate("Home", { fetchProfile: true });
         }
       }

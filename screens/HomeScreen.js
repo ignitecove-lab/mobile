@@ -73,10 +73,13 @@ const HomeScreen = ({}) => {
         );
 
   useLayoutEffect(() => {
-    if (!authState.isProfileComplete) {
+    if (authState.user.paywall) {
+      navigation.navigate("Ignitecove");
+    } else if (!authState.isProfileComplete) {
       navigation.navigate("Modal");
+    } else {
+      listProfiles();
     }
-    listProfiles();
   }, []);
 
   const initializeSwiper = () => {
@@ -116,8 +119,8 @@ const HomeScreen = ({}) => {
             <Image
               style={tw("h-10 w-10 rounded-full")}
               source={{
-                uri: user.imageURL.startsWith("http://")
-                  ? user.imageURL.replace("http://", "https://")
+                uri: user?.imageURL?.startsWith("http://")
+                  ? user?.imageURL?.replace("http://", "https://")
                   : user.imageURL,
               }}
             />
@@ -136,14 +139,14 @@ const HomeScreen = ({}) => {
           nextAppState === "active"
         ) {
           console.log("App has come to the foreground home screen!");
-          if (!authState.isProfileComplete) {
-            console.log("profile not complete profileUpdate");
-            navigation.navigate("Modal");
-          }
-
-          if (authState?.user.paywall) {
+          if (authState.user.paywall) {
             console.log("User not paid");
             navigation.navigate("Ignitecove");
+          } else if (!authState.isProfileComplete) {
+            console.log("profile not complete profileUpdate");
+            navigation.navigate("Modal");
+          } else {
+            console.log("Conditions not met for navigation");
           }
         }
 
@@ -188,7 +191,7 @@ const HomeScreen = ({}) => {
             throw new Error(text.error);
           })
           .then((data) => {
-            console.log("available profiles", data.data.length);
+            console.log("available profiles", data?.data?.length);
             setProfiles(data.data);
             setJustLoggedIn(false);
             setCardIndex(cardIndex + 1);
@@ -278,7 +281,7 @@ const HomeScreen = ({}) => {
   return (
     <View style={tw("flex-1")}>
       {!loading ? (
-        profiles && profiles.length > 0 ? (
+        profiles && profiles?.length > 0 ? (
           <>
             <View style={tw("flex-1 -mt-12")}>
               <Swiper

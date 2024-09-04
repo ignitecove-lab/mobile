@@ -48,8 +48,8 @@ const ProfileScreen = () => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+          "REAL_WINDOW_HEIGHT"
+        );
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -146,9 +146,11 @@ const ProfileScreen = () => {
             <TouchableOpacity onPress={() => navigation.navigate("Modal")}>
               <Image
                 source={{
-                  uri: userData.imageURL.startsWith("http://")
-                    ? userData.imageURL.replace("http://", "https://")
-                    : userData.imageURL
+                  uri: userData?.imageURL
+                    ? userData?.imageURL?.startsWith("http://")
+                      ? userData?.imageURL?.replace("http://", "https://")
+                      : userData.imageURL
+                    : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
                 }}
                 style={styles.profileImage}
               />
@@ -158,14 +160,18 @@ const ProfileScreen = () => {
               </View>
             </TouchableOpacity>
             <View style={styles.profileDetails}>
-              <Text style={styles.profileName}>{`${userData.firstName}`}</Text>
-              <Text
-                style={styles.profileText}
-              >{`${userData.age}, ${userData.gender}`}</Text>
+              <Text style={styles.profileName}>{`${
+                userData.firstName || ""
+              }`}</Text>
+              <Text style={styles.profileText}>{`${userData.age || ""}, ${
+                userData.gender || ""
+              }`}</Text>
               <Text
                 style={styles.profileText}
               >{`${userData.phoneNumber}`}</Text>
-              <Text style={styles.profileText}>{`${userData.location}`}</Text>
+              <Text style={styles.profileText}>{`${
+                userData.location || ""
+              }`}</Text>
             </View>
           </View>
           {/*Tags Section */}
@@ -533,8 +539,8 @@ const NumberSheet = ({ handleCloseSheet, userData, authState, navigation }) => {
         <Image
           source={{
             uri: item?.imageURL.startsWith("http://")
-              ? item.imageURL.replace("http://", "https://")
-              : item?.imageURL
+              ? item?.imageURL?.replace("http://", "https://")
+              : item?.imageURL,
           }}
           style={styles.image}
         />

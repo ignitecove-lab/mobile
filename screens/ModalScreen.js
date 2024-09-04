@@ -119,8 +119,8 @@ const ModalScreen = () => {
         if (response.ok) {
           const resp = await response.json();
           let imageUrl = resp.imageUrl;
-          if (imageUrl.startsWith("http://")) {
-            imageUrl = imageUrl.replace("http://", "https://");
+          if (imageUrl?.startsWith("http://")) {
+            imageUrl = imageUrl?.replace("http://", "https://");
           }
           setImage(imageUrl);
         } else {
