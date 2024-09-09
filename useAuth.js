@@ -101,7 +101,14 @@ export const AuthProvider = (props) => {
         });
 
         await SecureStore.setItemAsync("userToken", data.token);
-        await SecureStore.setItemAsync("user", JSON.stringify(data.user));
+        await SecureStore.setItemAsync(
+          "user",
+          JSON.stringify({
+            ...data.user,
+            currency: data.currency,
+            countryCode: data.countryCode,
+          })
+        );
         setJustLoggedIn(true);
       },
       logout: async () => {
@@ -401,6 +408,8 @@ export const AuthProvider = (props) => {
           token: userToken,
           tokenValid: tokenStatus,
           user: user,
+          currency: local_user.currency,
+          countryCode: local_user.countryCode,
           isProfileComplete: profile_complete,
         });
 

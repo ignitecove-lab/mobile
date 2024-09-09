@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import PhoneInput from "react-native-phone-number-input";
-import { getCountry } from "react-native-localize";
 
 import useAuth from "../useAuth";
 
@@ -30,7 +29,7 @@ const PhoneNumber = ({ navigation }) => {
           <PhoneInput
             ref={phoneInput}
             value={value}
-            defaultCode={getCountry()}
+            defaultCode={"KE"}
             layout="first"
             onChangeFormattedText={(text) => {
               setFormattedValue(text);

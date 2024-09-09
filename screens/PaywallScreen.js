@@ -18,7 +18,6 @@ import {
   FlatList,
   TextInput,
   Linking,
-  Button,
 } from "react-native";
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -27,7 +26,6 @@ import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import messaging from "@react-native-firebase/messaging";
 import RadioButtonRN from "radio-buttons-react-native";
-import { getCurrencies } from "react-native-localize";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
@@ -38,13 +36,15 @@ const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
 const ps_callback = `${API_BASE_URL}/paystack/callback`;
 
 const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
+  const { authState } = useAuth();
+
   const renderPlan = ({ item }) => (
     <View style={styles.planContainer}>
       <Text style={styles.planName}>{item.name}</Text>
       {item.planDetails &&
         item.planDetails.map(
           (price, index) =>
-            price.currency === getCurrencies()[0] && (
+            price.currency === authState?.currency && (
               <Text key={index} style={styles.planPrice}>
                 {new Intl.NumberFormat("en-US", {
                   style: "currency",
@@ -305,66 +305,67 @@ const PaywallScreen = ({ route }) => {
     "UGX",
     "TZS",
     "RWF",
-    "USD",
+    // "USD",
     "KES",
   ];
 
-  let radioData = plans &&
-    plans?.length > 0 && [
-      {
-        label: (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={{ width: 100, height: 70 }}>
-              <Image
-                source={require("../lipa_na_mpesa.png")}
-                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-              />
-            </View>
-            <Text style={{ marginLeft: 10 }}>
-              {(() => {
-                const targetCurrency = getCurrencies()[0];
-                const plan = plans?.find((plan) => plan?.id === planId);
-                if (!plan) return "Plan not found";
-                const planDetail = plan.planDetails.find(
-                  (detail) => detail.currency === targetCurrency
-                );
-                if (!planDetail) return "Price not available";
-
-                return `Lipa na Mpesa ${new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: targetCurrency,
-                }).format(planDetail.price)}`;
-              })()}
-            </Text>
+  let radioData = [];
+  if (plans && plans?.length > 0 && authState?.currency === "KES") {
+    radioData.push({
+      label: (
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ width: 100, height: 70 }}>
+            <Image
+              source={require("../lipa_na_mpesa.png")}
+              style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+            />
           </View>
-        ),
-        value: "lipa_na_mpesa",
-      },
-      //      {
-      //        label: (
-      //          <View style={{ flexDirection: "row", alignItems: "center" }}>
-      //            <View style={{ width: 100, height: 50 }}>
-      //              <Image
-      //                source={require("../pay_by_card.webp")}
-      //                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-      //              />
-      //            </View>
-      //            <Text
-      //              style={{ marginLeft: 10 }}
-      //            >{`Pay By card ${new Intl.NumberFormat("en-US", {
-      //              style: "currency",
-      //              currency: "USD",
-      //            }).format(
-      //              plans?.find((plan) => plan?.id === planId)?.planDetails[1]
-      //                ?.price || 0
-      //            )}`}</Text>
-      //          </View>
-      //        ),
-      //        value: "pay_by_card",
-      //      },
-    ];
+          <Text style={{ marginLeft: 10 }}>
+            {(() => {
+              const targetCurrency = authState?.currency;
+              const plan = plans?.find((plan) => plan?.id === planId);
+              if (!plan) return "Plan not found";
+              const planDetail = plan.planDetails.find(
+                (detail) => detail.currency === targetCurrency
+              );
+              if (!planDetail) return "Price not available";
 
-  start_button_currencies.includes(getCurrencies()[0]) &&
+              return `Lipa na Mpesa ${new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: targetCurrency,
+              }).format(planDetail.price)}`;
+            })()}
+          </Text>
+        </View>
+      ),
+      value: "lipa_na_mpesa",
+    });
+  }
+
+  //      {
+  //        label: (
+  //          <View style={{ flexDirection: "row", alignItems: "center" }}>
+  //            <View style={{ width: 100, height: 50 }}>
+  //              <Image
+  //                source={require("../pay_by_card.webp")}
+  //                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+  //              />
+  //            </View>
+  //            <Text
+  //              style={{ marginLeft: 10 }}
+  //            >{`Pay By card ${new Intl.NumberFormat("en-US", {
+  //              style: "currency",
+  //              currency: "USD",
+  //            }).format(
+  //              plans?.find((plan) => plan?.id === planId)?.planDetails[1]
+  //                ?.price || 0
+  //            )}`}</Text>
+  //          </View>
+  //        ),
+  //        value: "pay_by_card",
+  //      },
+
+  start_button_currencies.includes(authState?.currency) &&
     plans.length > 0 &&
     radioData.push({
       label: (
@@ -377,7 +378,7 @@ const PaywallScreen = ({ route }) => {
           </View>
           <Text style={{ marginLeft: 10 }}>
             {(() => {
-              const targetCurrency = getCurrencies()[0];
+              const targetCurrency = authState?.currency;
               const plan = plans?.find((plan) => plan?.id === planId);
               if (!plan) return "Plan not found";
               const planDetail = plan.planDetails.find(
@@ -441,7 +442,7 @@ const PaywallScreen = ({ route }) => {
       body: JSON.stringify({
         email: `${authState?.user?.phoneNumber}@ignitecove.com`,
         planId: parseInt(planId),
-        currency: getCurrencies()[0],
+        currency: authState?.currency,
         referralCode,
       }),
     })
@@ -571,13 +572,19 @@ const PaywallScreen = ({ route }) => {
             <Text style={styles.backButtonText}>Choose Another Plan</Text>
           </TouchableOpacity>
 
-          <RadioButtonRN
-            data={radioData}
-            selectedBtn={(e) => {
-              setPaymentMethod(e.value);
-              handleOpenSheet();
-            }}
-          />
+          {radioData.length > 0 ? (
+            <RadioButtonRN
+              data={radioData}
+              selectedBtn={(e) => {
+                setPaymentMethod(e.value);
+                handleOpenSheet();
+              }}
+            />
+          ) : (
+            <Text style={styles.backButtonText}>
+              No payment method available in your currency
+            </Text>
+          )}
         </>
       )}
 
