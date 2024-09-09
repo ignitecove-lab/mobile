@@ -35,9 +35,13 @@ const PhoneNumber = ({ navigation }) => {
               setFormattedValue(text);
             }}
             onChangeCountry={(country) => {
-              // console.log(country);
+              console.log(country);
               setCountryCode(country.cca2);
-              setCurrency(country.currency);
+              if (Array.isArray(country.currency)) {
+                setCurrency(country.currency[0]);
+              } else {
+                setCurrency(country.currency);
+              }
             }}
             countryPickerProps={{ withAlphaFilter: true }}
             withShadow
