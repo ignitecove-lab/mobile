@@ -443,6 +443,7 @@ const PaywallScreen = ({ route }) => {
         email: `${authState?.user?.phoneNumber}@ignitecove.com`,
         planId: parseInt(planId),
         currency: authState?.currency,
+        FCMToken: fcmToken,
         referralCode,
       }),
     })
