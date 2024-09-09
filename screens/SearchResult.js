@@ -6,7 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import React, {useLayoutEffect, useEffect, useState } from "react";
+import React, { useLayoutEffect, useEffect, useState } from "react";
 
 const SearchResult = ({ route, navigation }) => {
   const [users, setUsers] = useState(route.params);
@@ -17,14 +17,14 @@ const SearchResult = ({ route, navigation }) => {
     users;
   }, []);
   useLayoutEffect(() => {
-      navigation.setOptions({
-          headerShown: true,
-          headerTitle: "Search Result",
-          headerStyle: {
-              backgroundColor: "white",
-          },
-          headerTitleStyle: {color: "black"},
-      });
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: "Search Result",
+      headerStyle: {
+        backgroundColor: "white",
+      },
+      headerTitleStyle: { color: "black" },
+    });
   }, []);
   return (
     <FlatList
@@ -46,7 +46,7 @@ const SearchResult = ({ route, navigation }) => {
                     uri: "https://img.icons8.com/color/70/000000/filled-like.png",
                   }}
                 />
-                <Image style={styles.image} source={{ uri: item.imageURL }} />
+                <Image style={styles.image} source={{ uri: item?.imageURL }} />
                 <View style={styles.boxContent}>
                   <Text style={styles.title}>{item.firstName}</Text>
                   <Text style={styles.description}>{item.description}</Text>

@@ -209,7 +209,7 @@ const ModalScreen = () => {
           {image ? (
             <View style={styles.imageContainer1}>
               <Image
-                source={{ uri: image || user.imageURL }}
+                source={{ uri: image || user?.imageURL }}
                 style={styles.image}
               />
 

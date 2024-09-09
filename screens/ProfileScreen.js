@@ -48,7 +48,7 @@ const ProfileScreen = () => {
             source={{
               uri: user?.imageURL?.startsWith("http://")
                 ? user?.imageURL?.replace("http://", "https://")
-                : user.imageURL,
+                : user?.imageURL,
             }}
           />
         )}

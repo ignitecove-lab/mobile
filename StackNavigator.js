@@ -44,6 +44,7 @@ const HeaderLeft = () => {
 
 const StackNavigator = () => {
   const { authState, isVIP } = useAuth();
+  console.log(authState);
 
   return (
     <Stack.Navigator
@@ -51,9 +52,17 @@ const StackNavigator = () => {
         headerShown: false,
       }}
     >
-      {authState?.tokenValid ? (
+      {authState && authState?.tokenValid ? (
         <>
           <Stack.Group>
+            {authState?.user?.paywall && (
+              <Stack.Screen
+                options={{ headerShown: false }}
+                name="Paywall"
+                component={Unpaid}
+              />
+            )}
+
             <Stack.Screen
               name="Home"
               component={HomeScreen}
@@ -111,7 +120,11 @@ const StackNavigator = () => {
                 },
               }}
             />
-            <Stack.Screen name="Ignitecove" component={Unpaid} />
+            <Stack.Screen
+              options={{ headerShown: false }}
+              name="Ignitecove"
+              component={Unpaid}
+            />
           </Stack.Group>
 
           <Stack.Group screenOptions={{ presentation: "modal" }}>

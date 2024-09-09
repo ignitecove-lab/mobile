@@ -80,7 +80,7 @@ const ViewProfileScreen = ({ route }) => {
     <View style={tw("flex-1")}>
       <View>
         <View style={tw("items-center justify-center h-80 w-full")}>
-          <Image style={tw("h-96 w-96")} source={{ uri: userData.imageURL }} />
+          <Image style={tw("h-96 w-96")} source={{ uri: userData?.imageURL }} />
         </View>
 
         {/* Tags Section */}

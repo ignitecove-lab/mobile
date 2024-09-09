@@ -72,15 +72,15 @@ const HomeScreen = ({}) => {
           "REAL_WINDOW_HEIGHT"
         );
 
-  useLayoutEffect(() => {
-    if (authState.user.paywall) {
-      navigation.navigate("Ignitecove");
-    } else if (!authState.isProfileComplete) {
+  useEffect(() => {
+    if (authState && !authState.isProfileComplete) {
       navigation.navigate("Modal");
+    } else if (authState?.user?.paywall) {
+      navigation.navigate("Ignitecove");
     } else {
       listProfiles();
     }
-  }, []);
+  }, [page, listProfiles, authState]);
 
   const initializeSwiper = () => {
     swipeRef?.current?.forceUpdate();
@@ -119,9 +119,11 @@ const HomeScreen = ({}) => {
             <Image
               style={tw("h-10 w-10 rounded-full")}
               source={{
-                uri: user?.imageURL?.startsWith("http://")
-                  ? user?.imageURL?.replace("http://", "https://")
-                  : user.imageURL,
+                uri: user?.imageURL
+                  ? user?.imageURL?.startsWith("http://")
+                    ? user?.imageURL?.replace("http://", "https://")
+                    : user?.imageURL
+                  : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
               }}
             />
           </TouchableOpacity>
@@ -139,12 +141,12 @@ const HomeScreen = ({}) => {
           nextAppState === "active"
         ) {
           console.log("App has come to the foreground home screen!");
-          if (authState.user.paywall) {
-            console.log("User not paid");
-            navigation.navigate("Ignitecove");
-          } else if (!authState.isProfileComplete) {
+          if (!authState.isProfileComplete) {
             console.log("profile not complete profileUpdate");
             navigation.navigate("Modal");
+          } else if (authState?.user?.paywall) {
+            console.log("User not paid");
+            navigation.navigate("Ignitecove");
           } else {
             console.log("Conditions not met for navigation");
           }
@@ -223,10 +225,6 @@ const HomeScreen = ({}) => {
     [page]
   );
 
-  useEffect(() => {
-    listProfiles();
-  }, [page, listProfiles]);
-
   const checkSubscription = async (id, subToPhone) => {
     try {
       const data = JSON.stringify({
@@ -279,7 +277,7 @@ const HomeScreen = ({}) => {
   );
 
   return (
-    <View style={tw("flex-1")}>
+    <View style={tw("flex-1 justify-center")}>
       {!loading ? (
         profiles && profiles?.length > 0 ? (
           <>
@@ -479,6 +477,21 @@ const HomeScreen = ({}) => {
               </TouchableOpacity>
             </View>
           </>
+        ) : authState && !authState.isProfileComplete ? (
+          <View style={styles.premiumSection}>
+            <Text style={styles.premiumText}>Incomplete Profile</Text>
+            <Text style={styles.premiumDetails}>
+              Your profile is not complete. Please update your profile to see
+              potential matches that awaits you! 😊
+            </Text>
+
+            <TouchableOpacity
+              style={styles.upgradeButton}
+              onPress={() => navigation.navigate("Modal")}
+            >
+              <Text style={styles.upgradeButtonText}>Complete Profile</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <View
             style={tw(
@@ -663,6 +676,33 @@ const HomeScreen = ({}) => {
 };
 
 const styles = StyleSheet.create({
+  premiumSection: {
+    padding: 16,
+    backgroundColor: "#fc6a03",
+    alignItems: "center",
+    borderRadius: 20,
+    margin: 10,
+  },
+  premiumText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#ffffff",
+  },
+  premiumDetails: {
+    marginTop: 8,
+    textAlign: "center",
+    color: "#ffffff",
+  },
+  upgradeButton: {
+    marginTop: 16,
+    backgroundColor: "#007bff",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+  },
+  upgradeButtonText: {
+    color: "#ffffff",
+  },
   longText: {
     fontSize: 40,
     width: 20,
