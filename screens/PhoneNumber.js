@@ -35,7 +35,7 @@ const PhoneNumber = ({ navigation }) => {
               setFormattedValue(text);
             }}
             onChangeCountry={(country) => {
-              console.log(country);
+              // console.log(country);
               setCountryCode(country.cca2);
               if (Array.isArray(country.currency)) {
                 setCurrency(country.currency[0]);
