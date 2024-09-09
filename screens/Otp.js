@@ -4,7 +4,7 @@ import { OtpInput } from "react-native-otp-entry";
 import useAuth from "../useAuth";
 
 const Otp = ({ route, navigation }) => {
-  const { phoneNumber, countryCode } = route.params;
+  const { phoneNumber, countryCode, currency } = route.params;
   const [invalidCode, setInvalidCode] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState(true);
   const [timeLeft, setTimeLeft] = useState(300);
@@ -73,7 +73,8 @@ const Otp = ({ route, navigation }) => {
             const verify = await checkVerification(
               phoneNumber,
               countryCode,
-              text
+              text,
+              currency
             );
 
             if (!verify) {

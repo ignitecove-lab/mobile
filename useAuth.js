@@ -33,28 +33,34 @@ export const AuthProvider = (props) => {
         case "RESTORE_TOKEN":
           return {
             ...prevState,
+            isLoading: false,
             user: action.user,
             userToken: action.token,
-            isLoading: false,
+            currency: action.currency,
             tokenValid: action.tokenValid,
+            countryCode: action.countryCode,
             isProfileComplete: action.isProfileComplete,
           };
         case "SIGN_IN":
           return {
             ...prevState,
             isSignout: false,
-            userToken: action.token,
             user: action.user,
+            userToken: action.token,
+            currency: action.currency,
             tokenValid: action.tokenValid,
+            countryCode: action.countryCode,
             isProfileComplete: action.isProfileComplete,
           };
         case "SIGN_OUT":
           return {
             ...prevState,
             user: null,
+            currency: null,
             isSignout: true,
             userToken: null,
             tokenValid: false,
+            countryCode: null,
             isProfileComplete: false,
           };
         case "UPDATE_PAYWALL_STATE":
@@ -76,6 +82,8 @@ export const AuthProvider = (props) => {
       userToken: null,
       tokenValid: false,
       isProfileComplete: true,
+      currency: null,
+      countryCode: null,
     }
   );
 
@@ -86,9 +94,12 @@ export const AuthProvider = (props) => {
           type: "SIGN_IN",
           token: data.token,
           user: data.user,
+          currency: data.currency,
           tokenValid: data.tokenValid,
+          countryCode: data.countryCode,
           isProfileComplete: data.isProfileComplete,
         });
+
         await SecureStore.setItemAsync("userToken", data.token);
         await SecureStore.setItemAsync("user", JSON.stringify(data.user));
         setJustLoggedIn(true);
@@ -103,9 +114,12 @@ export const AuthProvider = (props) => {
           type: "SIGN_IN",
           token: data.token,
           user: data.user,
+          currency: data.currency,
           tokenValid: data.tokenValid,
+          countryCode: data.countryCode,
           isProfileComplete: data.isProfileComplete,
         });
+
         await SecureStore.setItemAsync("userToken", data.token);
         await SecureStore.setItemAsync("user", JSON.stringify(data.user));
         setJustLoggedIn(true);
@@ -121,6 +135,7 @@ export const AuthProvider = (props) => {
               ...user,
               paywall: paywall,
             };
+
             await SecureStore.setItemAsync("user", JSON.stringify(updatedUser));
           }
         } catch (error) {
@@ -156,7 +171,12 @@ export const AuthProvider = (props) => {
     }
   };
 
-  const checkVerification = async (phoneNumber, countryCode, code) => {
+  const checkVerification = async (
+    phoneNumber,
+    countryCode,
+    code,
+    currency
+  ) => {
     try {
       const data = JSON.stringify({
         phone: phoneNumber,
@@ -188,7 +208,9 @@ export const AuthProvider = (props) => {
         isProfileComplete: profile_complete,
         token: json.accessToken,
         tokenValid: true,
+        countryCode,
         user: json,
+        currency,
       };
 
       setJustLoggedIn(true);
@@ -441,7 +463,8 @@ export const AuthProvider = (props) => {
 
     bootstrapAsync();
   }, []);
-  // console.log(state)
+
+  // console.log("state", state);
 
   useEffect(() => {
     const versionCheck = AppState.addEventListener("change", (nextAppState) => {

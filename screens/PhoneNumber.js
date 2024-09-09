@@ -16,6 +16,7 @@ const PhoneNumber = ({ navigation }) => {
   const [value, setValue] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
   const [countryCode, setCountryCode] = useState("KE");
+  const [currency, setCurrency] = useState("KES");
   const phoneInput = useRef(null);
   const { sendSmsVerification } = useAuth();
 
@@ -35,8 +36,9 @@ const PhoneNumber = ({ navigation }) => {
               setFormattedValue(text);
             }}
             onChangeCountry={(country) => {
-              console.log(country);
+              // console.log(country);
               setCountryCode(country.cca2);
+              setCurrency(country.currency);
             }}
             countryPickerProps={{ withAlphaFilter: true }}
             withShadow
@@ -50,10 +52,10 @@ const PhoneNumber = ({ navigation }) => {
                   .formattedNumber;
               sendSmsVerification(formattedPhoneNum, countryCode);
 
-              console.log(formattedPhoneNum);
               navigation.navigate("Otp", {
                 phoneNumber: formattedPhoneNum,
-                countryCode: countryCode, // Pass country code as a parameter
+                countryCode: countryCode,
+                currency: currency,
               });
             }}
           >
