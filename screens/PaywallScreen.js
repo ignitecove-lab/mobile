@@ -18,6 +18,7 @@ import {
   FlatList,
   TextInput,
   Linking,
+  BackHandler
 } from "react-native";
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -31,9 +32,9 @@ import { Ionicons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import useAuth from "../useAuth";
 
-const CLOSE_URL = `https://standard.paystack.co/close`;
+const CLOSE_URL = `/v1/start-button/webhook/redirect`;
 const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
-const ps_callback = `${API_BASE_URL}/paystack/callback`;
+const ps_callback = `${API_BASE_URL}/v1/start-button/webhook/redirect`;
 
 const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
   const { authState } = useAuth();
@@ -187,6 +188,9 @@ const PaywallScreen = ({ route }) => {
   }, []);
 
   useEffect(() => {
+    // Add event listener for back button
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
     // Foreground/background message handling
     const unsubscribeOnMessage = messaging().onMessage(
       async (remoteMessage) => {
@@ -254,8 +258,17 @@ const PaywallScreen = ({ route }) => {
 
     return () => {
       unsubscribeOnMessage();
+      backHandler.remove();
     };
   }, [fcmToken, notificationData]);
+
+  const handleBackPress = () => {
+    if (showModal) {
+      setShowModal(false); // Close the modal when back button is pressed
+      return true; // Prevent default back behavior
+    }
+    return false; // Allow default back behavior if modal is not visible
+  };
 
   const initiatePayment = async (phoneNumber, fcmToken) => {
     setModalVisible(true);
