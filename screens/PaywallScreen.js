@@ -18,7 +18,7 @@ import {
   FlatList,
   TextInput,
   Linking,
-  BackHandler
+  BackHandler,
 } from "react-native";
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -126,6 +126,7 @@ const PaywallScreen = ({ route }) => {
   const [formattedValue, setFormattedValue] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [canGoBack, setCanGoBack] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [codeError, setCodeError] = useState(null);
   const [modalText, setModalText] = useState("");
@@ -135,6 +136,7 @@ const PaywallScreen = ({ route }) => {
   const [next, setNext] = useState(false);
   const { isUpgrade } = route.params;
   const bottomSheetRef = useRef(null);
+  const webViewRef = useRef(null);
 
   const phoneInput = useRef(null);
   const navigation = useNavigation();
@@ -189,7 +191,10 @@ const PaywallScreen = ({ route }) => {
 
   useEffect(() => {
     // Add event listener for back button
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
 
     // Foreground/background message handling
     const unsubscribeOnMessage = messaging().onMessage(
@@ -261,14 +266,6 @@ const PaywallScreen = ({ route }) => {
       backHandler.remove();
     };
   }, [fcmToken, notificationData]);
-
-  const handleBackPress = () => {
-    if (showModal) {
-      setShowModal(false); // Close the modal when back button is pressed
-      return true; // Prevent default back behavior
-    }
-    return false; // Allow default back behavior if modal is not visible
-  };
 
   const initiatePayment = async (phoneNumber, fcmToken) => {
     setModalVisible(true);
@@ -477,8 +474,21 @@ const PaywallScreen = ({ route }) => {
     }
   };
 
+  const handleBackPress = () => {
+    if (webViewRef.current && canGoBack && showModal) {
+      webViewRef.current.goBack();
+      setShowModal(false);
+    }
+  };
+
+  const handleWebViewClosePress = () => {
+    navigation.goBack();
+  };
+
   const onNavigationStateChange = (state) => {
-    const { url } = state;
+    const { url, canGoBack } = state;
+
+    setCanGoBack(canGoBack);
 
     if (!url) return;
 
@@ -713,6 +723,7 @@ const PaywallScreen = ({ route }) => {
                 >
                   <SafeAreaView style={{ flex: 1 }}>
                     <WebView
+                      ref={webViewRef}
                       style={[{ flex: 1 }]}
                       source={{ uri: authorizationUrl }}
                       onLoadStart={() => setIsLoading(true)}
@@ -727,6 +738,28 @@ const PaywallScreen = ({ route }) => {
                         <ActivityIndicator size="large" color={"green"} />
                       </View>
                     )}
+
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity
+                        onPress={handleBackPress}
+                        disabled={!canGoBack}
+                        style={[
+                          styles.webviewbutton,
+                          { backgroundColor: canGoBack ? "blue" : "gray" },
+                        ]}
+                      >
+                        <Text style={styles.buttonText}>Back</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleWebViewClosePress}
+                        style={[
+                          styles.webviewbutton,
+                          { backgroundColor: "red" },
+                        ]}
+                      >
+                        <Text style={styles.buttonText}>Close</Text>
+                      </TouchableOpacity>
+                    </View>
                   </SafeAreaView>
                 </Modal>
               )}
@@ -779,6 +812,32 @@ const PaywallScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+  },
+  webviewbutton: {
+    flex: 1,
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+  },
   bottomViewContainer: {
     padding: 16,
     marginTop: 30,
@@ -931,7 +990,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   button: {
     marginTop: 20,
     height: 50,
@@ -948,7 +1006,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6.27,
     elevation: 10,
   },
-
   welcome: {
     padding: 10,
     marginBottom: 10,
