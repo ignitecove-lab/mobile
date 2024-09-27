@@ -316,7 +316,7 @@ const PaywallScreen = ({ route }) => {
     "TZS",
     "RWF",
     // "USD",
-    "KES",
+    // "KES",
   ];
 
   let radioData = [];
@@ -623,22 +623,22 @@ const PaywallScreen = ({ route }) => {
             </View>
           }
         >
-          {plans &&
-            plans.length > 0 &&
-            plans?.find((obj) => obj.name === "BRONZE") && (
-              <View style={styles.welcome}>
-                <Text style={styles.referralLabel}>Referral Code</Text>
-                <TextInput
-                  style={styles.referralInput}
-                  placeholder="IGC-XXXX"
-                  onChangeText={handleReferralCodeChange}
-                />
+          {/*{plans &&*/}
+          {/*  plans.length > 0 &&*/}
+          {/*  plans?.find((obj) => obj.name === "BRONZE") && (*/}
+          {/*    <View style={styles.welcome}>*/}
+          {/*      <Text style={styles.referralLabel}>Referral Code</Text>*/}
+          {/*      <TextInput*/}
+          {/*        style={styles.referralInput}*/}
+          {/*        placeholder="IGC-XXXX"*/}
+          {/*        onChangeText={handleReferralCodeChange}*/}
+          {/*      />*/}
 
-                {codeError ? (
-                  <Text style={styles.labelErrorText}>{codeError}</Text>
-                ) : null}
-              </View>
-            )}
+          {/*      {codeError ? (*/}
+          {/*        <Text style={styles.labelErrorText}>{codeError}</Text>*/}
+          {/*      ) : null}*/}
+          {/*    </View>*/}
+          {/*  )}*/}
 
           {paymentMethod === "lipa_na_mpesa" && (
             <>
@@ -833,10 +833,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
   },
   bottomViewContainer: {
     padding: 16,
