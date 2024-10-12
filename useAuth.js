@@ -12,7 +12,11 @@ import * as SecureStore from "expo-secure-store";
 import { initSocket, likeDislike, onNewMessage } from "./socket";
 import { Alert, Linking, AppState, Platform } from "react-native";
 import VersionCheck from "react-native-version-check";
-import notifee, { AndroidStyle } from "@notifee/react-native";
+import notifee, {
+  AndroidStyle,
+  AndroidImportance,
+  EventType,
+} from "@notifee/react-native";
 
 const AuthContext = createContext();
 
@@ -503,7 +507,8 @@ export const AuthProvider = (props) => {
     const channelId = await notifee.createChannel({
       id: "default",
       name: "Default Channel",
-      sound: "hollow",
+      // sound: "hollow",
+      importance: AndroidImportance.HIGH,
     });
 
     // Display a notification
@@ -516,6 +521,7 @@ export const AuthProvider = (props) => {
         // pressAction is needed if you want the notification to open the app when pressed
         pressAction: {
           id: "default",
+          launchActivity: "default",
         },
         timestamp: Date.now(),
         showTimestamp: true,
@@ -533,11 +539,26 @@ export const AuthProvider = (props) => {
           },
         ],
       },
+      data: {
+        deepLink: `host.exp.ignitecove:////Profile_View?user_id=${parseInt(
+          message?.notification?.body
+        )}`,
+      },
     });
   }
 
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
+
+  notifee.onForegroundEvent(({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      const deepLink = detail.notification.data.deepLink;
+      if (deepLink) {
+        // Handle the deep link (e.g., navigate to the specific screen)
+        Linking.openURL(deepLink);
+      }
+    }
+  });
 
   // console.log("state", state);
 

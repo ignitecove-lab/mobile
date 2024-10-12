@@ -1,4 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import {
   View,
   Text,
@@ -62,6 +67,17 @@ const ViewProfileScreen = ({ route }) => {
       .catch((err) => {
         console.log("fetchProfiles error", err);
       });
+  }, []);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: "Profile View",
+      headerStyle: {
+        backgroundColor: "white",
+      },
+      headerTitleStyle: { color: "black" },
+    });
   }, []);
 
   useEffect(() => {

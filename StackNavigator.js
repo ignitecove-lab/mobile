@@ -89,7 +89,7 @@ const StackNavigator = () => {
               }
             />
             <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="Profile View" component={ViewProfileScreen} />
+            <Stack.Screen name="Profile_View" component={ViewProfileScreen} />
             <Stack.Screen name="PayWall" component={PaywallScreen} />
             <Stack.Screen name="Search" component={SearchScreen} />
             <Stack.Screen name="SearchResult" component={SearchResult} />
