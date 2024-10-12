@@ -36,8 +36,15 @@ import VIPBadge from "../vip_badge.png";
 
 const HomeScreen = ({}) => {
   const navigation = useNavigation();
-  const { user, authState, justLoggedIn, setJustLoggedIn, isVIP, setIsVIP } =
-    useAuth();
+  const {
+    user,
+    authState,
+    justLoggedIn,
+    setJustLoggedIn,
+    isVIP,
+    setIsVIP,
+    authContext,
+  } = useAuth();
   const swipeRef = useRef(null);
   const [profiles, setProfiles] = useState([]);
   const [showPhoneNumUi, setShowPhoneNumUi] = useState({});
@@ -55,6 +62,7 @@ const HomeScreen = ({}) => {
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
   const appState = useRef(AppState.currentState);
   const bottomSheetRef = useRef(null);
+  const { sendLikeDislike } = authContext;
 
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
   const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
@@ -349,6 +357,30 @@ const HomeScreen = ({}) => {
                       ]}
                     >
                       <View style={[tw("flex-col justify-between")]}>
+                        {/* like / dislike buttons */}
+                        <View style={[tw("flex-row justify-between")]}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              sendLikeDislike(card.id, "dislike");
+                              swipeRef.current.swipeLeft();
+                            }}
+                            style={tw(
+                              "items-center justify-center rounded-full w-7 h-7 bg-white"
+                            )}
+                          >
+                            <AntDesign name="dislike2" size={15} color="red" />
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            onPress={() => sendLikeDislike(card.id, "like")}
+                            style={tw(
+                              "items-center justify-center rounded-full w-7 h-7 bg-white"
+                            )}
+                          >
+                            <AntDesign name="hearto" size={15} color="green" />
+                          </TouchableOpacity>
+                        </View>
+
                         <View>
                           <Text style={tw("text-lg text-white")}>
                             {card.firstName}, {card.age}
