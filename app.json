@@ -2,7 +2,7 @@
   "expo": {
     "name": "igniteintcove",
     "scheme": "igniteintcove",
-    "slug": "igniteintcove",
+    "slug": "ignite",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,7 +25,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "@react-native-firebase/app",
@@ -56,7 +58,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "e7a0fabe-84f8-4dd5-8eb4-d6fbba74727f"
+        "projectId": "c3606a8e-5b2f-4970-ba05-7bb5106697e9"
       }
     }
   }
