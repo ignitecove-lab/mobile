@@ -36,7 +36,7 @@ const SearchResult = ({ route, navigation }) => {
           <View>
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate("Profile View", { userData: item })
+                navigation.navigate("Profile View", { user_id: item.id })
               }
             >
               <View style={styles.box}>
