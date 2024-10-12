@@ -9,6 +9,7 @@ import React, {
 import API_BASE_URL from "./lib/constants/baseUrl";
 import messaging from "@react-native-firebase/messaging";
 import * as SecureStore from "expo-secure-store";
+import { initSocket, likeDislike, onNewMessage } from "./socket";
 import { Alert, Linking, AppState, Platform } from "react-native";
 import VersionCheck from "react-native-version-check";
 
@@ -21,6 +22,7 @@ export const AuthProvider = (props) => {
   const [justLoggedIn, setJustLoggedIn] = useState(false);
   const [isVIP, setIsVIP] = useState(false);
   const appState = useRef(AppState.currentState);
+  const [socket, setSocket] = useState(null);
 
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
@@ -151,6 +153,9 @@ export const AuthProvider = (props) => {
       },
       updateProfileComplete: async (isProfileComplete) => {
         dispatch({ type: "UPDATE_PROFILE_COMPLETE", isProfileComplete });
+      },
+      sendSocketMessage: (user_id, action) => {
+        likeDislike(user_id, action);
       },
     }),
     []
@@ -473,6 +478,22 @@ export const AuthProvider = (props) => {
     bootstrapAsync();
   }, []);
 
+  useEffect(() => {
+    if (!state.userToken) return;
+
+    const socketConnection = initSocket(state.userToken);
+    setSocket(socketConnection);
+
+    onNewMessage((msg) => {
+      console.log("New message:", msg);
+      // Handle new messages globally if needed
+    });
+
+    return () => {
+      socketConnection.disconnect();
+    };
+  }, [state]);
+
   // console.log("state", state);
 
   useEffect(() => {
@@ -508,6 +529,7 @@ export const AuthProvider = (props) => {
         setJustLoggedIn,
         isVIP,
         setIsVIP,
+        socket,
       }}
     >
       {props.children}
