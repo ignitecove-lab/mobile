@@ -34,9 +34,12 @@ import Modal from "react-native-modal";
 import * as Clipboard from "expo-clipboard";
 
 const ProfileScreen = () => {
+  const [numberSheetURL, setNumberSheetURL] = useState(
+    `${API_BASE_URL}/v1/account/paid`
+  );
+  const [exitModalVisible, setExitModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [exitModalVisible, setExitModalVisible] = useState(false);
   const bottomSheetRef = useRef(null);
   const numberSheetRef = useRef(null);
 
@@ -195,6 +198,7 @@ const ProfileScreen = () => {
             handleOpenSheet={handleOpenSheet}
             openNumberSheet={openNumberSheet}
             userData={userData}
+            setNumberSheetURL={setNumberSheetURL}
           />
 
           {/* Referrals bottom sheet */}
@@ -214,6 +218,7 @@ const ProfileScreen = () => {
               userData={userData}
               authState={authState}
               navigation={navigation}
+              url={numberSheetURL}
             />
           </CustomBottomSheetModal>
 
@@ -312,14 +317,38 @@ const FeatureCard = ({ icon, color, title, subtitle }) => {
   );
 };
 
-const FeatureSection = ({ handleOpenSheet, openNumberSheet, userData }) => {
+const FeatureSection = ({
+  handleOpenSheet,
+  openNumberSheet,
+  userData,
+  setNumberSheetURL,
+}) => {
   return (
     <View style={styles.Infocontainer}>
-      <TouchableOpacity onPress={() => openNumberSheet()}>
+      <TouchableOpacity
+        onPress={() => {
+          setNumberSheetURL(`${API_BASE_URL}/v1/account/paid`);
+          openNumberSheet();
+        }}
+      >
         <FeatureCard
           icon="flame"
           title="Viewed Numbers"
           subtitle={userData?.viewCount || 0}
+          color="#ef4444"
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          setNumberSheetURL(`${API_BASE_URL}/v1/account/likes`);
+          openNumberSheet();
+        }}
+      >
+        <FeatureCard
+          icon="heart"
+          title="Likes Received"
+          subtitle={userData?.likes || 0}
           color="#ef4444"
         />
       </TouchableOpacity>
@@ -452,7 +481,13 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
   );
 };
 
-const NumberSheet = ({ handleCloseSheet, userData, authState, navigation }) => {
+const NumberSheet = ({
+  handleCloseSheet,
+  userData,
+  authState,
+  navigation,
+  url,
+}) => {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const styles = StyleSheet.create({
@@ -506,7 +541,7 @@ const NumberSheet = ({ handleCloseSheet, userData, authState, navigation }) => {
   const fetchProfiles = useCallback(() => {
     setLoading(true);
 
-    fetch(`${API_BASE_URL}/v1/account/paid`, {
+    fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
