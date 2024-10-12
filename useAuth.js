@@ -12,6 +12,7 @@ import * as SecureStore from "expo-secure-store";
 import { initSocket, likeDislike, onNewMessage } from "./socket";
 import { Alert, Linking, AppState, Platform } from "react-native";
 import VersionCheck from "react-native-version-check";
+import notifee, { AndroidStyle } from "@notifee/react-native";
 
 const AuthContext = createContext();
 
@@ -493,6 +494,50 @@ export const AuthProvider = (props) => {
       socketConnection.disconnect();
     };
   }, [state]);
+
+  async function onMessageReceived(message) {
+    // Request permissions
+    await notifee.requestPermission();
+
+    // Create a channel (required for Android)
+    const channelId = await notifee.createChannel({
+      id: "default",
+      name: "Default Channel",
+      sound: "hollow",
+    });
+
+    // Display a notification
+    await notifee.displayNotification({
+      title: message?.notification?.title,
+      body: "",
+
+      android: {
+        channelId,
+        // pressAction is needed if you want the notification to open the app when pressed
+        pressAction: {
+          id: "default",
+        },
+        timestamp: Date.now(),
+        showTimestamp: true,
+        style: {
+          type: AndroidStyle.BIGPICTURE,
+          picture: message.notification.android?.imageUrl,
+        },
+      },
+      ios: {
+        timestamp: Date.now(),
+        showTimestamp: true,
+        attachments: [
+          {
+            url: message.notification.android?.imageUrl,
+          },
+        ],
+      },
+    });
+  }
+
+  messaging().onMessage(onMessageReceived);
+  messaging().setBackgroundMessageHandler(onMessageReceived);
 
   // console.log("state", state);
 
