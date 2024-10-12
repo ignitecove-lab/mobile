@@ -361,7 +361,11 @@ const HomeScreen = ({}) => {
                         <View style={[tw("flex-row justify-between")]}>
                           <TouchableOpacity
                             onPress={() => {
-                              sendLikeDislike(card.id, "dislike");
+                              sendLikeDislike(
+                                card.id,
+                                card.phoneNumber,
+                                "dislike"
+                              );
                               swipeRef.current.swipeLeft();
                             }}
                             style={tw(
@@ -372,7 +376,9 @@ const HomeScreen = ({}) => {
                           </TouchableOpacity>
 
                           <TouchableOpacity
-                            onPress={() => sendLikeDislike(card.id, "like")}
+                            onPress={() =>
+                              sendLikeDislike(card.id, card.phoneNumber, "like")
+                            }
                             style={tw(
                               "items-center justify-center rounded-full w-7 h-7 bg-white"
                             )}

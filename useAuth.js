@@ -159,8 +159,8 @@ export const AuthProvider = (props) => {
       updateProfileComplete: async (isProfileComplete) => {
         dispatch({ type: "UPDATE_PROFILE_COMPLETE", isProfileComplete });
       },
-      sendLikeDislike: (user_id, action) => {
-        likeDislike(user_id, action);
+      sendLikeDislike: (user_id, phone_number, action) => {
+        likeDislike(user_id, phone_number, action);
       },
     }),
     []
