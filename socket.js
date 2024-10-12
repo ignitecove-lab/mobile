@@ -3,8 +3,8 @@ import { io } from "socket.io-client";
 let socket;
 
 export const initSocket = (token) => {
-  const SOCKET_SERVER = "https://ws.ignitecove.com";
-  // const SOCKET_SERVER = "http://192.168.100.200:3000";
+  // const SOCKET_SERVER = "https://ws.ignitecove.com";
+  const SOCKET_SERVER = "http://192.168.100.200:3000";
 
   if (!socket) {
     socket = io(SOCKET_SERVER, {
@@ -35,9 +35,9 @@ export const initSocket = (token) => {
   return socket;
 };
 
-export const likeDislike = (user_id, action) => {
+export const likeDislike = (user_id, phone_number, action) => {
   if (socket) {
-    socket.emit("likeDislike", { user_id, action });
+    socket.emit("likeDislike", { user_id, phone_number, action });
   }
 };
 
