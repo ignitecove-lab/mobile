@@ -173,11 +173,12 @@ const HomeScreen = ({}) => {
     async (minAge = null, maxAge = null, location = null) => {
       try {
         let url = `${API_BASE_URL}/v1/account/list/${user.id}?shuffle=${justLoggedIn}&page=${page}&size=${pageSize}`;
-        if (minAge) {
-          url = url + `&minAge=${minAge}`;
+
+        if (ageRange[0] || minAge) {
+          url = url + `&minAge=${ageRange[0]}`;
         }
-        if (maxAge) {
-          url = url + `&maxAge=${maxAge}`;
+        if (ageRange[1] || maxAge) {
+          url = url + `&maxAge=${ageRange[1]}`;
         }
         if (location) {
           url = url + `&location=${location}`;
