@@ -593,7 +593,7 @@ const NumberSheet = ({
 
   const handlePressItem = (item) => {
     handleCloseSheet();
-    navigation.navigate("Profile View", { user_id: item?.id });
+    navigation.navigate("Profile_View", { user_id: item?.id });
   };
 
   useEffect(() => {
