@@ -369,6 +369,7 @@ const HomeScreen = ({}) => {
                               );
                               swipeRef.current.swipeLeft();
                             }}
+                            disabled={card?.liked}
                             style={tw(
                               "items-center justify-center rounded-full w-7 h-7 bg-white"
                             )}
@@ -380,11 +381,16 @@ const HomeScreen = ({}) => {
                             onPress={() =>
                               sendLikeDislike(card.id, card.phoneNumber, "like")
                             }
+                            disabled={card?.liked}
                             style={tw(
                               "items-center justify-center rounded-full w-7 h-7 bg-white"
                             )}
                           >
-                            <AntDesign name="hearto" size={15} color="green" />
+                            <AntDesign
+                              name={card?.liked ? "heart" : "hearto"}
+                              size={15}
+                              color="green"
+                            />
                           </TouchableOpacity>
                         </View>
 
