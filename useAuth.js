@@ -500,6 +500,7 @@ export const AuthProvider = (props) => {
   }, [state]);
 
   async function onMessageReceived(message) {
+    console.log({ Nofifee: message });
     // Request permissions
     await notifee.requestPermission();
 

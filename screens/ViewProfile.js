@@ -63,6 +63,10 @@ const ViewProfileScreen = ({ route }) => {
       .then((data) => {
         setUserData(data);
         setLoading(false);
+        console.log({
+          ProfileViewURL: `${API_BASE_URL}/v1/account/view-account/${user_id}`,
+          ProfileViewData: data,
+        });
       })
       .catch((err) => {
         console.log("fetchProfiles error", err);
