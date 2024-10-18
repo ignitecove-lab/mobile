@@ -285,23 +285,34 @@ export const AuthProvider = (props) => {
   };
 
   const saveFCMToken = async (token) => {
+    let userToken = state?.userToken;
+    // Check if the token is null, try fetching it from SecureStore
+    if (!userToken) {
+      console.log("User token is null, attempting to retrieve it from SecureStore...");
+      userToken = await SecureStore.getItemAsync("userToken");
+
+      if (!userToken) {
+        console.error("Unable to retrieve user token, aborting API call.");
+        return;
+      }
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/v1/account/fcm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${state?.userToken}`,
+          Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({ fcmToken: token }),
       });
 
       const json = await response.json();
-      console.log({ saveFCMToken: json });
     } catch (error) {
-      console.error("saveFCMToken", error);
-      return false;
+      console.error("Error saving FCM token:", error);
     }
   };
+
 
   const fetchUser = useCallback(async (user_id, userToken) => {
     if (!user_id || !userToken) {
@@ -384,26 +395,6 @@ export const AuthProvider = (props) => {
           );
         }
       }
-      // else {
-      //   <AuthContext.Provider
-      //     value={{
-      //       authContext,
-      //       user: state.user,
-      //       authState: state,
-      //       sendSmsVerification,
-      //       checkVerification,
-      //       error,
-      //       fcmToken,
-      //       notificationData,
-      //       justLoggedIn,
-      //       setJustLoggedIn,
-      //       isVIP,
-      //       setIsVIP,
-      //     }}
-      //   >
-      //     {props.children}
-      //   </AuthContext.Provider>;
-      // }
     } catch (error) {
       console.error("Error checking app version:", error);
     }
