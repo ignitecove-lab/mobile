@@ -172,6 +172,7 @@ const HomeScreen = ({}) => {
   const listProfiles = useCallback(
     async (minAge = null, maxAge = null, location = null) => {
       try {
+        console.log(ageRange);
         let url = `${API_BASE_URL}/v1/account/list/${user.id}?shuffle=${justLoggedIn}&page=${page}&size=${pageSize}`;
 
         if (ageRange[0] || minAge) {
@@ -231,7 +232,7 @@ const HomeScreen = ({}) => {
         return false;
       }
     },
-    [page]
+    [page, ageRange]
   );
 
   const checkSubscription = async (id, subToPhone) => {
