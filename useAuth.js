@@ -541,7 +541,7 @@ export const AuthProvider = (props) => {
         ],
       },
       data: {
-        deepLink: `host.exp.ignitecove:////Profile_View?user_id=${parseInt(
+        deepLink: `host.exp.ignitecove://Profile_View?user_id=${parseInt(
           message?.notification?.body
         )}`,
       },
