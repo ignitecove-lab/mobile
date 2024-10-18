@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "igniteintcove",
-    "scheme": "igniteintcove",
+    "scheme": "host.exp.ignitecove",
     "slug": "ignite",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -25,9 +25,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "plugins": [
       "@react-native-firebase/app",
