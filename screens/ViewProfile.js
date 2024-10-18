@@ -109,6 +109,7 @@ const ViewProfileScreen = ({ route }) => {
       if (json.status === 0) {
         setSubscription(true);
         setModalVisible(false);
+        fetchProfile();
       } else {
         setSubscription(false);
         setModalText(json.message);
