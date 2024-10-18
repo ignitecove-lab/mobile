@@ -254,6 +254,7 @@ export const AuthProvider = (props) => {
       if (token) {
         // Store the token in the state
         setFcmToken(token);
+        await saveFCMToken(token);
         console.log("FCM Device Token: ", token);
       } else {
         console.log("No FCM token available");
@@ -279,6 +280,25 @@ export const AuthProvider = (props) => {
       return json.valid;
     } catch (error) {
       console.error("validateToken", error);
+      return false;
+    }
+  };
+
+  const saveFCMToken = async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/v1/account/fcm`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state?.userToken}`,
+        },
+        body: JSON.stringify({ fcmToken: token }),
+      });
+
+      const json = await response.json();
+      console.log({ saveFCMToken: json });
+    } catch (error) {
+      console.error("saveFCMToken", error);
       return false;
     }
   };
