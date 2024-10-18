@@ -15,11 +15,11 @@ const prefix = Linking.createURL("/");
 export default function App() {
   const linking = {
     prefixes: [prefix],
-    config: {
-      screens: {
-        Profile_View: "Profile_View/:user_id",
-      },
-    },
+    // config: {
+    //   screens: {
+    //     Profile_View: "Profile_View/:user_id",
+    //   },
+    // },
   };
 
   return (
