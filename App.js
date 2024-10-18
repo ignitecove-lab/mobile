@@ -11,11 +11,15 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 I18nManager.forceRTL(false);
 I18nManager.allowRTL(false);
 const prefix = Linking.createURL("/");
-console.log(prefix);
 
 export default function App() {
   const linking = {
     prefixes: [prefix],
+    config: {
+      screens: {
+        Profile_View: "Profile_View/:user_id",
+      },
+    },
   };
 
   return (
