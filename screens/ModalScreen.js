@@ -359,12 +359,6 @@ const ModalScreen = () => {
                   />
                 </Picker>
               </View>
-              {genderPreferenceDis && (
-                <Text style={styles.prefError}>
-                  You need to confirm your preference selection by pressing
-                  'Proceed'
-                </Text>
-              )}
             </View>
 
             {/* Modal for confirmation */}
@@ -428,7 +422,12 @@ const ModalScreen = () => {
               </View>
             </Modal>
           </View>
-
+          {genderPreferenceDis && (
+             <Text style={styles.prefError}>
+               You need to confirm your preference selection by pressing
+               'Proceed'
+             </Text>
+          )}
           <Text style={styles.stepText}>Age</Text>
           <TextInput
             value={age?.toString()}
@@ -552,11 +551,10 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   prefError: {
-    fontSize: 13,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "normal",
     color: "red",
-    marginTop: 12,
-    marginLeft: 10,
+    marginBottom: 8,
   },
   input: {
     fontSize: 16,

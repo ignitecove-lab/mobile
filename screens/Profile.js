@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 12,
     marginVertical: 12,
-    padding: 12,
+    padding: 16,
   },
   infoContainer: {
     flexDirection: "row",
