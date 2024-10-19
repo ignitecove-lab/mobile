@@ -7,6 +7,8 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  Dimensions,
+  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import React, {
@@ -22,6 +24,8 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import { updateProfile } from "../lib/uploadProfile";
 import API_BASE_URL from "../lib/constants/baseUrl";
 import { Ionicons } from "@expo/vector-icons";
+import Modal from "react-native-modal";
+import tw from "tailwind-rn";
 const IMAGE_URL = "https://image.ignitecove.com";
 
 const ModalScreen = () => {
@@ -30,14 +34,24 @@ const ModalScreen = () => {
   const [location, setLocation] = useState("");
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState("");
-  const [genderPreferenceDis, setGenderPreferenceDis] = useState("");
+  const [PreferenceDisiabled, setPreferenceDisabled] = useState(true);
+  const [genderPreferenceDis, setGenderPreferenceDis] = useState(true);
   const [permission, requestPermission] = ImagePicker.useCameraPermissions();
   const { user, authState, authContext } = useAuth();
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
   const [age, setAge] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
   const [tags, setTags] = useState(null);
+
+  const deviceWidth = Dimensions.get("window").width;
+  const deviceHeight =
+    Platform.OS === "ios"
+      ? Dimensions.get("window").height
+      : require("react-native-extra-dimensions-android").get(
+          "REAL_WINDOW_HEIGHT"
+        );
 
   const incompleteForm =
     !firstName ||
@@ -45,6 +59,8 @@ const ModalScreen = () => {
     !location ||
     !gender ||
     !age ||
+    !genderPreference ||
+    genderPreferenceDis ||
     selectedTags.length < 1;
 
   const fetchTags = useCallback(async () => {
@@ -179,11 +195,19 @@ const ModalScreen = () => {
         setAge(data.age);
         setGender(data.gender);
         setSelectedTags(data?.accountTags.map((tag) => tag.tagId));
+        setGenderPreference(data?.genderPreference);
+        setGenderPreferenceDis(data?.genderPreference ? false : true);
+        setPreferenceDisabled(data?.genderPreference ? false : true);
       })
       .catch((err) => {
         console.log("fetchUser error", err);
       });
   }, []);
+
+  const handlePreferenceChange = (itemValue) => {
+    setGenderPreference(itemValue);
+    setModalVisible(true);
+  };
 
   useEffect(() => {
     fetchTags();
@@ -299,7 +323,6 @@ const ModalScreen = () => {
                 </Picker>
               </View>
             </View>
-
             <View style={{ flex: 1 }}>
               <Text style={styles.stepText}>Only Show Me</Text>
               <View
@@ -320,9 +343,8 @@ const ModalScreen = () => {
                     height: 50,
                   }}
                   selectedValue={genderPreference}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setGenderPreference(itemValue)
-                  }
+                  onValueChange={handlePreferenceChange}
+                  enabled={PreferenceDisiabled}
                 >
                   <Picker.Item label="Gender Preference" value="" />
                   <Picker.Item
@@ -337,7 +359,74 @@ const ModalScreen = () => {
                   />
                 </Picker>
               </View>
+              {genderPreferenceDis && (
+                <Text style={styles.prefError}>
+                  You need to confirm your preference selection by pressing
+                  'Proceed'
+                </Text>
+              )}
             </View>
+
+            {/* Modal for confirmation */}
+            <Modal
+              style={styles.modalContainer}
+              isVisible={modalVisible}
+              animationType="slide"
+              hasBackdrop={true}
+              deviceWidth={deviceWidth}
+              deviceHeight={deviceHeight}
+              backdropColor={"#00000031"}
+            >
+              <View style={styles.modalBody}>
+                <Text style={styles.modalTextHeader}>Gender Preference</Text>
+
+                <Text style={styles.modalText}>
+                  Confirm that you want to choose "{genderPreference}" as your
+                  gender preference. This means you will only be able to see
+                  profiles of "{genderPreference}" gender with the same
+                  interests.
+                </Text>
+
+                <Text style={styles.disclaimerText}>
+                  Once saved, this preference cannot be changed.
+                </Text>
+
+                <View style={tw("flex-row justify-center items-center")}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setModalVisible(false);
+                    }}
+                    style={tw(
+                      "bg-indigo-600 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
+                    )}
+                  >
+                    <Text
+                      onPress={() => {
+                        setModalVisible(false);
+                        setGenderPreferenceDis(true);
+                      }}
+                      style={tw("text-white py-2 px-2  font-medium")}
+                    >
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setModalVisible(false);
+                      setGenderPreferenceDis(false);
+                    }}
+                    style={tw(
+                      "bg-red-500 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
+                    )}
+                  >
+                    <Text style={tw("text-white py-2 px-2 font-medium")}>
+                      Proceed
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
           </View>
 
           <Text style={styles.stepText}>Age</Text>
@@ -410,6 +499,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  modalContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+  modalBody: {
+    flex: 1,
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 10,
+    maxHeight: "35%",
+    width: "98%",
+  },
+  modalTextHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+    padding: 5,
+  },
+  disclaimerText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
@@ -431,6 +548,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "grey",
+    marginTop: 12,
+    marginLeft: 10,
+  },
+  prefError: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: "red",
     marginTop: 12,
     marginLeft: 10,
   },
