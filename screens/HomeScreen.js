@@ -393,11 +393,29 @@ const HomeScreen = ({}) => {
                             />
                           </TouchableOpacity>
                         </View>
-
-                        <View>
+                        <View style={styles.cardData}>
                           <Text style={tw("text-lg text-white")}>
                             {card.firstName}, {card.age}
                           </Text>
+                          {card.gender && card.genderPreference && (
+                             <>
+                               {/* Normalize gender and genderPreference directly in the JSX */}
+                               {(() => {
+                                 const normalizedGender = card.gender.trim().toLowerCase();
+                                 const normalizedGenderPreference = card.genderPreference.trim().toLowerCase();
+
+                                 if (normalizedGender === normalizedGenderPreference) {
+                                   return <Text style={{ fontSize: 20 }}>🌈</Text>; // Rainbow emoji
+                                 } else {
+                                   return normalizedGender === "male" ? (
+                                      <AntDesign name="man" size={20} color="white" /> // Man icon
+                                   ) : (
+                                      <Ionicons name="woman" size={20} color="white" /> // Woman icon
+                                   );
+                                 }
+                               })()}
+                             </>
+                          )}
                         </View>
                         <View>
                           <Text style={tw("text-sm text-white mb-2")}>
@@ -867,6 +885,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  cardData:{
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 8,
+  }
 });
 
 export default HomeScreen;
