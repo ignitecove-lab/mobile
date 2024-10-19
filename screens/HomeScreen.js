@@ -770,9 +770,10 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
-    padding: 12,
-    borderRadius: 20,
-    width: 120,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    minWidth: 120,
     alignItems: "center",
     justifyContent: "center",
     elevation: 3, // For shadow on Android
@@ -782,7 +783,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   clearButton: {
-    backgroundColor: "#E6E6E6",
+    backgroundColor: "#fff",
   },
   applyButton: {
     backgroundColor: "#007bff",

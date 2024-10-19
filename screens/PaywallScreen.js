@@ -584,7 +584,7 @@ const PaywallScreen = ({ route }) => {
       {next && planId && (
         <>
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.switchPlans}
             onPress={() => {
               setNext(false);
               setPlanId(null);
@@ -592,8 +592,8 @@ const PaywallScreen = ({ route }) => {
               handleClosePress();
             }}
           >
-            <Ionicons name="arrow-back" size={24} color="black" />
-            <Text style={styles.backButtonText}>Choose Another Plan</Text>
+            <Ionicons name="arrow-down-circle-outline" size={24} color="black" />
+            <Text style={styles.backButtonText}>Switch Plan</Text>
           </TouchableOpacity>
 
           {radioData.length > 0 ? (
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
   webviewbutton: {
     flex: 1,
     paddingVertical: 10,
-    marginHorizontal: 5,
+    marginHorizontal: 8,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
@@ -870,11 +870,17 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 5,
+    padding: 8,
+  },
+  switchPlans: {
+      marginLeft: 20,
+      marginTop: 16,
+      flexDirection: "row",
+      alignItems: "center",
   },
   backButtonText: {
     fontSize: 16,
-    marginLeft: 5,
+    marginLeft: 8,
   },
   title: {
     fontSize: 24,
@@ -892,7 +898,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: 8,
     elevation: 3,
   },
   planName: {
@@ -903,7 +909,7 @@ const styles = StyleSheet.create({
   },
   planPrice: {
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 8,
     textAlign: "center",
   },
   chooseButton: {
@@ -996,7 +1002,7 @@ const styles = StyleSheet.create({
     shadowColor: "rgba(0,0,0,0.4)",
     shadowOffset: {
       width: 1,
-      height: 5,
+      height: 8,
     },
     shadowOpacity: 0.34,
     shadowRadius: 6.27,

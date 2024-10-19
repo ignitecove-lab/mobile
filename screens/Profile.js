@@ -74,7 +74,6 @@ const ProfileScreen = () => {
           </MenuOptions>
         </Menu>
       ),
-      headerTitleStyle: { color: "black" },
     });
   }, []);
 
@@ -158,41 +157,46 @@ const ProfileScreen = () => {
                 style={styles.profileImage}
               />
 
-              <View style={styles.editIconContainer}>
-                <Ionicons name="pencil" size={20} padding={4} color="#fff" />
-              </View>
-            </TouchableOpacity>
-            <View style={styles.profileDetails}>
-              <Text style={styles.profileName}>{`${
-                userData.firstName || ""
-              }`}</Text>
-              <Text style={styles.profileText}>{`${userData.age || ""}, ${
-                userData.gender || ""
-              }`}</Text>
-              <Text
-                style={styles.profileText}
-              >{`${userData.phoneNumber}`}</Text>
-              <Text style={styles.profileText}>{`${
-                userData.location || ""
-              }`}</Text>
-            </View>
-          </View>
-          {/*Tags Section */}
-          {userData?.accountTags && userData?.accountTags.length > 0 && (
-            <View style={tw("p-4")}>
-              <Text style={tw("text-lg font-bold mb-2")}>Tags:</Text>
-              <View style={tw("flex-row flex-wrap")}>
-                {userData.accountTags?.map((tag, index) => (
-                  <View
-                    key={index}
-                    style={tw("bg-blue-200 px-4 py-2 rounded-lg m-1")}
-                  >
-                    <Text style={tw("text-black font-bold")}>{tag.tag}</Text>
-                  </View>
-                ))}
+                <View style={styles.editIconContainer}>
+                  <Ionicons name="pencil" size={20} padding={4} color="#fff" />
+                </View>
+              </TouchableOpacity>
+              <View style={styles.profileDetails}>
+                <Text style={styles.profileName}>{`${
+                   userData.firstName || ""
+                }`}</Text>
+                <Text style={styles.profileText}>{`${userData.age || ""}, ${
+                   userData.gender || ""
+                }`}</Text>
+                <Text
+                   style={styles.profileText}
+                >{`${userData.phoneNumber}`}</Text>
+                <Text style={styles.profileText}>{`${
+                   userData.location || ""
+                }`}</Text>
               </View>
             </View>
-          )}
+
+            {/*Tags Section */}
+
+            <View style={styles.profileTags}>
+              {userData?.accountTags && userData?.accountTags.length > 0 && (
+                 <View style={tw("p-4")}>
+                   <Text style={tw("text-lg font-bold mb-2")}>Tags:</Text>
+                   <View style={tw("flex-row flex-wrap")}>
+                     {userData.accountTags?.map((tag, index) => (
+                        <View
+                           key={index}
+                           style={tw("bg-blue-200 px-4 py-2 rounded-lg m-1")}
+                        >
+                          <Text style={tw("text-black font-bold")}>{tag.tag}</Text>
+                        </View>
+                     ))}
+                   </View>
+                 </View>
+              )}
+            </View>
+
 
           <FeatureSection
             handleOpenSheet={handleOpenSheet}
@@ -324,46 +328,49 @@ const FeatureSection = ({
   setNumberSheetURL,
 }) => {
   return (
-    <View style={styles.Infocontainer}>
-      <TouchableOpacity
-        onPress={() => {
-          setNumberSheetURL(`${API_BASE_URL}/v1/account/paid`);
-          openNumberSheet();
-        }}
-      >
-        <FeatureCard
-          icon="flame"
-          title="Viewed Numbers"
-          subtitle={userData?.viewCount || 0}
-          color="#ef4444"
-        />
-      </TouchableOpacity>
+     <View style={styles.actionContainer}>
+       <Text style={tw("text-lg font-bold mb-2")}>Actions:</Text>
+       <View style={styles.infoContainer}>
+         <TouchableOpacity
+            onPress={() => {
+              setNumberSheetURL(`${API_BASE_URL}/v1/account/paid`);
+              openNumberSheet();
+            }}
+         >
+           <FeatureCard
+              icon="flame"
+              title="Viewed"
+              subtitle={userData?.viewCount || 0}
+              color="#ef4444"
+           />
+         </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          setNumberSheetURL(`${API_BASE_URL}/v1/account/likes`);
-          openNumberSheet();
-        }}
-      >
-        <FeatureCard
-          icon="heart"
-          title="Likes Received"
-          subtitle={userData?.likes || 0}
-          color="#ef4444"
-        />
-      </TouchableOpacity>
+         <TouchableOpacity
+            onPress={() => {
+              setNumberSheetURL(`${API_BASE_URL}/v1/account/likes`);
+              openNumberSheet();
+            }}
+         >
+           <FeatureCard
+              icon="heart"
+              title="Likes"
+              subtitle={userData?.likes || 0}
+              color="#ef4444"
+           />
+         </TouchableOpacity>
 
-      {userData && userData.role === "Marketer" && (
-        <TouchableOpacity onPress={() => handleOpenSheet()}>
-          <FeatureCard
-            icon="cash-outline"
-            title="Referrals"
-            subtitle=""
-            color="#603FEF"
-          />
-        </TouchableOpacity>
-      )}
-    </View>
+         {userData && userData.role === "Marketer" && (
+            <TouchableOpacity onPress={() => handleOpenSheet()}>
+              <FeatureCard
+                 icon="cash-outline"
+                 title="Referrals"
+                 subtitle=""
+                 color="#ef4444"
+              />
+            </TouchableOpacity>
+         )}
+       </View>
+     </View>
   );
 };
 
@@ -372,23 +379,18 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
     await Clipboard.setStringAsync(userData?.referral?.referralCode);
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#D8434E",
-      padding: 20,
-    },
     backIcon: {
       marginBottom: 10,
     },
     title: {
-      color: "white",
+      color: "#000",
       fontSize: 18,
       textAlign: "center",
     },
     subtitle: {
-      color: "white",
+      color: "red",
       fontSize: 24,
-      fontWeight: "bold",
+      fontWeight: "normal",
       textAlign: "center",
       marginVertical: 10,
     },
@@ -402,7 +404,7 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
       alignItems: "center",
     },
     iconText: {
-      color: "white",
+      color: "#fff",
       textAlign: "center",
       marginTop: 10,
     },
@@ -432,7 +434,7 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
       marginBottom: 5,
     },
     copyText: {
-      color: "#A9A9A9",
+      color: "#5e5e5e",
     },
   });
 
@@ -453,7 +455,7 @@ const ReferralScreen = ({ handleCloseSheet, userData }) => {
 
           <View>
             <Text
-              style={{ color: "white", textAlign: "center", marginBottom: 10 }}
+              style={{ color: "#000", textAlign: "center", marginBottom: 10 }}
             >
               Refer your Friend and each time they pay you earn 10% of what they
               pay
@@ -493,18 +495,18 @@ const NumberSheet = ({
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#D8434E",
+      backgroundColor: "#e4e4e4",
       padding: 5,
       position: "relative",
     },
     contentContainer: {
-      backgroundColor: "white",
+      backgroundColor: "#ffffff",
     },
     itemContainer: {
       padding: 10,
       marginVertical: 5,
       borderRadius: 8,
-      backgroundColor: "#D88343",
+      backgroundColor: "#ffffff",
       flexDirection: "row",
       alignItems: "center",
     },
@@ -525,11 +527,11 @@ const NumberSheet = ({
     },
     nameAge: {
       fontSize: 16,
-      color: "#fff",
+      color: "#000",
     },
     number: {
       fontSize: 14,
-      color: "#fff",
+      color: "#000",
     },
     loading: {
       flex: 1,
@@ -608,7 +610,7 @@ const NumberSheet = ({
             <Ionicons
               name="close-outline"
               size={24}
-              color="white"
+              color="#000"
               style={styles.closeIcon}
               onPress={handleCloseSheet}
             />
@@ -634,7 +636,12 @@ const CustomBottomSheetModal = forwardRef(
           onChange={onChange}
           enablePanDownToClose={true}
           backgroundStyle={{
-            backgroundColor: "#D8434E",
+            backgroundColor: "#e4e4e4",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 5,
           }}
         >
           <BottomSheetScrollView
@@ -667,15 +674,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  Infocontainer: {
+  actionContainer : {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginHorizontal: 12,
+    marginVertical: 12,
+    padding: 12,
+  },
+  infoContainer: {
     flexDirection: "row",
     justifyContent: "start",
-    padding: 5,
   },
   card: {
-    height: 140,
-    width: 140,
-    backgroundColor: "#f5f5f5",
+    height: 96,
+    width: 96,
+    backgroundColor: "#fff",
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -697,15 +710,26 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 5,
   },
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
+  profileTags: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginHorizontal: 12,
   },
+   feature: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginHorizontal: 12,
+  },
+
   profileHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginVertical: 16,
+    marginHorizontal: 12,
   },
   profileImage: {
     flex: 1,

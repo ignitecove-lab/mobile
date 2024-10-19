@@ -8,7 +8,7 @@ const CustomBottomSheetModal = forwardRef(
       snapPoints = ["50%", "70%"],
       onChange,
       children,
-      backgroundColor = "#D8434E",
+      backgroundColor = "#e4e4e4",
       refreshing = false,
     },
     ref
