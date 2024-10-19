@@ -29,6 +29,8 @@ const ModalScreen = () => {
   const [firstName, setFirstName] = useState("");
   const [location, setLocation] = useState("");
   const [gender, setGender] = useState("");
+  const [genderPreference, setGenderPreference] = useState("");
+  const [genderPreferenceDis, setGenderPreferenceDis] = useState("");
   const [permission, requestPermission] = ImagePicker.useCameraPermissions();
   const { user, authState, authContext } = useAuth();
   const navigation = useNavigation();
@@ -254,38 +256,88 @@ const ModalScreen = () => {
           />
           <Text style={styles.input}>{location}</Text>
 
-          <Text style={styles.stepText}>Gender</Text>
           <View
             style={{
-              borderRadius: 10,
-              overflow: "hidden",
-              width: 180,
-              height: 50,
+              flexDirection: "row",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              marginBottom: 20,
             }}
           >
-            <Picker
-              style={{
-                borderWidth: 1,
-                borderRadius: 10,
-                backgroundColor: "#e4e4e7",
-                width: 180,
-                height: 50,
-              }}
-              selectedValue={gender}
-              onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
-            >
-              <Picker.Item label="Select Gender" value="" />
-              <Picker.Item
-                label="Male"
-                value="Male"
-                style={{ color: "#000000" }}
-              />
-              <Picker.Item
-                label="Female"
-                value="Female"
-                style={{ color: "000000" }}
-              />
-            </Picker>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.stepText}>Gender</Text>
+              <View
+                style={{
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  width: 180,
+                  height: 50,
+                }}
+              >
+                <Picker
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    backgroundColor: "#e4e4e7",
+                    width: 180,
+                    height: 50,
+                  }}
+                  selectedValue={gender}
+                  onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
+                >
+                  <Picker.Item label="Select Gender" value="" />
+                  <Picker.Item
+                    label="Male"
+                    value="Male"
+                    style={{ color: "#000000" }}
+                  />
+                  <Picker.Item
+                    label="Female"
+                    value="Female"
+                    style={{ color: "000000" }}
+                  />
+                </Picker>
+              </View>
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={styles.stepText}>Only Show Me</Text>
+              <View
+                style={{
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  width: 180,
+                  height: 50,
+                  marginLeft: 10,
+                }}
+              >
+                <Picker
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    backgroundColor: "#e4e4e7",
+                    width: 180,
+                    height: 50,
+                  }}
+                  selectedValue={genderPreference}
+                  onValueChange={(itemValue, itemIndex) =>
+                    setGenderPreference(itemValue)
+                  }
+                >
+                  <Picker.Item label="Gender Preference" value="" />
+                  <Picker.Item
+                    label="Men"
+                    value="Male"
+                    style={{ color: "#000000" }}
+                  />
+                  <Picker.Item
+                    label="Women"
+                    value="Female"
+                    style={{ color: "000000" }}
+                  />
+                </Picker>
+              </View>
+            </View>
           </View>
 
           <Text style={styles.stepText}>Age</Text>
@@ -338,7 +390,8 @@ const ModalScreen = () => {
                 user.phoneNumber,
                 selectedTags,
                 authContext,
-                authState
+                authState,
+                genderPreference
               ).then(() => {
                 navigation.navigate("Home");
               });
@@ -379,6 +432,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "grey",
     marginTop: 12,
+    marginLeft: 10,
   },
   input: {
     fontSize: 16,
