@@ -288,7 +288,9 @@ export const AuthProvider = (props) => {
     let userToken = state?.userToken;
     // Check if the token is null, try fetching it from SecureStore
     if (!userToken) {
-      console.log("User token is null, attempting to retrieve it from SecureStore...");
+      console.log(
+        "User token is null, attempting to retrieve it from SecureStore..."
+      );
       userToken = await SecureStore.getItemAsync("userToken");
 
       if (!userToken) {
@@ -312,7 +314,6 @@ export const AuthProvider = (props) => {
       console.error("Error saving FCM token:", error);
     }
   };
-
 
   const fetchUser = useCallback(async (user_id, userToken) => {
     if (!user_id || !userToken) {
@@ -563,6 +564,16 @@ export const AuthProvider = (props) => {
   messaging().setBackgroundMessageHandler(onMessageReceived);
 
   notifee.onForegroundEvent(({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      const deepLink = detail.notification.data.deepLink;
+      if (deepLink) {
+        // Handle the deep link (e.g., navigate to the specific screen)
+        Linking.openURL(deepLink);
+      }
+    }
+  });
+
+  notifee.onBackgroundEvent(({ type, detail }) => {
     if (type === EventType.PRESS) {
       const deepLink = detail.notification.data.deepLink;
       if (deepLink) {
