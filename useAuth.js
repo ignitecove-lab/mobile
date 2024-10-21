@@ -404,6 +404,8 @@ export const AuthProvider = (props) => {
   React.useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
+      // request notifications permission on app load
+      await notifee.requestPermission();
       let userToken, local_user;
 
       try {
