@@ -294,7 +294,7 @@ const ModalScreen = () => {
                 style={{
                   borderRadius: 10,
                   overflow: "hidden",
-                  width: 180,
+                  flex: 1,
                   height: 50,
                 }}
               >
@@ -303,7 +303,7 @@ const ModalScreen = () => {
                     borderWidth: 1,
                     borderRadius: 10,
                     backgroundColor: "#e4e4e7",
-                    width: 180,
+                    flex: 1,
                     height: 50,
                   }}
                   selectedValue={gender}
@@ -329,7 +329,7 @@ const ModalScreen = () => {
                 style={{
                   borderRadius: 10,
                   overflow: "hidden",
-                  width: 180,
+                  flex: 1,
                   height: 50,
                   marginLeft: 10,
                 }}
@@ -339,7 +339,7 @@ const ModalScreen = () => {
                     borderWidth: 1,
                     borderRadius: 10,
                     backgroundColor: "#e4e4e7",
-                    width: 180,
+                    flex: 1,
                     height: 50,
                   }}
                   selectedValue={genderPreference}
