@@ -34,7 +34,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
 
-const HomeScreen = ({}) => {
+const HomeScreen = ({ }) => {
   const navigation = useNavigation();
   const {
     user,
@@ -48,6 +48,7 @@ const HomeScreen = ({}) => {
   const swipeRef = useRef(null);
   const [profiles, setProfiles] = useState([]);
   const [showPhoneNumUi, setShowPhoneNumUi] = useState({});
+  const [liked, setLiked] = useState({});
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalText, setModalText] = useState("");
   const [modalLoading, setModalLoading] = useState(true);
@@ -77,8 +78,8 @@ const HomeScreen = ({}) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
 
   useEffect(() => {
     if (authState && !authState.isProfileComplete) {
@@ -101,7 +102,7 @@ const HomeScreen = ({}) => {
   useFocusEffect(
     useCallback(() => {
       initializeSwiper();
-    }, [showPhoneNumUi])
+    }, [showPhoneNumUi, liked])
   );
 
   useLayoutEffect(() => {
@@ -234,7 +235,7 @@ const HomeScreen = ({}) => {
     [page, ageRange]
   );
 
-  const checkSubscription = async (id, subToPhone) => {
+  const checkSubscription = async (id) => {
     try {
       const data = JSON.stringify({
         subscriberId: user.id,
@@ -377,44 +378,66 @@ const HomeScreen = ({}) => {
                             <AntDesign name="dislike2" size={15} color="red" />
                           </TouchableOpacity>
 
-                          <TouchableOpacity
-                            onPress={() =>
-                              sendLikeDislike(card.id, card.phoneNumber, "like")
-                            }
-                            disabled={card?.liked}
-                            style={tw(
-                              "items-center justify-center rounded-full w-7 h-7 bg-white"
+                          <View>
+                            {card.liked || (card.id === liked.id && liked.newLikeStatus) ? (
+                              <TouchableOpacity
+                                disabled={true}
+                                style={tw(
+                                  "items-center justify-center rounded-full w-7 h-7 bg-white"
+                                )}
+                              >
+                                <AntDesign
+                                  name={"heart"}
+                                  size={15}
+                                  color="green"
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  sendLikeDislike(card.id, card.phoneNumber, "like")
+                                  setLiked({
+                                    newLikeStatus: true,
+                                    id: card.id
+                                  })
+                                }}
+                                disabled={card?.liked}
+                                style={tw(
+                                  "items-center justify-center rounded-full w-7 h-7 bg-white"
+                                )}
+                              >
+                                <AntDesign
+                                  name={card?.liked ? "heart" : "hearto"}
+                                  size={15}
+                                  color="green"
+                                />
+                              </TouchableOpacity>
                             )}
-                          >
-                            <AntDesign
-                              name={card?.liked ? "heart" : "hearto"}
-                              size={15}
-                              color="green"
-                            />
-                          </TouchableOpacity>
+                          </View>
+
                         </View>
                         <View style={styles.cardData}>
                           <Text style={tw("text-lg text-white")}>
                             {card.firstName}, {card.age}
                           </Text>
                           {card.gender && card.genderPreference && (
-                             <>
-                               {/* Normalize gender and genderPreference directly in the JSX */}
-                               {(() => {
-                                 const normalizedGender = card.gender.trim().toLowerCase();
-                                 const normalizedGenderPreference = card.genderPreference.trim().toLowerCase();
+                            <>
+                              {/* Normalize gender and genderPreference directly in the JSX */}
+                              {(() => {
+                                const normalizedGender = card.gender.trim().toLowerCase();
+                                const normalizedGenderPreference = card.genderPreference.trim().toLowerCase();
 
-                                 if (normalizedGender === normalizedGenderPreference) {
-                                   return <Text style={{ fontSize: 20 }}>🌈</Text>; // Rainbow emoji
-                                 } else {
-                                   return normalizedGender === "male" ? (
-                                      <AntDesign name="man" size={20} color="white" /> // Man icon
-                                   ) : (
-                                      <Ionicons name="woman" size={20} color="white" /> // Woman icon
-                                   );
-                                 }
-                               })()}
-                             </>
+                                if (normalizedGender === normalizedGenderPreference) {
+                                  return <Text style={{ fontSize: 20 }}>🌈</Text>; // Rainbow emoji
+                                } else {
+                                  return normalizedGender === "male" ? (
+                                    <AntDesign name="man" size={20} color="white" /> // Man icon
+                                  ) : (
+                                    <Ionicons name="woman" size={20} color="white" /> // Woman icon
+                                  );
+                                }
+                              })()}
+                            </>
                           )}
                         </View>
                         <View>
@@ -425,8 +448,8 @@ const HomeScreen = ({}) => {
 
                         <View style={tw("flex flex-row flex-wrap")}>
                           {card.phoneNumberVisible ||
-                          (showPhoneNumUi.id === card.id &&
-                            showPhoneNumUi.visible) ? (
+                            (showPhoneNumUi.id === card.id &&
+                              showPhoneNumUi.visible) ? (
                             <View style={tw("flex-1")}>
                               <Text
                                 selectable={true}
@@ -444,8 +467,7 @@ const HomeScreen = ({}) => {
                                 onPress={() => {
                                   setShowPhoneNumUi({});
                                   checkSubscription(
-                                    card.id,
-                                    card.phoneNumber
+                                    card.id
                                   ).then((r) => {
                                     if (r.status === 0) {
                                       setShowPhoneNumUi({
@@ -885,7 +907,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  cardData:{
+  cardData: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
