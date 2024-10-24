@@ -287,11 +287,11 @@ const HomeScreen = ({ }) => {
   );
 
   return (
-    <View style={tw("flex-1 justify-center")}>
+    <View style={tw("flex-1 justify-start")}>
       {!loading ? (
         profiles && profiles?.length > 0 ? (
           <>
-            <View style={tw("flex-1 -mt-12")}>
+            <View style={tw("flex-1 -mt-14")}>
               <Swiper
                 ref={swipeRef}
                 containerStyle={{ backgroundColor: "transparent" }}
@@ -324,7 +324,7 @@ const HomeScreen = ({ }) => {
                 onSwiped={(index) => console.log(index)}
                 onSwipedAll={async () => setPage((prevPage) => prevPage + 1)}
                 renderCard={(card) => (
-                  <View key={card.id} style={tw("bg-white h-5/6 rounded-xl")}>
+                  <View key={card.id} style={tw("bg-white h-full w-full rounded-xl")}>
                     <Image
                       style={tw("h-full w-full rounded-xl")}
                       source={{ uri: card.imageURL }}
@@ -431,9 +431,9 @@ const HomeScreen = ({ }) => {
                                   return <Text style={{ fontSize: 20 }}>🌈</Text>; // Rainbow emoji
                                 } else {
                                   return normalizedGender === "male" ? (
-                                    <AntDesign name="man" size={20} color="white" /> // Man icon
+                                     <AntDesign name="man" size={24} color="white" /> // Man icon
                                   ) : (
-                                    <Ionicons name="woman" size={20} color="white" /> // Woman icon
+                                     <AntDesign name="woman" size={24} color="white" /> // Woman icon
                                   );
                                 }
                               })()}
@@ -526,41 +526,7 @@ const HomeScreen = ({ }) => {
               />
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                paddingVertical: 10,
-                position: "absolute",
-                bottom: 0,
-                marginBottom: 20,
-                width: "100%",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  swipeRef.current.swipeLeft();
-                  setShowPhoneNumUi({});
-                }}
-                style={tw(
-                  "items-center justify-center rounded-full w-14 h-14 bg-white"
-                )}
-              >
-                <Entypo name="cross" size={24} color="red" />
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => {
-                  swipeRef.current.swipeRight();
-                  setShowPhoneNumUi({});
-                }}
-                style={tw(
-                  "items-center justify-center rounded-full w-14 h-14 bg-white"
-                )}
-              >
-                <AntDesign name="heart" size={24} color="green" />
-              </TouchableOpacity>
-            </View>
           </>
         ) : authState && !authState.isProfileComplete ? (
           <View style={styles.premiumSection}>
