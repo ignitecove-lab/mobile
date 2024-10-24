@@ -26,6 +26,7 @@ import API_BASE_URL from "../lib/constants/baseUrl";
 import { Ionicons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import tw from "tailwind-rn";
+import CustomModal from "./CustomModal";
 const IMAGE_URL = "https://image.ignitecove.com";
 
 const ModalScreen = () => {
@@ -35,6 +36,7 @@ const ModalScreen = () => {
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState("");
   const [PreferenceDisiabled, setPreferenceDisabled] = useState(true);
+  const [genderSelected, setGenderDis] = useState(true);
   const [genderPreferenceDis, setGenderPreferenceDis] = useState(true);
   const [permission, requestPermission] = ImagePicker.useCameraPermissions();
   const { user, authState, authContext } = useAuth();
@@ -42,7 +44,8 @@ const ModalScreen = () => {
   const [image, setImage] = useState(null);
   const [age, setAge] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalPrefVisible, setModalPrefVisible] = useState(false);
+  const [modalGenderVisible, setModalGenderVisible] = useState(false);
   const [tags, setTags] = useState(null);
 
   const deviceWidth = Dimensions.get("window").width;
@@ -50,8 +53,8 @@ const ModalScreen = () => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
 
   const incompleteForm =
     !firstName ||
@@ -198,6 +201,7 @@ const ModalScreen = () => {
         setGenderPreference(data?.genderPreference);
         setGenderPreferenceDis(data?.genderPreference ? false : true);
         setPreferenceDisabled(data?.genderPreference ? false : true);
+        setGenderDis(data?.gender ? false : true);
       })
       .catch((err) => {
         console.log("fetchUser error", err);
@@ -206,8 +210,21 @@ const ModalScreen = () => {
 
   const handlePreferenceChange = (itemValue) => {
     setGenderPreference(itemValue);
-    setModalVisible(true);
+    setModalPrefVisible(true);
   };
+  const handleGenderChange = (itemValue) => {
+    setGender(itemValue);
+    setModalGenderVisible(true);
+  };
+
+  const handleProceed = () => {
+    setModalPrefVisible(false);
+    setGenderPreferenceDis(false);
+  }
+  const handleGenderProceed = () => {
+    setModalGenderVisible(false);
+    setGenderDis(false);
+  }
 
   useEffect(() => {
     fetchTags();
@@ -307,7 +324,8 @@ const ModalScreen = () => {
                     height: 50,
                   }}
                   selectedValue={gender}
-                  onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
+                  onValueChange={handleGenderChange}
+                  enabled={genderSelected}
                 >
                   <Picker.Item label="Select Gender" value="" />
                   <Picker.Item
@@ -321,6 +339,13 @@ const ModalScreen = () => {
                     style={{ color: "000000" }}
                   />
                 </Picker>
+                <CustomModal
+                  modalVisible={modalGenderVisible}
+                  setModalVisible={setModalGenderVisible}
+                  headerText="Gender"
+                  bodyText={`Confirm you want to choose "${gender}" as your gender.`}
+                  onProceed={handleGenderProceed}
+                />
               </View>
             </View>
             <View style={{ flex: 1 }}>
@@ -358,75 +383,23 @@ const ModalScreen = () => {
                     style={{ color: "000000" }}
                   />
                 </Picker>
+                <CustomModal
+                  modalVisible={modalPrefVisible}
+                  setModalVisible={setModalPrefVisible}
+                  headerText="Gender Preference"
+                  bodyText={`Confirm you want to choose "${genderPreference}" as your gender preference.
+               You will only be able to see "${genderPreference}" with the same interests.`}
+                  onProceed={handleProceed}
+                />
               </View>
             </View>
 
-            {/* Modal for confirmation */}
-            <Modal
-              style={styles.modalContainer}
-              isVisible={modalVisible}
-              animationType="slide"
-              hasBackdrop={true}
-              deviceWidth={deviceWidth}
-              deviceHeight={deviceHeight}
-              backdropColor={"#00000031"}
-            >
-              <View style={styles.modalBody}>
-                <Text style={styles.modalTextHeader}>Gender Preference</Text>
-
-                <Text style={styles.modalText}>
-                  Confirm that you want to choose "{genderPreference}" as your
-                  gender preference. This means you will only be able to see
-                  profiles of "{genderPreference}" gender with the same
-                  interests.
-                </Text>
-
-                <Text style={styles.disclaimerText}>
-                  Once saved, this preference cannot be changed.
-                </Text>
-
-                <View style={tw("flex-row justify-center items-center")}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setModalVisible(false);
-                    }}
-                    style={tw(
-                      "bg-indigo-600 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
-                    )}
-                  >
-                    <Text
-                      onPress={() => {
-                        setModalVisible(false);
-                        setGenderPreferenceDis(true);
-                      }}
-                      style={tw("text-white py-2 px-2  font-medium")}
-                    >
-                      Cancel
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      setModalVisible(false);
-                      setGenderPreferenceDis(false);
-                    }}
-                    style={tw(
-                      "bg-red-500 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
-                    )}
-                  >
-                    <Text style={tw("text-white py-2 px-2 font-medium")}>
-                      Proceed
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Modal>
           </View>
           {genderPreferenceDis && (
-             <Text style={styles.prefError}>
-               You need to confirm your preference selection by pressing
-               'Proceed'
-             </Text>
+            <Text style={styles.prefError}>
+              You need to confirm your preference selection by pressing
+              'Proceed'
+            </Text>
           )}
           <Text style={styles.stepText}>Age</Text>
           <TextInput

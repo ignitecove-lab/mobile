@@ -353,7 +353,7 @@ const HomeScreen = ({ }) => {
                           flex: 1,
                           borderBottomLeftRadius: 12,
                           borderBottomRightRadius: 12,
-                          maxHeight: 180,
+                          maxHeight: 200,
                         },
                         tw("absolute w-full px-6 py-2 bottom-0"),
                       ]}
@@ -370,12 +370,15 @@ const HomeScreen = ({ }) => {
                               );
                               swipeRef.current.swipeLeft();
                             }}
-                            disabled={card?.liked}
+                            disabled={card?.liked || (card.id === liked.id && liked.newLikeStatus)}
                             style={tw(
-                              "items-center justify-center rounded-full w-7 h-7 bg-white"
+                              "items-center justify-center rounded-full p-2 "
                             )}
                           >
-                            <AntDesign name="dislike2" size={15} color="red" />
+                            <AntDesign
+                              name="dislike2"
+                              size={28}
+                              color={(card.id === liked.id && liked.newLikeStatus) ? "gray" : "white"} />
                           </TouchableOpacity>
 
                           <View>
@@ -383,13 +386,13 @@ const HomeScreen = ({ }) => {
                               <TouchableOpacity
                                 disabled={true}
                                 style={tw(
-                                  "items-center justify-center rounded-full w-7 h-7 bg-white"
+                                  "items-center justify-center rounded-full p-2 "
                                 )}
                               >
                                 <AntDesign
                                   name={"heart"}
-                                  size={15}
-                                  color="green"
+                                  size={28}
+                                  color="red"
                                 />
                               </TouchableOpacity>
                             ) : (
@@ -403,13 +406,13 @@ const HomeScreen = ({ }) => {
                                 }}
                                 disabled={card?.liked}
                                 style={tw(
-                                  "items-center justify-center rounded-full w-7 h-7 bg-white"
+                                  "items-center justify-center rounded-full p-2"
                                 )}
                               >
                                 <AntDesign
                                   name={card?.liked ? "heart" : "hearto"}
-                                  size={15}
-                                  color="green"
+                                  size={28}
+                                  color={card?.liked ? "red" : "white"}
                                 />
                               </TouchableOpacity>
                             )}
@@ -431,9 +434,9 @@ const HomeScreen = ({ }) => {
                                   return <Text style={{ fontSize: 20 }}>🌈</Text>; // Rainbow emoji
                                 } else {
                                   return normalizedGender === "male" ? (
-                                     <AntDesign name="man" size={24} color="white" /> // Man icon
+                                    <AntDesign name="man" size={18} color="white" /> // Man icon
                                   ) : (
-                                     <AntDesign name="woman" size={24} color="white" /> // Woman icon
+                                    <AntDesign name="woman" size={18} color="white" /> // Woman icon
                                   );
                                 }
                               })()}

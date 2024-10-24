@@ -20,7 +20,7 @@
     "android": {
       "googleServicesFile": "./google-services.json",
       "package": "host.exp.ignitecove",
-      "versionCode": 18,
+      "versionCode": 28,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -50,7 +50,7 @@
       "favicon": "./assets/favicon.png"
     },
     "owner": "charlesncn",
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": "1.2.8",
     "updates": {
       "url": "https://u.expo.dev/998a2585-4a51-404e-b384-42e709c6ce6c"
     },
