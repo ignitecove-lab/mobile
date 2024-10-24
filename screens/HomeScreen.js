@@ -287,11 +287,11 @@ const HomeScreen = ({ }) => {
   );
 
   return (
-    <View style={tw("flex-1 justify-start")}>
+    <View style={styles.homeContainer}>
       {!loading ? (
         profiles && profiles?.length > 0 ? (
           <>
-            <View style={tw("flex-1 -mt-14")}>
+            <View style={styles.homeContent}>
               <Swiper
                 ref={swipeRef}
                 containerStyle={{ backgroundColor: "transparent" }}
@@ -324,9 +324,9 @@ const HomeScreen = ({ }) => {
                 onSwiped={(index) => console.log(index)}
                 onSwipedAll={async () => setPage((prevPage) => prevPage + 1)}
                 renderCard={(card) => (
-                  <View key={card.id} style={tw("bg-white h-full w-full rounded-xl")}>
+                  <View key={card.id} style={styles.homeCard}>
                     <Image
-                      style={tw("h-full w-full rounded-xl")}
+                      style={styles.homeImage}
                       source={{ uri: card.imageURL }}
                     />
 
@@ -730,6 +730,24 @@ const HomeScreen = ({ }) => {
 };
 
 const styles = StyleSheet.create({
+  homeContainer: {
+    width: "100%",
+  },
+  homeContent: {
+    width: "100%",
+  },
+  homeCard:{
+    marginTop: -34,
+    borderRadius: 16,
+    height: "90%",
+    width: "100%",
+  },
+  homeImage: {
+    marginTop: 0,
+    height: "100%",
+    width: "100%",
+    borderRadius: 16,
+  },
   premiumSection: {
     padding: 16,
     backgroundColor: "#fc6a03",
