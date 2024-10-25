@@ -149,10 +149,10 @@ const ProfileScreen = () => {
               <Image
                 source={{
                   uri: userData?.imageURL
-                    ? userData?.imageURL?.startsWith("http://")
-                      ? userData?.imageURL?.replace("http://", "https://")
-                      : userData.imageURL
-                    : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+                     ? userData?.imageURL?.startsWith("http://")
+                        ? userData?.imageURL?.replace("http://", "https://")
+                        : userData?.imageURL
+                     : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
                 }}
                 style={styles.profileImage}
               />
@@ -575,9 +575,12 @@ const NumberSheet = ({
       >
         <Image
           source={{
-            uri: item?.imageURL.startsWith("http://")
-              ? item?.imageURL?.replace("http://", "https://")
-              : item?.imageURL,
+            uri: item?.imageURL
+               ? item.imageURL.startsWith("http://")
+                  ? item.imageURL.replace("http://", "https://")
+                  : item.imageURL
+               : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+
           }}
           style={styles.image}
         />

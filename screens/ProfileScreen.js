@@ -46,9 +46,7 @@ const ProfileScreen = () => {
           <Image
             style={tw("h-40 w-40 rounded-full")}
             source={{
-              uri: user?.imageURL?.startsWith("http://")
-                ? user?.imageURL?.replace("http://", "https://")
-                : user?.imageURL,
+              uri: user?.imageURL,
             }}
           />
         )}
