@@ -287,7 +287,6 @@ const ModalScreen = () => {
             placeholder="Search location"
             fetchDetails={true}
             onPress={(data, details = null) => {
-              console.log(data.description);
               setLocation(data.description);
             }}
             query={{
