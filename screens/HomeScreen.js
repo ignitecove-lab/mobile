@@ -98,6 +98,17 @@ const HomeScreen = ({}) => {
     } else {
       let dev_location = await Location.getCurrentPositionAsync({});
       setDeviceLocation(dev_location);
+      await fetch(`${API_BASE_URL}/v1/account/location`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + authState.userToken,
+        },
+        body: JSON.stringify({
+          longitude: dev_location?.coords?.longitude,
+          latitude: dev_location?.coords?.latitude,
+        }),
+      });
       listProfiles(minAge, maxAge, location);
       setLocationError(null);
     }
