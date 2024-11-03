@@ -368,7 +368,7 @@ const ModalScreen = () => {
                   }}
                   selectedValue={genderPreference}
                   onValueChange={handlePreferenceChange}
-                  enabled={PreferenceDisiabled}
+                  enabled={true}
                 >
                   <Picker.Item label="Gender Preference" value="" />
                   <Picker.Item

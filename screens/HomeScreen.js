@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   homeCard:{
     marginTop: -34,
     borderRadius: 16,
-    height: "90%",
+    height: "95%",
     width: "100%",
   },
   homeImage: {
