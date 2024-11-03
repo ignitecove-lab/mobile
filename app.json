@@ -3,7 +3,7 @@
     "name": "igniteintcove",
     "scheme": "host.exp.ignitecove",
     "slug": "ignite",
-    "version": "1.0.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,17 +15,24 @@
     "ios": {
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "host.exp.ignitecove"
+      "bundleIdentifier": "host.exp.ignitecove",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to provide better services.",
+        "NSLocationAlwaysUsageDescription": "We need your location to provide better services."
+      }
     },
     "android": {
       "googleServicesFile": "./google-services.json",
       "package": "host.exp.ignitecove",
-      "versionCode": 29,
+      "versionCode": 30,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "plugins": [
       "@react-native-firebase/app",
@@ -42,6 +49,12 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ],
       "expo-secure-store"

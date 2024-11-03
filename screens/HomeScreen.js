@@ -23,18 +23,20 @@ import React, {
 import { useNavigation } from "@react-navigation/core";
 import useAuth from "../useAuth";
 import tw from "tailwind-rn";
-import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Swiper from "react-native-deck-swiper";
 import Modal from "react-native-modal";
 import { Dropdown } from "react-native-element-dropdown";
 import CustomBottomSheetModal from "../components/BottomSheet";
-
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
+import { Linking } from "react-native";
 
-const HomeScreen = ({ }) => {
+import * as Location from "expo-location";
+
+const HomeScreen = ({}) => {
   const navigation = useNavigation();
   const {
     user,
@@ -59,6 +61,8 @@ const HomeScreen = ({ }) => {
   const [cardIndex, setCardIndex] = useState(page);
   const [loading, setLoading] = useState(false);
   const [ageRange, setAgeRange] = useState([18, 100]);
+  const [deviceLocation, setDeviceLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
   const [location, setLocation] = useState(null);
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
   const appState = useRef(AppState.currentState);
@@ -78,8 +82,26 @@ const HomeScreen = ({ }) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
+          "REAL_WINDOW_HEIGHT"
+        );
+
+  const checkLocationPermissions = async (
+    minAge = null,
+    maxAge = null,
+    location = null
+  ) => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setLocationError(
+        "Permission to access location was denied. You need to enable location access to for us to give you a better experience. Enable Location access now to continue"
       );
+    } else {
+      let dev_location = await Location.getCurrentPositionAsync({});
+      setDeviceLocation(dev_location);
+      listProfiles(minAge, maxAge, location);
+      setLocationError(null);
+    }
+  };
 
   useEffect(() => {
     if (authState && !authState.isProfileComplete) {
@@ -87,7 +109,7 @@ const HomeScreen = ({ }) => {
     } else if (authState?.user?.paywall) {
       navigation.navigate("Ignitecove");
     } else {
-      listProfiles();
+      checkLocationPermissions();
     }
   }, [page, listProfiles, authState]);
 
@@ -280,7 +302,7 @@ const HomeScreen = ({ }) => {
   const handleSheetChanges = useCallback(
     (index) => {
       if (index === -1) {
-        listProfiles(ageRange[0], ageRange[1], location);
+        checkLocationPermissions(ageRange[0], ageRange[1], location);
       }
     },
     [ageRange, location]
@@ -370,7 +392,10 @@ const HomeScreen = ({ }) => {
                               );
                               swipeRef.current.swipeLeft();
                             }}
-                            disabled={card?.liked || (card.id === liked.id && liked.newLikeStatus)}
+                            disabled={
+                              card?.liked ||
+                              (card.id === liked.id && liked.newLikeStatus)
+                            }
                             style={tw(
                               "items-center justify-center rounded-full p-2 "
                             )}
@@ -378,11 +403,17 @@ const HomeScreen = ({ }) => {
                             <AntDesign
                               name="dislike2"
                               size={28}
-                              color={(card.id === liked.id && liked.newLikeStatus) ? "gray" : "white"} />
+                              color={
+                                card.id === liked.id && liked.newLikeStatus
+                                  ? "gray"
+                                  : "white"
+                              }
+                            />
                           </TouchableOpacity>
 
                           <View>
-                            {card.liked || (card.id === liked.id && liked.newLikeStatus) ? (
+                            {card.liked ||
+                            (card.id === liked.id && liked.newLikeStatus) ? (
                               <TouchableOpacity
                                 disabled={true}
                                 style={tw(
@@ -398,11 +429,15 @@ const HomeScreen = ({ }) => {
                             ) : (
                               <TouchableOpacity
                                 onPress={() => {
-                                  sendLikeDislike(card.id, card.phoneNumber, "like")
+                                  sendLikeDislike(
+                                    card.id,
+                                    card.phoneNumber,
+                                    "like"
+                                  );
                                   setLiked({
                                     newLikeStatus: true,
-                                    id: card.id
-                                  })
+                                    id: card.id,
+                                  });
                                 }}
                                 disabled={card?.liked}
                                 style={tw(
@@ -417,7 +452,6 @@ const HomeScreen = ({ }) => {
                               </TouchableOpacity>
                             )}
                           </View>
-
                         </View>
                         <View style={styles.cardData}>
                           <Text style={tw("text-lg text-white")}>
@@ -427,16 +461,32 @@ const HomeScreen = ({ }) => {
                             <>
                               {/* Normalize gender and genderPreference directly in the JSX */}
                               {(() => {
-                                const normalizedGender = card.gender.trim().toLowerCase();
-                                const normalizedGenderPreference = card.genderPreference.trim().toLowerCase();
+                                const normalizedGender = card.gender
+                                  .trim()
+                                  .toLowerCase();
+                                const normalizedGenderPreference =
+                                  card.genderPreference.trim().toLowerCase();
 
-                                if (normalizedGender === normalizedGenderPreference) {
-                                  return <Text style={{ fontSize: 20 }}>🌈</Text>; // Rainbow emoji
+                                if (
+                                  normalizedGender ===
+                                  normalizedGenderPreference
+                                ) {
+                                  return (
+                                    <Text style={{ fontSize: 20 }}>🌈</Text>
+                                  ); // Rainbow emoji
                                 } else {
                                   return normalizedGender === "male" ? (
-                                    <AntDesign name="man" size={18} color="white" /> // Man icon
+                                    <AntDesign
+                                      name="man"
+                                      size={18}
+                                      color="white"
+                                    /> // Man icon
                                   ) : (
-                                    <AntDesign name="woman" size={18} color="white" /> // Woman icon
+                                    <AntDesign
+                                      name="woman"
+                                      size={18}
+                                      color="white"
+                                    /> // Woman icon
                                   );
                                 }
                               })()}
@@ -451,8 +501,8 @@ const HomeScreen = ({ }) => {
 
                         <View style={tw("flex flex-row flex-wrap")}>
                           {card.phoneNumberVisible ||
-                            (showPhoneNumUi.id === card.id &&
-                              showPhoneNumUi.visible) ? (
+                          (showPhoneNumUi.id === card.id &&
+                            showPhoneNumUi.visible) ? (
                             <View style={tw("flex-1")}>
                               <Text
                                 selectable={true}
@@ -469,9 +519,7 @@ const HomeScreen = ({ }) => {
                                 style={tw("rounded-md bg-red-500 p-2")}
                                 onPress={() => {
                                   setShowPhoneNumUi({});
-                                  checkSubscription(
-                                    card.id
-                                  ).then((r) => {
+                                  checkSubscription(card.id).then((r) => {
                                     if (r.status === 0) {
                                       setShowPhoneNumUi({
                                         id: card.id,
@@ -528,8 +576,6 @@ const HomeScreen = ({ }) => {
                 )}
               />
             </View>
-
-
           </>
         ) : authState && !authState.isProfileComplete ? (
           <View style={styles.premiumSection}>
@@ -547,19 +593,36 @@ const HomeScreen = ({ }) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <View
-            style={tw(
-              "relative bg-white h-2/3 rounded-xl justify-center items-center"
+          <>
+            {locationError ? (
+              <View style={tw("bg-white h-2/3 justify-center items-center")}>
+                <MaterialIcons name="place" size={40} color="orange" />
+                <Text style={styles.errorText}>{locationError}</Text>
+                <TouchableOpacity
+                  style={[styles.button, styles.applyButton]}
+                  onPress={() => Linking.openSettings()}
+                >
+                  <Text style={styles.settingsButtonText}>
+                    Enable Location Access
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View
+                style={tw(
+                  "relative bg-white h-2/3 rounded-xl justify-center items-center"
+                )}
+              >
+                <Text style={tw("font-bold pb-5")}>No More Profiles</Text>
+                <Image
+                  style={tw("h-20 w-full")}
+                  height={100}
+                  width={100}
+                  source={{ uri: "https://links.papareact.com/6gb" }}
+                />
+              </View>
             )}
-          >
-            <Text style={tw("font-bold pb-5")}>No More Profiles</Text>
-            <Image
-              style={tw("h-20 w-full")}
-              height={100}
-              width={100}
-              source={{ uri: "https://links.papareact.com/6gb" }}
-            />
-          </View>
+          </>
         )
       ) : (
         <View
@@ -730,13 +793,35 @@ const HomeScreen = ({ }) => {
 };
 
 const styles = StyleSheet.create({
+  homeContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  errorText: {
+    color: "black",
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  settingsButton: {
+    backgroundColor: "#007BFF",
+    padding: 10,
+    borderRadius: 5,
+  },
+  settingsButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
   homeContainer: {
     width: "100%",
+    justifyContent: "center",
   },
-  homeContent: {
-    width: "100%",
-  },
-  homeCard:{
+  // homeContent: {
+  //   width: "100%",
+  // },
+  homeCard: {
     marginTop: -34,
     borderRadius: 16,
     height: "95%",
@@ -900,7 +985,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 8,
-  }
+  },
 });
 
 export default HomeScreen;
