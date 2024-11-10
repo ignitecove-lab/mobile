@@ -16,9 +16,9 @@ import {
   View,
   Image,
   FlatList,
-  TextInput,
   Linking,
   BackHandler,
+  Keyboard
 } from "react-native";
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
@@ -646,19 +646,24 @@ const PaywallScreen = ({ route }) => {
                 <Text>MPESA NUMBER</Text>
               </View>
               <PhoneInput
-                ref={phoneInput}
-                defaultValue={value}
-                defaultCode="KE"
-                layout="first"
-                onChangeText={(text) => {
-                  setValue(text);
-                }}
-                onChangeFormattedText={(text) => {
-                  setFormattedValue(text);
-                }}
-                countryPickerProps={{ withAlphaFilter: true }}
-                withShadow
-                autoFocus
+                 ref={phoneInput}
+                 defaultValue={value}
+                 defaultCode="KE"
+                 layout="first"
+                 onChangeText={(text) => {
+                   setValue(text);
+
+                   // Check if the user entered 9 digits, or 10 if the first digit is 0
+                   if ((((text.length === 9) && !text.startsWith("0"))) || (text.length === 10 && text.startsWith("0"))) {
+                     Keyboard.dismiss();
+                   }
+                 }}
+                 onChangeFormattedText={(text) => {
+                   setFormattedValue(text);
+                 }}
+                 countryPickerProps={{ withAlphaFilter: true }}
+                 withShadow
+                 autoFocus
               />
               <TouchableOpacity
                 style={styles.button}

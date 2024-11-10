@@ -17,6 +17,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "host.exp.ignitecove",
       "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription":  "We need your location to provide better services.",
         "NSLocationWhenInUseUsageDescription": "We need your location to provide better services.",
         "NSLocationAlwaysUsageDescription": "We need your location to provide better services."
       }

@@ -311,7 +311,6 @@ const ModalScreen = () => {
                   borderRadius: 10,
                   overflow: "hidden",
                   flex: 1,
-                  height: 50,
                 }}
               >
                 <Picker
@@ -320,7 +319,7 @@ const ModalScreen = () => {
                     borderRadius: 10,
                     backgroundColor: "#e4e4e7",
                     flex: 1,
-                    height: 50,
+                    height: Platform.OS === 'ios' ? 150 : 50,
                   }}
                   selectedValue={gender}
                   onValueChange={handleGenderChange}
@@ -364,7 +363,7 @@ const ModalScreen = () => {
                     borderRadius: 10,
                     backgroundColor: "#e4e4e7",
                     flex: 1,
-                    height: 50,
+                    height: Platform.OS === 'ios' ? 150 : 50,
                   }}
                   selectedValue={genderPreference}
                   onValueChange={handlePreferenceChange}
