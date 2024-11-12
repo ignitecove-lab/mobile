@@ -18,5 +18,8 @@
         "ASSET_BUNDLE_PATTERNS": "assets/**"
       }
     }
+  },
+  "cli": {
+    "appVersionSource": "remote"
   }
 }
