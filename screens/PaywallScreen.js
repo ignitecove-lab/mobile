@@ -25,7 +25,6 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 import PhoneInput from "react-native-phone-number-input";
 import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "./../lib/constants/baseUrl";
-import messaging from "@react-native-firebase/messaging";
 import RadioButtonRN from "radio-buttons-react-native";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
@@ -143,7 +142,7 @@ const PaywallScreen = ({ route }) => {
 
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-  const { fcmToken, notificationData, authState, authContext, isVIP } =
+  const { fcmToken, authState, isVIP } =
     useAuth();
 
   const deviceWidth = Dimensions.get("window").width;
@@ -196,76 +195,12 @@ const PaywallScreen = ({ route }) => {
       handleBackPress
     );
 
-    // Foreground/background message handling
-    const unsubscribeOnMessage = messaging().onMessage(
-      async (remoteMessage) => {
-        console.log(`Notification ${remoteMessage.notification?.body}`);
-        if (
-          remoteMessage &&
-          remoteMessage.notification &&
-          remoteMessage.notification?.body
-        ) {
-          console.log("Foreground/Background Message:", remoteMessage);
-          // Check if the message body contains a specific keyword
-          if (remoteMessage.notification?.body === "payment successful") {
-            // Perform actions when the keyword is found in the message body
-            console.log("Message contains the keyword!");
-
-            let navigationParams = { phoneNumber: formattedValue };
-            if (authState?.user.paywall) {
-              navigationParams.redirectScreen = "ModalScreen";
-            }
-
-            authContext.updatePaywallState(false);
-            setModalVisible(false);
-            bottomSheetRef.current.dismiss();
-
-            navigation.navigate("PayStatus", navigationParams);
-          } else {
-            console.log(
-              "Message does not contain the keyword!" +
-                remoteMessage.notification?.body
-            );
-          }
-        }
-      }
-    );
-
-    // App terminated message handling
-    messaging()
-      .getInitialNotification()
-      .then((remoteMessage) => {
-        if (
-          remoteMessage &&
-          remoteMessage.notification &&
-          remoteMessage.notification?.body
-        ) {
-          if (remoteMessage.notification?.body === "payment successful") {
-            // Perform actions when the keyword is found in the message body
-            console.log("Initial notification contains the keyword!");
-            authContext.updatePaywallState(false);
-            setModalVisible(false);
-            navigation.navigate("PayStatus", {
-              phoneNumber: formattedValue,
-              redirectScreen: "ModalScreen",
-            });
-            bottomSheetRef.current.dismiss();
-          } else {
-            console.log(
-              "Initial notification does not contain the keyword!" +
-                remoteMessage.notification?.body
-            );
-          }
-        }
-      });
-
     fetchPlans();
 
     return () => {
-      unsubscribeOnMessage();
       backHandler.remove();
     };
-  }, [fcmToken, notificationData]);
+  }, [fcmToken]);
 
   const initiatePayment = async (phoneNumber, fcmToken) => {
     setModalVisible(true);
@@ -292,6 +227,10 @@ const PaywallScreen = ({ route }) => {
       const json = await response.json();
 
       console.log(json);
+      bottomSheetRef.current.dismiss();
+      await navigation.navigate("PayStatus", {
+        phoneNumber: formattedValue,
+      });
 
       return json;
     } catch (error) {
