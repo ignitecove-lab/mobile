@@ -35,6 +35,7 @@ import VIPBadge from "../vip_badge.png";
 import { Linking } from "react-native";
 
 import * as Location from "expo-location";
+import ReusableModal from "./ReusableModal";
 
 const HomeScreen = ({}) => {
   const navigation = useNavigation();
@@ -779,26 +780,15 @@ const HomeScreen = ({}) => {
         </View>
       </Modal>
 
-      <Modal
-        style={styles.modalContainer}
-        isVisible={isModalVisible}
-        hasBackdrop={true}
-        deviceWidth={deviceWidth}
-        deviceHeight={deviceHeight}
-        backdropColor={"#00000031"}
-      >
-        <View style={styles.modalBody}>
-          <Text style={styles.modalTextHeader}>Please wait</Text>
-
-          {modalLoading ? (
-            <View style={styles.loading}>
-              <ActivityIndicator size="large" color="#7CDB8A" />
-            </View>
-          ) : null}
-
-          <Text style={styles.modalText}>{modalText}</Text>
-        </View>
-      </Modal>
+      <ReusableModal
+         isVisible={isModalVisible}
+         onBackdropPress={() => setModalVisible(false)}
+         deviceWidth={Dimensions.get("window").width}
+         deviceHeight={Dimensions.get("window").height}
+         headerText="Loading"
+         bodyText="Your request is being processed."
+         isLoading={true}
+      />
     </View>
   );
 };
