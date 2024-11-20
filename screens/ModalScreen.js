@@ -284,7 +284,7 @@ const ModalScreen = () => {
 
           <Text style={styles.stepText}>Location</Text>
           <GooglePlacesAutocomplete
-            placeholder="Search location"
+            placeholder="Search your location here"
             fetchDetails={true}
             onPress={(data, details = null) => {
               setLocation(data.description);
@@ -294,7 +294,7 @@ const ModalScreen = () => {
               language: "en",
             }}
           />
-          <Text style={styles.input}>{location}</Text>
+          <Text style={styles.inputNoBorder}>{location}</Text>
 
           <View
             style={{
@@ -468,6 +468,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    padding: 20,
   },
   modalContainer: {
     flex: 1,
@@ -531,6 +532,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "black",
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 6,
+  },
+  inputNoBorder: {
+    fontSize: 16,
+    borderWidth: 0,
     borderRadius: 8,
     padding: 10,
     marginTop: 6,

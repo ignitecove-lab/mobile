@@ -1,22 +1,19 @@
-import React, { useState, useEffect, useCallback } from "react";
 import {
+  SafeAreaView,
   View,
   Text,
-  FlatList,
-  ImageBackground,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
+  FlatList,
   Dimensions,
-  ActivityIndicator,
+  ImageBackground,
 } from "react-native";
-import Modal from "react-native-modal";
-import { BlurView } from "@react-native-community/blur";
+import useAuth from "../useAuth";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../hooks/useAuth";
-import ReusableModal from "./ReusableModal"; // Assuming this is your auth hook
-
-const { width, height } = Dimensions.get("window");
-const API_BASE_URL = "https://api.ignitecove.com";
+import { BlurView } from "@react-native-community/blur";
+import API_BASE_URL from "../lib/constants/baseUrl";
+import ReusableModal from "./ReusableModal";
 
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -25,6 +22,7 @@ const shuffleArray = (array) => {
   }
   return array;
 };
+const { width, height } = Dimensions.get("window");
 
 const App = () => {
   const [shuffledProfiles, setShuffledProfiles] = useState([]);
@@ -41,7 +39,6 @@ const App = () => {
     { id: "5", src: require("../persons/5.jpg") },
     { id: "6", src: require("../persons/6.jpg") },
   ];
-
   const checkPaywall = useCallback(async () => {
     try {
       setModalVisible(true);
@@ -60,7 +57,11 @@ const App = () => {
 
       if (json?.data?.paywall === false) {
         await authContext.updatePaywallState(false);
-        await navigation.navigate("Home", {fetchProfile: true});
+        if (!authState?.user?.firstName || !authState?.user?.gender || !authState?.user?.age) {
+          navigation.navigate("Modal");
+        } else {
+          await navigation.navigate("Home", {fetchProfile: true});
+        }
       } else {
         await navigation.navigate("PayWall", {isUpgrade: false});
       }
@@ -83,7 +84,7 @@ const App = () => {
   }, [checkPaywall, navigation]);
 
   return (
-     <View style={styles.container}>
+     <SafeAreaView style={styles.container}>
        <FlatList
           data={shuffledProfiles}
           keyExtractor={(item) => item.id}
@@ -102,13 +103,16 @@ const App = () => {
              </View>
           )}
        />
-       <ReusableModal
-          isVisible={isModalVisible}
-          onBackdropPress={() => setModalVisible(false)}
-          headerText="Loading"
-          bodyText="Your request is being processed."
-          isLoading={true}
-       />
+       {
+         isModalVisible ? (<ReusableModal
+            isVisible={isModalVisible}
+            onBackdropPress={() => setModalVisible(false)}
+            headerText="Loading"
+            bodyText="We are processing your requst"
+            isLoading={true}
+         />) : (<></>)
+       }
+
        <View style={styles.popup}>
          <Text style={styles.popupText}>You're a total catch!</Text>
          <Text style={styles.popupSubText}>
@@ -118,49 +122,59 @@ const App = () => {
            <Text style={styles.buttonText}>Join IgniteCove</Text>
          </TouchableOpacity>
        </View>
-     </View>
+     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  profileContainer: {
-    flex: 1,
-    margin: 10,
-  },
-  profileImage: {
-    width: "100%",
-    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   absolute: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
   },
-  modalBody: {
-    backgroundColor: "white",
+  profileContainer: {
+    padding: 10,
+  },
+  profileImage: {
+    width: (width - 50) / 2,
+    height: (height - 200) / 3,
     borderRadius: 10,
     overflow: "hidden",
   },
   popup: {
+    position: "absolute",
+    backgroundColor: "white",
     padding: 20,
-    alignItems: "center",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   popupText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
+    marginBottom: 10,
   },
   popupSubText: {
-    fontSize: 14,
-    marginVertical: 10,
+    fontSize: 16,
     textAlign: "center",
+    marginBottom: 20,
   },
   button: {
     backgroundColor: "#007bff",
     padding: 10,
     borderRadius: 5,
-    marginTop: 10,
   },
   buttonText: {
     color: "white",
