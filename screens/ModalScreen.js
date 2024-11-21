@@ -24,8 +24,8 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import { updateProfile } from "../lib/uploadProfile";
 import API_BASE_URL from "../lib/constants/baseUrl";
 import { Ionicons } from "@expo/vector-icons";
-import Modal from "react-native-modal";
-import tw from "tailwind-rn";
+import RNRestart from "react-native-restart";
+
 import CustomModal from "./CustomModal";
 const IMAGE_URL = "https://image.ignitecove.com";
 
@@ -199,9 +199,9 @@ const ModalScreen = () => {
         setGender(data.gender);
         setSelectedTags(data?.accountTags.map((tag) => tag.tagId));
         setGenderPreference(data?.genderPreference);
-        setGenderPreferenceDis(data?.genderPreference ? false : true);
-        setPreferenceDisabled(data?.genderPreference ? false : true);
-        setGenderDis(data?.gender ? false : true);
+        setGenderPreferenceDis(!data?.genderPreference);
+        setPreferenceDisabled(!data?.genderPreference);
+        setGenderDis(!data?.gender);
       })
       .catch((err) => {
         console.log("fetchUser error", err);
@@ -452,7 +452,7 @@ const ModalScreen = () => {
                 authState,
                 genderPreference
               ).then(() => {
-                navigation.navigate("Home");
+                RNRestart.Restart();
               });
             }
           }}

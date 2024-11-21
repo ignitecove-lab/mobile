@@ -116,9 +116,7 @@ const HomeScreen = ({}) => {
   };
 
   useEffect(() => {
-    if (authState && !authState.isProfileComplete) {
-      navigation.navigate("Modal");
-    } else if (authState?.user?.paywall) {
+    if (authState?.user?.paywall) {
       navigation.navigate("Ignitecove");
     } else {
       checkLocationPermissions();
