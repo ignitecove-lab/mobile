@@ -63,12 +63,12 @@ const App = () => {
         } else {
           console.log("go to Home")
 
-          await navigation.navigate("Home", {fetchProfile: true});
+          await navigation.navigate("Home", { fetchProfile: true });
         }
       } else {
         console.log("go to Paywall")
 
-        await navigation.navigate("PayWall", {isUpgrade: false});
+        await navigation.navigate("PayWall", { isUpgrade: false });
       }
     } catch (error) {
       setModalVisible(false);
@@ -80,6 +80,7 @@ const App = () => {
     const shuffled = shuffleArray([...profiles]).slice(0, 6);
     setShuffledProfiles(shuffled);
 
+    checkPaywall()
     const unsubscribe = navigation.addListener("focus", () => {
       setBlurKey((prevKey) => prevKey + 1);
     });
@@ -88,45 +89,45 @@ const App = () => {
   }, [navigation]);
 
   return (
-     <SafeAreaView style={styles.container}>
-       <FlatList
-          data={shuffledProfiles}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          renderItem={({ item }) => (
-             <View style={styles.profileContainer}>
-               <ImageBackground source={item.src} style={styles.profileImage}>
-                 <BlurView
-                    key={blurKey}
-                    style={styles.absolute}
-                    blurType="dark"
-                    blurAmount={20}
-                    reducedTransparencyFallbackColor="white"
-                 />
-               </ImageBackground>
-             </View>
-          )}
-       />
-       {
-         isModalVisible ? (<ReusableModal
-            isVisible={isModalVisible}
-            onBackdropPress={() => setModalVisible(false)}
-            headerText="Loading"
-            bodyText="We are processing your requst"
-            isLoading={true}
-         />) : (<></>)
-       }
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={shuffledProfiles}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        renderItem={({ item }) => (
+          <View style={styles.profileContainer}>
+            <ImageBackground source={item.src} style={styles.profileImage}>
+              <BlurView
+                key={blurKey}
+                style={styles.absolute}
+                blurType="dark"
+                blurAmount={20}
+                reducedTransparencyFallbackColor="white"
+              />
+            </ImageBackground>
+          </View>
+        )}
+      />
+      {
+        isModalVisible ? (<ReusableModal
+          isVisible={isModalVisible}
+          onBackdropPress={() => setModalVisible(false)}
+          headerText="Loading"
+          bodyText="We are processing your requst"
+          isLoading={true}
+        />) : (<></>)
+      }
 
-       <View style={styles.popup}>
-         <Text style={styles.popupText}>You're a total catch!</Text>
-         <Text style={styles.popupSubText}>
-           Let the right people find you with IgniteCove Premium. Join IgniteCove today!
-         </Text>
-         <TouchableOpacity style={styles.button} onPress={checkPaywall}>
-           <Text style={styles.buttonText}>Join IgniteCove</Text>
-         </TouchableOpacity>
-       </View>
-     </SafeAreaView>
+      <View style={styles.popup}>
+        <Text style={styles.popupText}>You're a total catch!</Text>
+        <Text style={styles.popupSubText}>
+          Let the right people find you with IgniteCove Premium. Join IgniteCove today!
+        </Text>
+        <TouchableOpacity style={styles.button} onPress={checkPaywall}>
+          <Text style={styles.buttonText}>Join IgniteCove</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 

@@ -383,11 +383,11 @@ export const AuthProvider = (props) => {
                   Linking.openURL(
                     Platform.OS === "ios"
                       ? await VersionCheck.getAppStoreUrl({
-                          appID: "xxxxxxxxxx",
-                        })
+                        appID: "xxxxxxxxxx",
+                      })
                       : await VersionCheck.getPlayStoreUrl({
-                          packageName: "host.exp.ignitecove",
-                        })
+                        packageName: "host.exp.ignitecove",
+                      })
                   );
                 },
               },

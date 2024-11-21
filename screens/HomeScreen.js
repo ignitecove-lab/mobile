@@ -37,7 +37,7 @@ import { Linking } from "react-native";
 import * as Location from "expo-location";
 import ReusableModal from "./ReusableModal";
 
-const HomeScreen = ({}) => {
+const HomeScreen = ({ }) => {
   const navigation = useNavigation();
   const {
     user,
@@ -83,8 +83,8 @@ const HomeScreen = ({}) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
 
   const checkLocationPermissions = async (
     minAge = null,
@@ -385,7 +385,6 @@ const HomeScreen = ({}) => {
                           flex: 1,
                           borderBottomLeftRadius: 12,
                           borderBottomRightRadius: 12,
-                          maxHeight: 240,
                         },
                         tw("absolute w-full px-6 py-2 bottom-0"),
                       ]}
@@ -423,7 +422,7 @@ const HomeScreen = ({}) => {
 
                           <View>
                             {card.liked ||
-                            (card.id === liked.id && liked.newLikeStatus) ? (
+                              (card.id === liked.id && liked.newLikeStatus) ? (
                               <TouchableOpacity
                                 disabled={true}
                                 style={tw(
@@ -511,8 +510,8 @@ const HomeScreen = ({}) => {
 
                         <View style={tw("flex flex-row flex-wrap")}>
                           {card.phoneNumberVisible ||
-                          (showPhoneNumUi.id === card.id &&
-                            showPhoneNumUi.visible) ? (
+                            (showPhoneNumUi.id === card.id &&
+                              showPhoneNumUi.visible) ? (
                             <View style={tw("flex-1")}>
                               <Text
                                 selectable={true}
@@ -551,35 +550,33 @@ const HomeScreen = ({}) => {
                       </View>
 
                       {card.accountTags && (
-                        <ScrollView style={{ flex: 1, maxHeight: 200 }}>
-                          <View
-                            style={tw(
-                              "flex-row justify-center items-center w-full flex-wrap mt-2"
-                            )}
-                          >
-                            {card.accountTags?.map((tag) => (
-                              <TouchableOpacity
-                                key={tag.tagId}
-                                style={[
-                                  styles.tag,
-                                  {
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 12,
-                                    borderRadius: 4,
-                                    borderWidth: 0.5,
-                                    borderColor: "white",
-                                    backgroundColor: user.accountTags?.some(
-                                      (accountTag) =>
-                                        accountTag.tagId === tag.tagId
-                                    ),
-                                  },
-                                ]}
-                              >
-                                <Text style={styles.tagText}>{tag.tag}</Text>
-                              </TouchableOpacity>
-                            ))}
-                          </View>
-                        </ScrollView>
+                        <View
+                          style={tw(
+                            "flex-row justify-center items-center w-full flex-wrap mt-2"
+                          )}
+                        >
+                          {card.accountTags?.map((tag) => (
+                            <TouchableOpacity
+                              key={tag.tagId}
+                              style={[
+                                styles.tag,
+                                {
+                                  paddingVertical: 2,
+                                  paddingHorizontal: 12,
+                                  borderRadius: 4,
+                                  borderWidth: 0.5,
+                                  borderColor: "white",
+                                  backgroundColor: user.accountTags?.some(
+                                    (accountTag) =>
+                                      accountTag.tagId === tag.tagId
+                                  ),
+                                },
+                              ]}
+                            >
+                              <Text style={styles.tagText}>{tag.tag}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
                       )}
                     </LinearGradient>
                   </View>
@@ -779,13 +776,13 @@ const HomeScreen = ({}) => {
       </Modal>
 
       <ReusableModal
-         isVisible={isModalVisible}
-         onBackdropPress={() => setModalVisible(false)}
-         deviceWidth={Dimensions.get("window").width}
-         deviceHeight={Dimensions.get("window").height}
-         headerText="Loading"
-         bodyText="Your request is being processed."
-         isLoading={true}
+        isVisible={isModalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        deviceWidth={Dimensions.get("window").width}
+        deviceHeight={Dimensions.get("window").height}
+        headerText="Loading"
+        bodyText="Your request is being processed."
+        isLoading={true}
       />
     </View>
   );

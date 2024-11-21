@@ -57,7 +57,7 @@ const StackNavigator = () => {
           <Stack.Group>
             {authState?.user?.paywall && (
               <Stack.Screen
-                options={{ headerShown: false }}
+                options={{ headerShown: true }}
                 name="Paywall"
                 component={Unpaid}
               />
@@ -101,19 +101,19 @@ const StackNavigator = () => {
               options={{
                 headerRight: isVIP
                   ? () => (
-                      <FontAwesome
-                        name="tag"
-                        size={10}
-                        color="white"
-                        style={{
-                          backgroundColor: "#3944bc",
-                          padding: 10,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <Text> VIP</Text>
-                      </FontAwesome>
-                    )
+                    <FontAwesome
+                      name="tag"
+                      size={10}
+                      color="white"
+                      style={{
+                        backgroundColor: "#3944bc",
+                        padding: 10,
+                        borderRadius: 8,
+                      }}
+                    >
+                      <Text> VIP</Text>
+                    </FontAwesome>
+                  )
                   : undefined,
                 headerRightContainerStyle: {
                   paddingRight: 15,
