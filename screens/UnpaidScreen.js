@@ -58,11 +58,16 @@ const App = () => {
       if (json?.data?.paywall === false) {
         await authContext.updatePaywallState(false);
         if (!authState?.user?.firstName || !authState?.user?.gender || !authState?.user?.age) {
+          console.log("go to modal")
           navigation.navigate("Modal");
         } else {
+          console.log("go to Home")
+
           await navigation.navigate("Home", {fetchProfile: true});
         }
       } else {
+        console.log("go to Paywall")
+
         await navigation.navigate("PayWall", {isUpgrade: false});
       }
     } catch (error) {
@@ -72,7 +77,6 @@ const App = () => {
   }, [authState.userToken, authContext, navigation]);
 
   useEffect(() => {
-    checkPaywall();
     const shuffled = shuffleArray([...profiles]).slice(0, 6);
     setShuffledProfiles(shuffled);
 
@@ -81,7 +85,7 @@ const App = () => {
     });
 
     return unsubscribe;
-  }, [checkPaywall, navigation]);
+  }, [navigation]);
 
   return (
      <SafeAreaView style={styles.container}>
