@@ -385,7 +385,7 @@ const HomeScreen = ({}) => {
                           flex: 1,
                           borderBottomLeftRadius: 12,
                           borderBottomRightRadius: 12,
-                          maxHeight: 200,
+                          maxHeight: 240,
                         },
                         tw("absolute w-full px-6 py-2 bottom-0"),
                       ]}
@@ -551,7 +551,7 @@ const HomeScreen = ({}) => {
                       </View>
 
                       {card.accountTags && (
-                        <ScrollView style={{ flex: 1, maxHeight: 180 }}>
+                        <ScrollView style={{ flex: 1, maxHeight: 200 }}>
                           <View
                             style={tw(
                               "flex-row justify-center items-center w-full flex-wrap mt-2"
@@ -986,5 +986,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
-// "@notifee/react-native": "^9.1.1",
 export default HomeScreen;

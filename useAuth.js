@@ -12,11 +12,11 @@ import * as SecureStore from "expo-secure-store";
 import { initSocket, likeDislike, onNewMessage } from "./socket";
 import { Alert, Linking, AppState, Platform } from "react-native";
 import VersionCheck from "react-native-version-check";
-// import notifee, {
-//   AndroidStyle,
-//   AndroidImportance,
-//   EventType,
-// } from "@notifee/react-native";
+import notifee, {
+  AndroidStyle,
+  AndroidImportance,
+  EventType,
+} from "@notifee/react-native";
 
 const AuthContext = createContext();
 
@@ -405,7 +405,7 @@ export const AuthProvider = (props) => {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
       // request notifications permission on app load
-      // await notifee.requestPermission();
+      await notifee.requestPermission();
       let userToken, local_user;
 
       try {
@@ -516,74 +516,74 @@ export const AuthProvider = (props) => {
   async function onMessageReceived(message) {
     console.log({ Nofifee: message });
     // Request permissions
-    // await notifee.requestPermission();
+    await notifee.requestPermission();
 
     // Create a channel (required for Android)
-    // const channelId = await notifee.createChannel({
-    //   id: "default",
-    //   name: "Default Channel",
-    //   // sound: "hollow",
-    //   importance: AndroidImportance.HIGH,
-    // });
+    const channelId = await notifee.createChannel({
+      id: "default",
+      name: "Default Channel",
+      // sound: "hollow",
+      importance: AndroidImportance.HIGH,
+    });
 
     // Display a notification
-    // await notifee.displayNotification({
-    //   title: message?.notification?.title,
-    //   body: "",
-    //
-    //   android: {
-    //     channelId,
-    //     // pressAction is needed if you want the notification to open the app when pressed
-    //     pressAction: {
-    //       id: "default",
-    //       launchActivity: "default",
-    //     },
-    //     timestamp: Date.now(),
-    //     showTimestamp: true,
-    //     style: {
-    //       type: AndroidStyle.BIGPICTURE,
-    //       picture: message.notification.android?.imageUrl,
-    //     },
-    //   },
-    //   ios: {
-    //     timestamp: Date.now(),
-    //     showTimestamp: true,
-    //     attachments: [
-    //       {
-    //         url: message.notification.android?.imageUrl,
-    //       },
-    //     ],
-    //   },
-    //   data: {
-    //     deepLink: `host.exp.ignitecove://Profile_View?user_id=${parseInt(
-    //       message?.notification?.body
-    //     )}`,
-    //   },
-    // });
+    await notifee.displayNotification({
+      title: message?.notification?.title,
+      body: "",
+
+      android: {
+        channelId,
+        // pressAction is needed if you want the notification to open the app when pressed
+        pressAction: {
+          id: "default",
+          launchActivity: "default",
+        },
+        timestamp: Date.now(),
+        showTimestamp: true,
+        style: {
+          type: AndroidStyle.BIGPICTURE,
+          picture: message.notification.android?.imageUrl,
+        },
+      },
+      ios: {
+        timestamp: Date.now(),
+        showTimestamp: true,
+        attachments: [
+          {
+            url: message.notification.android?.imageUrl,
+          },
+        ],
+      },
+      data: {
+        deepLink: `host.exp.ignitecove://Profile_View?user_id=${parseInt(
+          message?.notification?.body
+        )}`,
+      },
+    });
   }
 
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
 
-  // notifee.onForegroundEvent(({ type, detail }) => {
-  //   if (type === EventType.PRESS) {
-  //     const deepLink = detail.notification.data.deepLink;
-  //     if (deepLink) {
-  //       // Handle the deep link (e.g., navigate to the specific screen)
-  //       Linking.openURL(deepLink);
-  //     }
-  //   }
-  // });
+  notifee.onForegroundEvent(({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      const deepLink = detail.notification.data.deepLink;
+      if (deepLink) {
+        // Handle the deep link (e.g., navigate to the specific screen)
+        Linking.openURL(deepLink);
+      }
+    }
+  });
 
-  // notifee.onBackgroundEvent(({ type, detail }) => {
-  //   if (type === EventType.PRESS) {
-  //     const deepLink = detail.notification.data.deepLink;
-  //     if (deepLink) {
-  //       // Handle the deep link (e.g., navigate to the specific screen)
-  //       Linking.openURL(deepLink);
-  //     }
-  //   }
-  // });
+  notifee.onBackgroundEvent(({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      const deepLink = detail.notification.data.deepLink;
+      if (deepLink) {
+        // Handle the deep link (e.g., navigate to the specific screen)
+        Linking.openURL(deepLink);
+      }
+    }
+  });
 
   // console.log("state", state);
 
