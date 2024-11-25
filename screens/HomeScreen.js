@@ -32,12 +32,13 @@ import API_BASE_URL from "./../lib/constants/baseUrl";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
+import noContentImage from '../assets/no-content.png'
 import { Linking } from "react-native";
 
 import * as Location from "expo-location";
 import ReusableModal from "./ReusableModal";
 
-const HomeScreen = ({ }) => {
+const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const {
     user,
@@ -69,6 +70,7 @@ const HomeScreen = ({ }) => {
   const appState = useRef(AppState.currentState);
   const bottomSheetRef = useRef(null);
   const { sendLikeDislike } = authContext;
+  const [refreshScreen, setRefreshScreen] = useState(true);
 
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
   const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
@@ -86,15 +88,11 @@ const HomeScreen = ({ }) => {
         "REAL_WINDOW_HEIGHT"
       );
 
-  const checkLocationPermissions = async (
-    minAge = null,
-    maxAge = null,
-    location = null
-  ) => {
+  const checkLocationPermissions = async (minAge = null, maxAge = null, location = null) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setLocationError(
-        "Permission to access location was denied. You need to enable location access to for us to give you a better experience. Enable Location access now to continue"
+         "Permission to access location was denied. You need to enable location access to for us to give you a better experience. Enable Location access now to continue"
       );
     } else {
       let dev_location = await Location.getCurrentPositionAsync({});
@@ -110,7 +108,10 @@ const HomeScreen = ({ }) => {
           latitude: dev_location?.coords?.latitude,
         }),
       });
-      listProfiles(minAge, maxAge, location);
+      if (refreshScreen){
+        listProfiles(minAge, maxAge, location);
+        setRefreshScreen(false);
+      }
       setLocationError(null);
     }
   };
@@ -133,6 +134,9 @@ const HomeScreen = ({ }) => {
 
   useFocusEffect(
     useCallback(() => {
+      if(route.params?.fetchProfile !== undefined){
+        setRefreshScreen(route.params.fetchProfile ?? true)
+      }
       initializeSwiper();
     }, [showPhoneNumUi, liked])
   );
@@ -181,12 +185,9 @@ const HomeScreen = ({ }) => {
           appState.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
-          console.log("App has come to the foreground home screen!");
           if (!authState.isProfileComplete) {
-            console.log("profile not complete profileUpdate");
             navigation.navigate("Modal");
           } else if (authState?.user?.paywall) {
-            console.log("User not paid");
             navigation.navigate("Ignitecove");
           } else {
             console.log("Conditions not met for navigation");
@@ -217,8 +218,6 @@ const HomeScreen = ({ }) => {
           url = url + `&location=${location}`;
         }
 
-        console.log({ "current page": page, url });
-
         setLoading(true);
         await fetch(url, {
           method: "GET",
@@ -235,7 +234,6 @@ const HomeScreen = ({ }) => {
             throw new Error(text.error);
           })
           .then((data) => {
-            console.log("available profiles", data?.data?.length);
             setProfiles(data.data);
             setJustLoggedIn(false);
             setCardIndex(cardIndex + 1);
@@ -289,14 +287,12 @@ const HomeScreen = ({ }) => {
       );
       const json = await response.json();
 
+      setModalVisible(false);
       if (json.status === 0) {
         setSubscription(true);
-        setModalVisible(false);
       } else {
         setSubscription(false);
-        setModalText(json.message);
-        setModalVisible(false);
-        navigation.navigate("PayWall", { isUpgrade: false });
+        navigation.navigate("PayWall", { isUpgrade: false, refreshScreen: false });
       }
       return json;
     } catch (e) {
@@ -354,7 +350,10 @@ const HomeScreen = ({ }) => {
                   },
                 }}
                 onSwiped={(index) => console.log(index)}
-                onSwipedAll={async () => setPage((prevPage) => prevPage + 1)}
+                onSwipedAll={async () => {
+                  setPage((prevPage) => prevPage + 1)
+                  listProfiles()
+                }}
                 renderCard={(card) => (
                   <View key={card.id} style={styles.homeCard}>
                     <Image
@@ -617,16 +616,26 @@ const HomeScreen = ({ }) => {
             ) : (
               <View
                 style={tw(
-                  "relative bg-white h-2/3 rounded-xl justify-center items-center"
+                  "relative h-2/3 rounded-xl justify-center items-center"
                 )}
               >
-                <Text style={tw("font-bold pb-5")}>No More Profiles</Text>
+                <Text style={tw("font-bold pb-5")}>Refresh and discover more</Text>
                 <Image
-                  style={tw("h-20 w-full")}
+                  style={tw("h-full w-full")}
                   height={100}
                   width={100}
-                  source={{ uri: "https://links.papareact.com/6gb" }}
+                  source={noContentImage}
                 />
+                <TouchableOpacity
+                   style={tw("h-12 w-full bg-blue-500 p-2 mt-6  w-3/4 rounded-lg justify-center items-center")}
+                   onPress={() => {
+                     listProfiles()
+                   }}
+                >
+                  <Text style={tw("text-white text-center")}>
+                    Refresh
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </>
@@ -634,12 +643,9 @@ const HomeScreen = ({ }) => {
       ) : (
         <View
           style={tw(
-            "relative bg-white h-4/5 rounded-xl justify-center items-center"
+            "relative h-4/5 rounded-xl justify-center items-center"
           )}
         >
-          <Text style={tw("font-bold pb-5")}>
-            Hang in there as we fetch Profiles!
-          </Text>
           <View style={styles.loading}>
             <ActivityIndicator size="large" color="#7CDB8A" />
           </View>
@@ -876,6 +882,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 16,
     gap: 16,
+  },
+  refreshButton: {
+    minWidth: "120",
+    paddingTop: 20,
+    marginTop: 16,
+    backgroundColor: "#007BFF",
+    borderRadius: 16
   },
   button: {
     paddingVertical: 12,

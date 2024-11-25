@@ -44,7 +44,6 @@ const HeaderLeft = () => {
 
 const StackNavigator = () => {
   const { authState, isVIP } = useAuth();
-  console.log(authState);
 
   return (
     <Stack.Navigator

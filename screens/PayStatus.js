@@ -15,10 +15,11 @@ import {
 import API_BASE_URL from "../lib/constants/baseUrl";
 
 
-const PayStatus = ({ }) => {
+const PayStatus = ({ route}) => {
    const navigation = useNavigation();
    const [isLoading, setIsLoading] = useState(true);
    const {authState, authContext } = useAuth();
+   const { refreshScreen } = route.params;
 
    useEffect(() => {
       const timer = setTimeout(async () => {
@@ -55,7 +56,6 @@ const PayStatus = ({ }) => {
             clearTimeout(timer);
             await authContext.updatePaywallState(false);
             setIsLoading(false); // Stop loading
-            console.log("Payment successful notification received!");
          }
       });
 
@@ -67,7 +67,6 @@ const PayStatus = ({ }) => {
                clearTimeout(timer);
                authContext.updatePaywallState(false);
                setIsLoading(false);
-               console.log("Initial notification indicates payment successful!");
             }
          });
 
@@ -96,7 +95,7 @@ const PayStatus = ({ }) => {
                      if (!authState?.user?.firstName || !authState?.user?.gender || !authState?.user?.age) {
                         navigation.navigate("Modal");
                      } else {
-                        navigation.navigate("Home", { fetchProfile: true });
+                        navigation.navigate("Home", { fetchProfile: refreshScreen  ?? false});
                      }
                   }}
                   style={tw("bg-indigo-600 w-full py-2 items-center rounded-md mt-6")}

@@ -133,7 +133,7 @@ const PaywallScreen = ({ route }) => {
   const [value, setValue] = useState("");
   const [plans, setPlans] = useState([]);
   const [next, setNext] = useState(false);
-  const { isUpgrade } = route.params;
+  const { isUpgrade, refreshScreen } = route.params;
   const bottomSheetRef = useRef(null);
   const webViewRef = useRef(null);
 
@@ -226,16 +226,15 @@ const PaywallScreen = ({ route }) => {
 
       const json = await response.json();
 
-      console.log(json);
       bottomSheetRef.current.dismiss();
       await navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
+        refreshHomeScreen: refreshScreen ?? false
       });
-
+      setModalVisible(false);
       return json;
     } catch (error) {
       setModalText("An error occurred while initiating payment");
-      console.error("an error occurred while initiating payment");
       console.error(error);
       await delay(1000);
       setModalVisible(false);
@@ -438,6 +437,7 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
+        refreshHomeScreen: refreshScreen ?? false,
       });
     }
 
@@ -454,6 +454,7 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
+        refreshHomeScreen: refreshScreen ?? false
       });
     }
   };
@@ -612,7 +613,6 @@ const PaywallScreen = ({ route }) => {
                       .formattedNumber;
                   initiatePayment(formattedPhoneNum, fcmToken).then(
                     (result) => {
-                      console.log("this is the result ... " + result);
                     }
                   );
                 }}
