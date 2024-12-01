@@ -352,7 +352,7 @@ const HomeScreen = ({ route }) => {
                 onSwiped={(index) => console.log(index)}
                 onSwipedAll={async () => {
                   setPage((prevPage) => prevPage + 1)
-                  listProfiles()
+                  listProfiles(ageRange[0], ageRange[1], location)
                 }}
                 renderCard={(card) => (
                   <View key={card.id} style={styles.homeCard}>
@@ -722,7 +722,10 @@ const HomeScreen = ({ route }) => {
           </Pressable>
           <Pressable
             style={[styles.button, styles.applyButton]}
-            onPress={handleCloseSheet}
+            onPress={() => {
+              handleCloseSheet();
+              listProfiles(ageRange[0], ageRange[1], location);
+            }}
           >
             <Text style={styles.buttonText}>Apply Filters</Text>
           </Pressable>
