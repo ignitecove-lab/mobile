@@ -371,7 +371,7 @@ export const AuthProvider = (props) => {
 
       const currentVersion = VersionCheck.getCurrentBuildNumber();
 
-      if (latestVersion && latestVersion.mandatory) {
+      if (latestVersion && latestVersion.mandatory && !API_BASE_URL.includes("sandbox")) {
         if (Number(latestVersion.versionCode) > Number(currentVersion)) {
           Alert.alert(
             "Update Required",

@@ -22,12 +22,15 @@ const PayStatus = ({ route}) => {
    const { refreshScreen } = route.params;
 
    useEffect(() => {
-      const timer = setTimeout(async () => {
+      let isCallSuccessful = false; // Flag to track success
+
+      const makeApiCall = async () => {
          try {
             const data = JSON.stringify({
                subscriberId: authState.user.id,
                subscribedToId: null,
             });
+
             const response = await fetch(
                `${API_BASE_URL}/v1/account/subscribe/${authState.user.id}`,
                {
@@ -36,35 +39,57 @@ const PayStatus = ({ route}) => {
                      "Content-Type": "application/json",
                      Authorization: `Bearer ${authState.userToken}`,
                   },
-                  body: data
+                  body: data,
                }
             );
+
             const json = await response.json();
-            setIsLoading(false);
-            if (json.status !== 0){
-               navigation.goBack();
+            if (json.status === 0) {
+               isCallSuccessful = true;
+               setIsLoading(false);
             }
-            setIsLoading(false);
+            else
+               isCallSuccessful = false;
+
          } catch (error) {
             console.error("Error calling subscribe endpoint: ", error);
          }
-      }, 30000);
+      };
 
-      // Message handling for notifications
+      // Call the API immediately
+      makeApiCall();
+
+      // Schedule subsequent API calls only if the first call fails
+      const secondCall = setTimeout(() => {
+         if (!isCallSuccessful) {
+            void makeApiCall(); // Make second call
+         }
+      }, 15000); // After 15 seconds
+
+      const thirdCall = setTimeout(() => {
+         if (!isCallSuccessful) {
+            void makeApiCall();
+            setIsLoading(false);
+            navigation.goBack(); // Navigate back after the third call
+         }
+      }, 30000); // After 30 seconds
+
+      // Notification handling
       const subscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
          if (remoteMessage.notification?.body === "payment successful") {
-            clearTimeout(timer);
+            clearTimeout(secondCall);
+            clearTimeout(thirdCall);
             await authContext.updatePaywallState(false);
-            setIsLoading(false); // Stop loading
+            setIsLoading(false);
          }
       });
 
-      // App terminated message handling
       messaging()
          .getInitialNotification()
          .then((remoteMessage) => {
             if (remoteMessage?.notification?.body === "payment successful") {
-               clearTimeout(timer);
+               clearTimeout(secondCall);
+               clearTimeout(thirdCall);
                authContext.updatePaywallState(false);
                setIsLoading(false);
             }
@@ -73,9 +98,12 @@ const PayStatus = ({ route}) => {
       // Cleanup on unmount
       return () => {
          subscribeOnMessage();
-         clearTimeout(timer);
+         clearTimeout(secondCall);
+         clearTimeout(thirdCall);
       };
    }, [authContext, authState.user.id, authState.userToken]);
+
+
 
    return (
       <View style={tw("h-full items-center p-12 pt-40")}>

@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  Alert,
   TouchableOpacity,
   View,
   Image,
@@ -23,6 +24,7 @@ import {
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import PhoneInput from "react-native-phone-number-input";
+import messaging from "@react-native-firebase/messaging";
 import { useNavigation } from "@react-navigation/native";
 import API_BASE_URL from "./../lib/constants/baseUrl";
 import RadioButtonRN from "radio-buttons-react-native";
@@ -30,7 +32,12 @@ import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import useAuth from "../useAuth";
-
+import {
+  StripeProvider,
+  PlatformPayButton,
+  usePlatformPay,
+  PlatformPay,
+} from "@stripe/stripe-react-native";
 const CLOSE_URL = `/v1/start-button/webhook/redirect`;
 const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
 const ps_callback = `${API_BASE_URL}/v1/start-button/webhook/redirect`;
@@ -142,9 +149,12 @@ const PaywallScreen = ({ route }) => {
 
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-  const { fcmToken, authState, isVIP } =
+  const { fcmToken, authState, isVIP, authContext } =
     useAuth();
-
+  const {
+    isPlatformPaySupported,
+    confirmPlatformPayPayment,
+  } = usePlatformPay();
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight =
     Platform.OS === "ios"
@@ -189,6 +199,32 @@ const PaywallScreen = ({ route }) => {
   }, []);
 
   useEffect(() => {
+    const subscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
+      if (remoteMessage.notification?.body === "payment successful") {
+        await authContext.updatePaywallState(false);
+      }
+    });
+
+    // App terminated message handling
+    messaging()
+       .getInitialNotification()
+       .then((remoteMessage) => {
+         if (remoteMessage?.notification?.body === "payment successful") {
+           authContext.updatePaywallState(false);
+           bottomSheetRef.current.dismiss();
+           navigation.navigate("PayStatus", {
+             phoneNumber: formattedValue,
+             haveLoader: false,
+             refreshHomeScreen: refreshScreen ?? false
+           });
+         }
+       });
+    (async function () {
+      if (!(await isPlatformPaySupported({ googlePay: {testEnv: true} }))) {
+        Alert.alert('Google Pay is not supported.');
+
+      }
+    })();
     // Add event listener for back button
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -198,10 +234,57 @@ const PaywallScreen = ({ route }) => {
     fetchPlans();
 
     return () => {
+      subscribeOnMessage();
       backHandler.remove();
     };
-  }, [fcmToken]);
+  }, [fcmToken, authContext]);
+  const fetchPaymentIntentClientSecret = async () => {
+    const data = JSON.stringify({
+      email: `${authState?.user?.phoneNumber}@ignitecove.com`,
+      currency: "USD",
+      planId: parseInt(planId),
+      FCMToken: fcmToken,
+      referralCode:"",
+    });
+    const response = await fetch(`${API_BASE_URL}/v1/stripe/create-payment-intent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data
 
+    });
+    const { clientSecret } = await response.json();
+    console.log(data)
+    return clientSecret;
+  };
+  const pay = async () => {
+    const clientSecret = await fetchPaymentIntentClientSecret();
+
+    const { error } = await confirmPlatformPayPayment(
+       clientSecret,
+       {
+         googlePay: {
+           testEnv: true,
+           merchantName: 'Dalik International',
+           merchantCountryCode: 'US',
+           currencyCode: 'USD',
+         },
+       }
+    );
+
+    if (!error) {
+      bottomSheetRef.current.dismiss();
+      await navigation.navigate("PayStatus", {
+        phoneNumber: formattedValue,
+        refreshHomeScreen: refreshScreen ?? false
+      });
+    }
+    else{
+      console.log(error)
+      Alert.alert(error.code, error.message);
+    }
+  };
   const initiatePayment = async (phoneNumber, fcmToken) => {
     setModalVisible(true);
 
@@ -262,7 +345,7 @@ const PaywallScreen = ({ route }) => {
     radioData.push({
       label: (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View style={{ width: 100, height: 70 }}>
+          <View style={{ width: 100, height: 50 }}>
             <Image
               source={require("../lipa_na_mpesa.png")}
               style={{ width: "100%", height: "100%", resizeMode: "contain" }}
@@ -287,6 +370,38 @@ const PaywallScreen = ({ route }) => {
         </View>
       ),
       value: "lipa_na_mpesa",
+    });
+  }
+
+  if (plans && plans?.length > 0){
+    radioData.push({
+      label: (
+         <View style={{ flexDirection: "row", alignItems: "center"}}>
+           <View style={{ width: 100, height: 50}}>
+             <Image
+                source={require("../google_pay.png")}
+                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+              />
+            </View>
+           <Text style={{ marginLeft: 10 }}>
+             {(() => {
+               const targetCurrency = "USD";
+               const plan = plans?.find((plan) => plan?.id === planId);
+               if (!plan) return "Plan not found";
+               const planDetail = plan.planDetails.find(
+                  (detail) => detail.currency === targetCurrency
+               );
+               if (!planDetail) return "Price not available";
+
+               return `Google Pay ${new Intl.NumberFormat("en-US", {
+                 style: "currency",
+                 currency: targetCurrency,
+               }).format(planDetail.price)}`;
+             })()}
+           </Text>
+         </View>
+      ),
+      value: "pay_by_stripe",
     });
   }
 
@@ -510,6 +625,11 @@ const PaywallScreen = ({ route }) => {
   const handleClosePress = () => bottomSheetRef.current.dismiss();
 
   return (
+     <StripeProvider
+        publishableKey="pk_test_51N8IS6Fr9AEuiOwniojVYD4Opk4ZGbSE9Je6rjBj5Q0HxwAkc01cqmelTfTLHV2nkJOBFcBmmzU0TnhNkORPsdRy00nOjoDBJ6"
+     >
+    {/*   pk_test_51N8IS6Fr9AEuiOwniojVYD4Opk4ZGbSE9Je6rjBj5Q0HxwAkc01cqmelTfTLHV2nkJOBFcBmmzU0TnhNkORPsdRy00nOjoDBJ6*/}
+    {/*   pk_live_51N8IS6Fr9AEuiOwnzgM2oF6V8UHIjhPtSldUmWx9yiw7Ax5ohEQiRYstbClJLfwdYlUMfsaSjVbJXs7AmddR8o7Y008hNO4kAM*/}
     <View style={styles.container}>
       {isLoading && <LoadingIndicator />}
 
@@ -710,6 +830,19 @@ const PaywallScreen = ({ route }) => {
             </>
           )}
 
+
+          {paymentMethod === "pay_by_stripe" && (
+            <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  await pay();
+                }}
+              >
+                <Text style={styles.buttonText}>Initiate Payment</Text>
+              </TouchableOpacity>
+              </>
+          )}
           {paymentMethod === "pay_by_card" && (
             <>
               <TouchableOpacity
@@ -752,6 +885,7 @@ const PaywallScreen = ({ route }) => {
         </CustomBottomSheetModal>
       </View>
     </View>
+   </StripeProvider>
   );
 };
 
