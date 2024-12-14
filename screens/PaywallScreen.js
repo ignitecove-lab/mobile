@@ -48,7 +48,7 @@ const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
 const ps_callback = `${API_BASE_URL}/v1/start-button/webhook/redirect`;
 const items = Platform.select({
   ios: [],
-  android: ["ignitecove_bronze_plan", "ignitecove_silver_plan"]
+  android: ["ignite_bronze_plan", "ignite_silver_plan"]
 });
 let purchaseUpdateItem;
 let purchaseItemError;
@@ -278,56 +278,36 @@ const PaywallScreen = ({ route }) => {
             if (Platform.OS === 'ios') {
               ackResult = await finishTransaction(purchase.transactionId);
             } else {
-              ackResult = await finishTransaction({ purchase });
+              ackResult = await finishTransaction(
+                {
+                  purchase: purchase,
+                  isConsumable: true,
+                }
+              );
             }
             console.log('ack results: ', ackResult);
+            if (ackResult?.code === "OK") {
+              const shouldNavigate = sendReceipts(receipt);
+
+              if (shouldNavigate === true) {
+                Alert.alert("Success");
+                console.log("Receipt confirmed")
+                navigation.navigate("PayStatus", {
+                  phoneNumber: formattedValue,
+                  refreshHomeScreen: refreshScreen ?? false
+                })
+                endTransaction();
+              }
+            }
           } catch (ackErr) {
             Alert.alert("An error occurred");
             console.warn('ackErr', ackErr);
           }
 
-          if (receipt?.purchaseState === "1") {
-            const shouldNavigate = sendReceipts(receipt);
-
-            if (shouldNavigate === true) {
-              Alert.alert("Success");
-              console.log("Receipt confirmed")
-              navigation.navigate("PayStatus", {
-                phoneNumber: formattedValue,
-                refreshHomeScreen: refreshScreen ?? false
-              })
-              endTransaction();
-            }
-          }
         }
       },
     );
-    // purchaseUpdateItem = purchaseUpdatedListener((purchase) => {
-    //   const receipt = receipt ? JSON.parse(purchase.transactionReceipt) : null;
-    //   console.log("receipt>>>>> ", receipt)
-    //
-    //   if (receipt) {
-    //     const result = finishTransaction({purchase});
-    //     console.log('confirm purchase : ', result)
-    //     if(Platform.OS === 'android'){
-    //       Alert.alert(result.message)
-    //     }
-    //   }
-    //   if(receipt?.purchaseState === "1"){
-    //     const shouldNavigate = sendReceipts(receipt);
-    //
-    //     if (shouldNavigate) {
-    //       Alert.alert("Success");
-    //       console.log("Receipt confirmed")
-    //       navigation.navigate("PayStatus", {
-    //         phoneNumber: formattedValue,
-    //         refreshHomeScreen: refreshScreen ?? false
-    //       })
-    //       endTransaction();
-    //     }}
-    // });
 
-    // App terminated message handling
     messaging()
       .getInitialNotification()
       .then((remoteMessage) => {
@@ -397,8 +377,8 @@ const PaywallScreen = ({ route }) => {
   const productIds = (() => {
     const planToUse = isUpgrade ? 'bronze' : plans?.name?.toLocaleLowerCase?.() ?? '';
     return planToUse.includes('bronze')
-      ? 'ignitecove_bronze_plan'
-      : 'ignitecove_silver_plan';
+      ? 'ignite_bronze_plan'
+      : 'ignite_silver_plan';
   })();
 
   const handleBuyProduct = async () => {

@@ -115,7 +115,7 @@ missingDimensionStrategy "store", "play"
         applicationId 'host.exp.ignitecove'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionName "1.5.1"
+        versionName "1.5.3"
     }
     signingConfigs {
         debug {
