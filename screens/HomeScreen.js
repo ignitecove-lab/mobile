@@ -34,6 +34,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import VIPBadge from "../vip_badge.png";
 import noContentImage from '../assets/no-content.png'
 import { Linking } from "react-native";
+import FastImage from "@d11/react-native-fast-image";
 
 import * as Location from "expo-location";
 import ReusableModal from "./ReusableModal";
@@ -71,6 +72,7 @@ const HomeScreen = ({ route }) => {
   const bottomSheetRef = useRef(null);
   const { sendLikeDislike } = authContext;
   const [refreshScreen, setRefreshScreen] = useState(true);
+  const [isImageLoading, setImageLoading] = useState(true);
 
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
   const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
@@ -202,6 +204,15 @@ const HomeScreen = ({ route }) => {
       profileUpdate.remove();
     };
   }, []);
+
+  const onImageLoadStart = () => {
+    setImageLoading(true);
+  };
+  
+  const onImageLoadEnd = () => {
+    setImageLoading(false);
+  };
+  
 
   const listProfiles = useCallback(
     async (minAge = null, maxAge = null, location = null) => {
@@ -356,11 +367,27 @@ const HomeScreen = ({ route }) => {
                 }}
                 renderCard={(card) => (
                   <View key={card.id} style={styles.homeCard}>
-                    <Image
+                    <View>
+                      <FastImage
+                       fallback={true}
+                       onLoadEnd={onImageLoadEnd}
+                       onLoadStart={onImageLoadStart}
                       style={styles.homeImage}
-                      source={{ uri: card.imageURL }}
+                      source={{
+                        uri: card.imageURL,
+                        priority: FastImage.priority.high,
+                      }}
+                      resizeMode={FastImage.resizeMode.cover}
+                       defaultSource={require("../assets/no_profile.png")}
+                      {
+                        ...isImageLoading && (
+                          <ActivityIndicator size="large" color="#7CDB8A" />
+                        )
+                      }
                     />
 
+                    </View>
+                    
                     {card?.premium && (
                       <Image
                         source={VIPBadge}

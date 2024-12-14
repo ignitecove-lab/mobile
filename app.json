@@ -3,7 +3,7 @@
     "name": "igniteintcove",
     "scheme": "host.exp.ignitecove",
     "slug": "ignite",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,18 +11,6 @@
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    },
-    "cli": {
-      "appVersionSource": "remote"
-    },
-    "build": {
-      "development": {
-      },
-      "preview": {
-      },
-      "production": {
-        "autoIncrement": true
-      }
     },
     "ios": {
       "buildNumber": "2",
@@ -38,7 +26,6 @@
     "android": {
       "googleServicesFile": "./google-services.json",
       "package": "host.exp.ignitecove",
-      "versionCode": 31,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -49,6 +36,7 @@
       ]
     },
     "plugins": [
+      "react-native-iap",
       "@react-native-firebase/app",
       "@react-native-google-signin/google-signin",
       [

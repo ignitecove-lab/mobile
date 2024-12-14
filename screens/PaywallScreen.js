@@ -33,6 +33,11 @@ import { Ionicons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import useAuth from "../useAuth";
 import {
+  IAP, products, getProducts, initConnection, purchaseErrorListener,
+  purchaseUpdatedListener, endConnection, finishTransaction, requestPurchase
+} from "react-native-iap";
+
+import {
   StripeProvider,
   PlatformPayButton,
   usePlatformPay,
@@ -41,6 +46,12 @@ import {
 const CLOSE_URL = `/v1/start-button/webhook/redirect`;
 const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
 const ps_callback = `${API_BASE_URL}/v1/start-button/webhook/redirect`;
+const items = Platform.select({
+  ios: [],
+  android: ["ignitecove_bronze_plan", "ignitecove_silver_plan"]
+});
+let purchaseUpdateItem;
+let purchaseItemError;
 
 const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
   const { authState } = useAuth();
@@ -143,6 +154,10 @@ const PaywallScreen = ({ route }) => {
   const { isUpgrade, refreshScreen } = route.params;
   const bottomSheetRef = useRef(null);
   const webViewRef = useRef(null);
+  const [gpName, setGpName] = useState(null);
+  const [gpDescription, setGpDescription] = useState(null);
+  const [gpLocalizedPrice, setGpLocalizedPrice] = useState(null);
+  const [gpCurrency, setGpCurrency] = useState(null);
 
   const phoneInput = useRef(null);
   const navigation = useNavigation();
@@ -160,8 +175,8 @@ const PaywallScreen = ({ route }) => {
     Platform.OS === "ios"
       ? Dimensions.get("window").height
       : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+        "REAL_WINDOW_HEIGHT"
+      );
 
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
@@ -198,44 +213,143 @@ const PaywallScreen = ({ route }) => {
       });
   }, []);
 
+  const endTransaction = (() => {
+    try {
+      purchaseUpdateItem.remove();
+    } catch (error) {
+    }
+    try {
+      purchaseItemError.remove();
+    } catch (error) {
+    }
+    try {
+      endConnection();
+    } catch (error) {
+      console.log('Error removing listeners: ', error)
+    }
+  })
+
   useEffect(() => {
+    fetchPlans().then(() => {
+      initConnection().catch((e) => {
+        Alert.alert("Google Pay\n" + e.message);
+        console.warn("error initializing connection ", e);
+      }).then(() => {
+        getProducts({ skus: items }).catch((e) => {
+          console.log("Error occurred", e)
+        }).then((returnedProducts) => {
+          console.log("From G-Pay: ", returnedProducts);
+          const planToUse = isUpgrade ? 'bronze' : plans?.name?.toLocaleLowerCase?.() ?? 'silver';
+          console.log("plan to use: ", planToUse);
+          const product = returnedProducts.find(product => product.productId.includes(planToUse));
+          console.log("returned chosen ", product);
+          if (product) {
+            setGpName(product.name);
+            setGpDescription(product.description);
+            setGpLocalizedPrice(product.localizedPrice)
+            setGpCurrency(product.currency);
+          }
+        });
+      })
+    });
+
     const subscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
       if (remoteMessage.notification?.body === "payment successful") {
         await authContext.updatePaywallState(false);
       }
     });
 
+    purchaseItemError = purchaseErrorListener((error) => {
+      console.log("Error purchasing item: ".error);
+      if (!(error["responseCode"] === "2")) {
+        Alert.alert(
+          error.message
+        );
+      }
+    });
+
+    purchaseUpdateItem = purchaseUpdatedListener(
+      async (purchase) => {
+        console.log('purchase: ', purchase)
+        const receipt = purchase.transactionReceipt;
+        if (receipt) {
+          let ackResult;
+          try {
+            if (Platform.OS === 'ios') {
+              ackResult = await finishTransaction(purchase.transactionId);
+            } else {
+              ackResult = await finishTransaction({ purchase });
+            }
+            console.log('ack results: ', ackResult);
+          } catch (ackErr) {
+            Alert.alert("An error occurred");
+            console.warn('ackErr', ackErr);
+          }
+
+          if (receipt?.purchaseState === "1") {
+            const shouldNavigate = sendReceipts(receipt);
+
+            if (shouldNavigate === true) {
+              Alert.alert("Success");
+              console.log("Receipt confirmed")
+              navigation.navigate("PayStatus", {
+                phoneNumber: formattedValue,
+                refreshHomeScreen: refreshScreen ?? false
+              })
+              endTransaction();
+            }
+          }
+        }
+      },
+    );
+    // purchaseUpdateItem = purchaseUpdatedListener((purchase) => {
+    //   const receipt = receipt ? JSON.parse(purchase.transactionReceipt) : null;
+    //   console.log("receipt>>>>> ", receipt)
+    //
+    //   if (receipt) {
+    //     const result = finishTransaction({purchase});
+    //     console.log('confirm purchase : ', result)
+    //     if(Platform.OS === 'android'){
+    //       Alert.alert(result.message)
+    //     }
+    //   }
+    //   if(receipt?.purchaseState === "1"){
+    //     const shouldNavigate = sendReceipts(receipt);
+    //
+    //     if (shouldNavigate) {
+    //       Alert.alert("Success");
+    //       console.log("Receipt confirmed")
+    //       navigation.navigate("PayStatus", {
+    //         phoneNumber: formattedValue,
+    //         refreshHomeScreen: refreshScreen ?? false
+    //       })
+    //       endTransaction();
+    //     }}
+    // });
+
     // App terminated message handling
     messaging()
-       .getInitialNotification()
-       .then((remoteMessage) => {
-         if (remoteMessage?.notification?.body === "payment successful") {
-           authContext.updatePaywallState(false);
-           bottomSheetRef.current.dismiss();
-           navigation.navigate("PayStatus", {
-             phoneNumber: formattedValue,
-             haveLoader: false,
-             refreshHomeScreen: refreshScreen ?? false
-           });
-         }
-       });
-    (async function () {
-      if (!(await isPlatformPaySupported({ googlePay: {testEnv: true} }))) {
-        Alert.alert('Google Pay is not supported.');
-
-      }
-    })();
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage?.notification?.body === "payment successful") {
+          authContext.updatePaywallState(false);
+          bottomSheetRef.current.dismiss();
+          navigation.navigate("PayStatus", {
+            phoneNumber: formattedValue,
+            haveLoader: false,
+            refreshHomeScreen: refreshScreen ?? false
+          });
+        }
+      });
     // Add event listener for back button
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       handleBackPress
     );
-
-    fetchPlans();
-
     return () => {
       subscribeOnMessage();
       backHandler.remove();
+      endTransaction();
     };
   }, [fcmToken, authContext]);
   const fetchPaymentIntentClientSecret = async () => {
@@ -244,7 +358,7 @@ const PaywallScreen = ({ route }) => {
       currency: "USD",
       planId: parseInt(planId),
       FCMToken: fcmToken,
-      referralCode:"",
+      referralCode: "",
     });
     const response = await fetch(`${API_BASE_URL}/v1/stripe/create-payment-intent`, {
       method: 'POST',
@@ -258,33 +372,54 @@ const PaywallScreen = ({ route }) => {
     console.log(data)
     return clientSecret;
   };
-  const pay = async () => {
-    const clientSecret = await fetchPaymentIntentClientSecret();
 
-    const { error } = await confirmPlatformPayPayment(
-       clientSecret,
-       {
-         googlePay: {
-           testEnv: true,
-           merchantName: 'Dalik International',
-           merchantCountryCode: 'US',
-           currencyCode: 'USD',
-         },
-       }
-    );
+  const sendReceipts = async (receipt) => {
+    const data = JSON.stringify({
+      receipt: receipt,
+      planId: parseInt(planId),
+      fcmToken: fcmToken,
+      phoneNumber: `${authState?.user?.phoneNumber}`,
+    });
+    console.log("receipt data: ", data)
+    const response = await fetch(`${API_BASE_URL}/v1/g-pay/receipt`, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: data
+    });
+    const json = await response.json();
+    console.log("receipt res: ", json)
 
-    if (!error) {
+    return response.ok && (json.status === 0)
+  }
+
+  const productIds = (() => {
+    const planToUse = isUpgrade ? 'bronze' : plans?.name?.toLocaleLowerCase?.() ?? '';
+    return planToUse.includes('bronze')
+      ? 'ignitecove_bronze_plan'
+      : 'ignitecove_silver_plan';
+  })();
+
+  const handleBuyProduct = async () => {
+    const skus = [productIds];
+    try {
+      console.log(skus);
+      await requestPurchase({ skus: skus });
       bottomSheetRef.current.dismiss();
-      await navigation.navigate("PayStatus", {
-        phoneNumber: formattedValue,
-        refreshHomeScreen: refreshScreen ?? false
-      });
-    }
-    else{
-      console.log(error)
-      Alert.alert(error.code, error.message);
+    } catch (error) {
+      handleError(error.message, 'handleBuyProduct');
     }
   };
+
+  const handleError = (error, context) => {
+    Alert.alert(error);
+    console.log(
+      'Exception while making Request',
+      error,
+    );
+  };
+
   const initiatePayment = async (phoneNumber, fcmToken) => {
     setModalVisible(true);
 
@@ -373,35 +508,24 @@ const PaywallScreen = ({ route }) => {
     });
   }
 
-  if (plans && plans?.length > 0){
+  {
     radioData.push({
       label: (
-         <View style={{ flexDirection: "row", alignItems: "center"}}>
-           <View style={{ width: 100, height: 50}}>
-             <Image
-                source={require("../google_pay.png")}
-                style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-              />
-            </View>
-           <Text style={{ marginLeft: 10 }}>
-             {(() => {
-               const targetCurrency = "USD";
-               const plan = plans?.find((plan) => plan?.id === planId);
-               if (!plan) return "Plan not found";
-               const planDetail = plan.planDetails.find(
-                  (detail) => detail.currency === targetCurrency
-               );
-               if (!planDetail) return "Price not available";
-
-               return `Google Pay ${new Intl.NumberFormat("en-US", {
-                 style: "currency",
-                 currency: targetCurrency,
-               }).format(planDetail.price)}`;
-             })()}
-           </Text>
-         </View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ width: 100, height: 50 }}>
+            <Image
+              source={require("../google_pay.png")}
+              style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+            />
+          </View>
+          <Text style={{ marginLeft: 10 }}>
+            {(() => {
+              return `Google Pay ${gpCurrency ?? ''} ${gpLocalizedPrice ?? ''}`;
+            })()}
+          </Text>
+        </View>
       ),
-      value: "pay_by_stripe",
+      value: "pay_by_google",
     });
   }
 
@@ -625,11 +749,6 @@ const PaywallScreen = ({ route }) => {
   const handleClosePress = () => bottomSheetRef.current.dismiss();
 
   return (
-     <StripeProvider
-        publishableKey="pk_test_51N8IS6Fr9AEuiOwniojVYD4Opk4ZGbSE9Je6rjBj5Q0HxwAkc01cqmelTfTLHV2nkJOBFcBmmzU0TnhNkORPsdRy00nOjoDBJ6"
-     >
-    {/*   pk_test_51N8IS6Fr9AEuiOwniojVYD4Opk4ZGbSE9Je6rjBj5Q0HxwAkc01cqmelTfTLHV2nkJOBFcBmmzU0TnhNkORPsdRy00nOjoDBJ6*/}
-    {/*   pk_live_51N8IS6Fr9AEuiOwnzgM2oF6V8UHIjhPtSldUmWx9yiw7Ax5ohEQiRYstbClJLfwdYlUMfsaSjVbJXs7AmddR8o7Y008hNO4kAM*/}
     <View style={styles.container}>
       {isLoading && <LoadingIndicator />}
 
@@ -706,24 +825,24 @@ const PaywallScreen = ({ route }) => {
                 <Text>MPESA NUMBER</Text>
               </View>
               <PhoneInput
-                 ref={phoneInput}
-                 defaultValue={value}
-                 defaultCode="KE"
-                 layout="first"
-                 onChangeText={(text) => {
-                   setValue(text);
+                ref={phoneInput}
+                defaultValue={value}
+                defaultCode="KE"
+                layout="first"
+                onChangeText={(text) => {
+                  setValue(text);
 
-                   // Check if the user entered 9 digits, or 10 if the first digit is 0
-                   if ((((text.length === 9) && !text.startsWith("0"))) || (text.length === 10 && text.startsWith("0"))) {
-                     Keyboard.dismiss();
-                   }
-                 }}
-                 onChangeFormattedText={(text) => {
-                   setFormattedValue(text);
-                 }}
-                 countryPickerProps={{ withAlphaFilter: true }}
-                 withShadow
-                 autoFocus
+                  // Check if the user entered 9 digits, or 10 if the first digit is 0
+                  if ((((text.length === 9) && !text.startsWith("0"))) || (text.length === 10 && text.startsWith("0"))) {
+                    Keyboard.dismiss();
+                  }
+                }}
+                onChangeFormattedText={(text) => {
+                  setFormattedValue(text);
+                }}
+                countryPickerProps={{ withAlphaFilter: true }}
+                withShadow
+                autoFocus
               />
               <TouchableOpacity
                 style={styles.button}
@@ -831,17 +950,17 @@ const PaywallScreen = ({ route }) => {
           )}
 
 
-          {paymentMethod === "pay_by_stripe" && (
+          {paymentMethod === "pay_by_google" && (
             <>
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
-                  await pay();
+                  await handleBuyProduct();
                 }}
               >
                 <Text style={styles.buttonText}>Initiate Payment</Text>
               </TouchableOpacity>
-              </>
+            </>
           )}
           {paymentMethod === "pay_by_card" && (
             <>
@@ -885,7 +1004,6 @@ const PaywallScreen = ({ route }) => {
         </CustomBottomSheetModal>
       </View>
     </View>
-   </StripeProvider>
   );
 };
 
@@ -951,10 +1069,10 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   switchPlans: {
-      marginLeft: 20,
-      marginTop: 16,
-      flexDirection: "row",
-      alignItems: "center",
+    marginLeft: 20,
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
   },
   backButtonText: {
     fontSize: 16,

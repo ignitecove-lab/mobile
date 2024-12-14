@@ -57,12 +57,24 @@ const LoginScreen = () => {
           />
        ) : (
          <View style={[tw("flex-1 flex-col items-center justify-around"), { gap: 20 }]}>
-     <View style={tw("flex-row justify-center mt-4")}>
-       <Checkbox
-          value={isChecked}
-          onValueChange={setIsChecked}
-          style={tw("mr-2")}
-       />
+     <View style={tw("flex-row justify-center items-center mt-2")}>
+       <TouchableOpacity
+          onPress={() => setIsChecked(!isChecked)}
+          style={tw("flex-row justify-center p-4 mr-4")}
+       >
+         <Checkbox
+            value={isChecked}
+            onValueChange={setIsChecked}
+            style={[
+              tw("mr-2"),
+              {
+                width: 20,
+                height: 20,
+              },
+            ]}
+         />
+       </TouchableOpacity>
+
        <TouchableOpacity onPress={goToTermsScreen}>
          <Text style={tw("text-blue-500 underline pr-2")}>Terms</Text>
        </TouchableOpacity>
