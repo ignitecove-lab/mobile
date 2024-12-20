@@ -37,12 +37,6 @@ import {
   purchaseUpdatedListener, endConnection, finishTransaction, requestPurchase
 } from "react-native-iap";
 
-import {
-  StripeProvider,
-  PlatformPayButton,
-  usePlatformPay,
-  PlatformPay,
-} from "@stripe/stripe-react-native";
 const CLOSE_URL = `/v1/start-button/webhook/redirect`;
 const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
 const ps_callback = `${API_BASE_URL}/v1/start-button/webhook/redirect`;
@@ -166,10 +160,6 @@ const PaywallScreen = ({ route }) => {
 
   const { fcmToken, authState, isVIP, authContext } =
     useAuth();
-  const {
-    isPlatformPaySupported,
-    confirmPlatformPayPayment,
-  } = usePlatformPay();
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight =
     Platform.OS === "ios"
@@ -230,83 +220,74 @@ const PaywallScreen = ({ route }) => {
   })
 
   useEffect(() => {
-    fetchPlans().then(() => {
-      initConnection().catch((e) => {
-        Alert.alert("Google Pay\n" + e.message);
-        console.warn("error initializing connection ", e);
-      }).then(() => {
-        getProducts({ skus: items }).catch((e) => {
-          console.log("Error occurred", e)
-        }).then((returnedProducts) => {
-          console.log("From G-Pay: ", returnedProducts);
-          const planToUse = isUpgrade ? 'bronze' : plans?.name?.toLocaleLowerCase?.() ?? 'silver';
-          console.log("plan to use: ", planToUse);
-          const product = returnedProducts.find(product => product.productId.includes(planToUse));
-          console.log("returned chosen ", product);
-          if (product) {
-            setGpName(product.name);
-            setGpDescription(product.description);
-            setGpLocalizedPrice(product.localizedPrice)
-            setGpCurrency(product.currency);
-          }
-        });
-      })
-    });
+    fetchPlans();
+  }, []);
 
+  useEffect(() => {
     const subscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
       if (remoteMessage.notification?.body === "payment successful") {
         await authContext.updatePaywallState(false);
       }
     });
-
+    initConnection()
+    .catch((e) => {
+      Alert.alert("Google Pay\n" + e.message);
+      console.warn("Error initializing connection ", e);
+    })
+    .then(() => {
+      getProducts({ skus: items })
+        .catch((e) => {
+          console.warn("Error occurred while fetching products", e);
+        })
+        .then((returnedProducts) => {
+          const planToUse = isUpgrade
+            ? "bronze"
+            : plans?.[0]?.name.toLocaleLowerCase() ?? "silver";
+          console.log(`Plan to use: ${planToUse},\n Plans: ${plans?.[0]?.name.toLocaleLowerCase()}, \n\n ${JSON.stringify(returnedProducts)}`);
+          const product = returnedProducts.find((product) =>
+            product.productId.includes(planToUse)
+          );
+          if (product) {
+            setGpName(product.name);
+            setGpDescription(product.description);
+            setGpLocalizedPrice(product.localizedPrice);
+            setGpCurrency(product.currency);
+          }
+        });
+    });
     purchaseItemError = purchaseErrorListener((error) => {
-      console.log("Error purchasing item: ".error);
+      console.log("Error purchasing item:", error);
       if (!(error["responseCode"] === "2")) {
-        Alert.alert(
-          error.message
-        );
+        Alert.alert(error.message);
       }
     });
 
-    purchaseUpdateItem = purchaseUpdatedListener(
-      async (purchase) => {
-        console.log('purchase: ', purchase)
-        const receipt = purchase.transactionReceipt;
-        if (receipt) {
-          let ackResult;
-          try {
-            if (Platform.OS === 'ios') {
-              ackResult = await finishTransaction(purchase.transactionId);
-            } else {
-              ackResult = await finishTransaction(
-                {
-                  purchase: purchase,
-                  isConsumable: true,
-                }
-              );
+    purchaseUpdateItem = purchaseUpdatedListener(async (purchase) => {
+      const receipt = purchase.transactionReceipt;
+      if (receipt) {
+        try {
+          const ackResult = await finishTransaction(
+            Platform.OS === "ios"
+              ? purchase.transactionId
+              : { purchase, isConsumable: true }
+          );
+          console.log("ack results: ", ackResult);
+          if (ackResult?.code === "OK") {
+            const shouldNavigate = await sendReceipts(receipt);
+            if (shouldNavigate === true) {
+              Alert.alert("Success");
+              navigation.navigate("PayStatus", {
+                phoneNumber: formattedValue,
+                refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
+              });
             }
-            console.log('ack results: ', ackResult);
-            if (ackResult?.code === "OK") {
-              const shouldNavigate = sendReceipts(receipt);
-
-              if (shouldNavigate === true) {
-                Alert.alert("Success");
-                console.log("Receipt confirmed")
-                navigation.navigate("PayStatus", {
-                  phoneNumber: formattedValue,
-                  refreshHomeScreen: refreshScreen ?? false
-                })
-                endTransaction();
-              }
-            }
-          } catch (ackErr) {
-            Alert.alert("An error occurred");
-            console.warn('ackErr', ackErr);
           }
-
+        } catch (ackErr) {
+          Alert.alert("An error occurred");
+          console.warn("ackErr", ackErr);
         }
-      },
-    );
+      }
+    });
 
     messaging()
       .getInitialNotification()
@@ -317,7 +298,7 @@ const PaywallScreen = ({ route }) => {
           navigation.navigate("PayStatus", {
             phoneNumber: formattedValue,
             haveLoader: false,
-            refreshHomeScreen: refreshScreen ?? false
+            refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
           });
         }
       });
@@ -331,54 +312,48 @@ const PaywallScreen = ({ route }) => {
       backHandler.remove();
       endTransaction();
     };
-  }, [fcmToken, authContext]);
-  const fetchPaymentIntentClientSecret = async () => {
-    const data = JSON.stringify({
-      email: `${authState?.user?.phoneNumber}@ignitecove.com`,
-      currency: "USD",
-      planId: parseInt(planId),
-      FCMToken: fcmToken,
-      referralCode: "",
-    });
-    const response = await fetch(`${API_BASE_URL}/v1/stripe/create-payment-intent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: data
+  }, [gpCurrency, gpLocalizedPrice, gpName, planId, fcmToken, authContext, plans]);
 
-    });
-    const { clientSecret } = await response.json();
-    console.log(data)
-    return clientSecret;
-  };
 
   const sendReceipts = async (receipt) => {
-    const data = JSON.stringify({
-      receipt: receipt,
-      planId: parseInt(planId),
-      fcmToken: fcmToken,
-      phoneNumber: `${authState?.user?.phoneNumber}`,
-    });
-    console.log("receipt data: ", data)
-    const response = await fetch(`${API_BASE_URL}/v1/g-pay/receipt`, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: data
-    });
-    const json = await response.json();
-    console.log("receipt res: ", json)
+    try {
+      const data = JSON.stringify({
+        receipt: JSON.parse(receipt),
+        planId: parseInt(planId),
+        currency: gpCurrency,
+        amount: gpLocalizedPrice,
+        planName: gpName,
+        fcmToken: fcmToken,
+        phoneNumber: `${authState?.user?.phoneNumber}`,
+      });
+      console.log("receipt data: ", data);
 
-    return response.ok && (json.status === 0)
-  }
+      const response = await fetch(`${API_BASE_URL}/v1/g-pay/receipt`, {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: data,
+      });
+      if (!response.ok) {
+        console.error("Error: ", response.statusText);
+        return false;
+      }
+      const json = await response.json();
+      console.log("receipt res: ", json);
+
+      return json.status === 0;
+    } catch (error) {
+      console.error("Error occurred:", error);
+      return false;
+    }
+  };
+
 
   const productIds = (() => {
-    const planToUse = isUpgrade ? 'bronze' : plans?.name?.toLocaleLowerCase?.() ?? '';
-    return planToUse.includes('bronze')
-      ? 'ignite_bronze_plan'
-      : 'ignite_silver_plan';
+    const plan = plans?.find((plan) => plan?.id === planId);
+    const planToUse = isUpgrade ? 'bronze' : plan?.name.toLocaleLowerCase() ?? '';
+    return planToUse.includes('bronze') ? 'ignite_bronze_plan' : 'ignite_silver_plan';
   })();
 
   const handleBuyProduct = async () => {
@@ -427,7 +402,7 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       await navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
-        refreshHomeScreen: refreshScreen ?? false
+        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false
       });
       setModalVisible(false);
       return json;
@@ -656,7 +631,7 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
-        refreshHomeScreen: refreshScreen ?? false,
+        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false
       });
     }
 
@@ -673,7 +648,7 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
-        refreshHomeScreen: refreshScreen ?? false
+        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false
       });
     }
   };
