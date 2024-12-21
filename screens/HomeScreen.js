@@ -3,8 +3,6 @@ import {
   BackHandler,
   Dimensions,
   Image,
-  Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -83,12 +81,7 @@ const HomeScreen = ({ route }) => {
   });
 
   const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+  const deviceHeight = Dimensions.get("window").height;
 
   const checkLocationPermissions = async (minAge = null, maxAge = null, location = null) => {
     let { status } = await Location.requestForegroundPermissionsAsync();

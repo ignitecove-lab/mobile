@@ -7,8 +7,6 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
-  Dimensions,
-  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import React, {
@@ -48,13 +46,6 @@ const ModalScreen = () => {
   const [modalGenderVisible, setModalGenderVisible] = useState(false);
   const [tags, setTags] = useState(null);
 
-  const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
 
   const incompleteForm =
     !firstName ||
@@ -319,7 +310,7 @@ const ModalScreen = () => {
                     borderRadius: 10,
                     backgroundColor: "#e4e4e7",
                     flex: 1,
-                    height: Platform.OS === 'ios' ? 150 : 50,
+                    height: 50,
                   }}
                   selectedValue={gender}
                   onValueChange={handleGenderChange}
@@ -363,7 +354,7 @@ const ModalScreen = () => {
                     borderRadius: 10,
                     backgroundColor: "#e4e4e7",
                     flex: 1,
-                    height: Platform.OS === 'ios' ? 150 : 50,
+                    height: 50,
                   }}
                   selectedValue={genderPreference}
                   onValueChange={handlePreferenceChange}

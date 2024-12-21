@@ -10,7 +10,7 @@ import API_BASE_URL from "./lib/constants/baseUrl";
 import messaging from "@react-native-firebase/messaging";
 import * as SecureStore from "expo-secure-store";
 import { initSocket, likeDislike, onNewMessage } from "./socket";
-import { Alert, Linking, AppState, Platform } from "react-native";
+import { Alert, Linking, AppState } from "react-native";
 import VersionCheck from "react-native-version-check";
 // import notifee, {
 //   AndroidStyle,
@@ -381,11 +381,7 @@ export const AuthProvider = (props) => {
                 text: "Update Now",
                 onPress: async () => {
                   Linking.openURL(
-                    Platform.OS === "ios"
-                      ? await VersionCheck.getAppStoreUrl({
-                        appID: "xxxxxxxxxx",
-                      })
-                      : await VersionCheck.getPlayStoreUrl({
+                     await VersionCheck.getPlayStoreUrl({
                         packageName: "host.exp.ignitecove",
                       })
                   );

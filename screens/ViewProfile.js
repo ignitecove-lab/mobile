@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/core";
 import tw from "tailwind-rn";
@@ -36,12 +35,7 @@ const ViewProfileScreen = ({ route }) => {
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
   const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+  const deviceHeight = Dimensions.get("window").height;
 
   const fetchProfile = useCallback(() => {
     setLoading(true);

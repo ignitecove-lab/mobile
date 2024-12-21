@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import PhoneInput from "react-native-phone-number-input";
 
 import useAuth from "../useAuth";
@@ -73,7 +72,7 @@ const PhoneNumber = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lighter,
+    backgroundColor: "#007BFF",
   },
 
   wrapper: {

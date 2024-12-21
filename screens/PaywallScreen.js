@@ -8,7 +8,6 @@ import React, {
 import {
   ActivityIndicator,
   Dimensions,
-  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -22,7 +21,6 @@ import {
   Keyboard
 } from "react-native";
 import { BottomSheetView, BottomSheetModal } from "@gorhom/bottom-sheet";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import PhoneInput from "react-native-phone-number-input";
 import messaging from "@react-native-firebase/messaging";
 import { useNavigation } from "@react-navigation/native";
@@ -40,10 +38,7 @@ import {
 const CLOSE_URL = `/v1/start-button/webhook/redirect`;
 const ps_cancel_url = `${API_BASE_URL}/paystack/cancel`;
 const ps_callback = `${API_BASE_URL}/v1/start-button/webhook/redirect`;
-const items = Platform.select({
-  ios: [],
-  android: ["ignite_bronze_plan", "ignite_silver_plan"]
-});
+const items = ["ignite_bronze_plan", "ignite_silver_plan"]
 let purchaseUpdateItem;
 let purchaseItemError;
 
@@ -161,12 +156,7 @@ const PaywallScreen = ({ route }) => {
   const { fcmToken, authState, isVIP, authContext } =
     useAuth();
   const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-        "REAL_WINDOW_HEIGHT"
-      );
+  const deviceHeight = Dimensions.get("window").height;
 
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
@@ -267,9 +257,7 @@ const PaywallScreen = ({ route }) => {
       if (receipt) {
         try {
           const ackResult = await finishTransaction(
-            Platform.OS === "ios"
-              ? purchase.transactionId
-              : { purchase, isConsumable: true }
+             { purchase, isConsumable: true }
           );
           console.log("ack results: ", ackResult);
           if (ackResult?.code === "OK") {
@@ -1077,7 +1065,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.lighter,
+    backgroundColor: "#007BFF",
   },
   emailContainer: {
     flex: 1,
@@ -1101,17 +1089,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
     fontSize: 16,
     color: "#333333",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    elevation: 3,
   },
   emailButton: {
     backgroundColor: "#7CDB8A",
@@ -1121,17 +1099,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    elevation: 4,
   },
   buttonText: {
     color: "#FFFFFF", // White text for contrast

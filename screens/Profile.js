@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 import React, {
   useLayoutEffect,
@@ -47,12 +46,7 @@ const ProfileScreen = () => {
   const { logout } = authContext;
   const navigation = useNavigation();
   const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
+  const deviceHeight = Dimensions.get("window").height;
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
