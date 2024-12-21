@@ -11,7 +11,6 @@ import {
 import useAuth from "../useAuth";
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { BlurView } from "@react-native-community/blur";
 import API_BASE_URL from "../lib/constants/baseUrl";
 import ReusableModal from "./ReusableModal";
 
@@ -96,14 +95,10 @@ const App = () => {
         numColumns={2}
         renderItem={({ item }) => (
           <View style={styles.profileContainer}>
-            <ImageBackground source={item.src} style={styles.profileImage}>
-              <BlurView
-                key={blurKey}
-                style={styles.absolute}
-                blurType="dark"
-                blurAmount={20}
-                reducedTransparencyFallbackColor="white"
-              />
+            <ImageBackground 
+            blurRadius={90}
+            source={item.src} style={styles.profileImage}>
+            
             </ImageBackground>
           </View>
         )}
