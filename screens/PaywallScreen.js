@@ -238,6 +238,7 @@ const PaywallScreen = ({ route }) => {
             product.productId.includes(planToUse)
           );
           if (product) {
+            console.log(JSON.stringify(product));
             setGpName(product.name);
             setGpDescription(product.description);
             setGpLocalizedPrice(product.localizedPrice);
@@ -271,7 +272,6 @@ const PaywallScreen = ({ route }) => {
             }
           }
         } catch (ackErr) {
-          Alert.alert("An error occurred");
           console.warn("ackErr", ackErr);
         }
       }
@@ -463,7 +463,7 @@ const PaywallScreen = ({ route }) => {
           </View>
           <Text style={{ marginLeft: 10 }}>
             {(() => {
-              return `Google Pay ${gpCurrency ?? ''} ${gpLocalizedPrice ?? ''}`;
+              return `Google Pay`;
             })()}
           </Text>
         </View>
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#007BFF",
+    backgroundColor: "#fff",
   },
   emailContainer: {
     flex: 1,

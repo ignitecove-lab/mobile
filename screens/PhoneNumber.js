@@ -72,7 +72,7 @@ const PhoneNumber = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#007BFF",
+    backgroundColor: "#fff",
   },
 
   wrapper: {
