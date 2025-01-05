@@ -219,7 +219,11 @@ const HomeScreen = ({ route }) => {
           url = url + `&maxAge=${ageRange[1]}`;
         }
         if (location) {
-          url = url + `&location=${location}`;
+          url = url + `&radius=${location}`;
+        }
+        if(deviceLocation){
+          url = url + `&longitude=${deviceLocation?.coords?.longitude}`
+          url = url + `&latitude=${deviceLocation?.coords?.latitude}`
         }
 
         setLoading(true);
@@ -317,7 +321,12 @@ const HomeScreen = ({ route }) => {
     },
     [ageRange, location]
   );
-
+  const handleChangeText = (text) => {
+    // Allow only numbers
+    if (/^\d*$/.test(text)) {
+      setValue(text);
+    }
+  };
   return (
     <View style={styles.homeContainer}>
       {!loading ? (
@@ -716,15 +725,16 @@ const HomeScreen = ({ route }) => {
 
         {/* location filter */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Location</Text>
+          <Text style={styles.sectionTitle}>Distance (KM)</Text>
           <Text style={styles.sliderValue}>{location}</Text>
 
           <View style={styles.sliderRow}>
             <TextInput
               value={location}
               onChangeText={setLocation}
+              keyboardType="numeric"
               style={styles.input}
-              placeholder="Search location"
+              placeholder="Within radius of (Km)"
             />
           </View>
         </View>
