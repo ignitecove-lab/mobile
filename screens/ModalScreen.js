@@ -30,7 +30,6 @@ const IMAGE_URL = "https://image.ignitecove.com";
 const ModalScreen = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [firstName, setFirstName] = useState("");
-  const [location, setLocation] = useState("");
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState("");
   const [PreferenceDisiabled, setPreferenceDisabled] = useState(true);
@@ -50,7 +49,6 @@ const ModalScreen = () => {
   const incompleteForm =
     !firstName ||
     !image ||
-    !location ||
     !gender ||
     !age ||
     !genderPreference ||
@@ -185,7 +183,6 @@ const ModalScreen = () => {
       .then((data) => {
         setFirstName(data.firstName);
         setImage(data.imageURL);
-        setLocation(data.location);
         setAge(data.age);
         setGender(data.gender);
         setSelectedTags(data?.accountTags.map((tag) => tag.tagId));
@@ -272,20 +269,6 @@ const ModalScreen = () => {
               />
             </View>
           )}
-
-          <Text style={styles.stepText}>Location</Text>
-          <GooglePlacesAutocomplete
-            placeholder="Search your location here"
-            fetchDetails={true}
-            onPress={(data, details = null) => {
-              setLocation(data.description);
-            }}
-            query={{
-              key: "AIzaSyBy61yd9aWrx4XhVvsujA_4aSA_sDINB_s",
-              language: "en",
-            }}
-          />
-          <Text style={styles.inputNoBorder}>{location}</Text>
 
           <View
             style={{
@@ -434,7 +417,6 @@ const ModalScreen = () => {
                 user.id,
                 firstName,
                 image,
-                location,
                 age,
                 gender,
                 user.phoneNumber,

@@ -321,10 +321,15 @@ const HomeScreen = ({ route }) => {
     },
     [ageRange, location]
   );
-  const handleChangeText = (text) => {
-    // Allow only numbers
-    if (/^\d*$/.test(text)) {
-      setValue(text);
+  const handleLocationChange = (text) => {
+    // Remove any non-numeric characters
+    const numericValue = text.replace(/[^0-9]/g, '');
+
+    // Convert to number and set the value if within range (0 to 500)
+    if (numericValue !== '' && (parseInt(numericValue) <= 500)) {
+      setLocation(numericValue);
+    } else if (numericValue === '') {
+      setLocation('');
     }
   };
   return (
@@ -725,13 +730,13 @@ const HomeScreen = ({ route }) => {
 
         {/* location filter */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Distance (KM)</Text>
+          <Text style={styles.sectionTitle}>Distance (Max 500 KM)</Text>
           <Text style={styles.sliderValue}>{location}</Text>
 
           <View style={styles.sliderRow}>
             <TextInput
               value={location}
-              onChangeText={setLocation}
+              onChangeText={handleLocationChange}
               keyboardType="numeric"
               style={styles.input}
               placeholder="Within radius of (Km)"

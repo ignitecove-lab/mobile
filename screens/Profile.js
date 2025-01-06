@@ -165,9 +165,7 @@ const ProfileScreen = () => {
                 <Text
                    style={styles.profileText}
                 >{`${userData.phoneNumber}`}</Text>
-                <Text style={styles.profileText}>{`${
-                   userData.location || ""
-                }`}</Text>
+
               </View>
             </View>
 
