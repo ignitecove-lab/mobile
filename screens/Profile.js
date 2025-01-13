@@ -29,14 +29,18 @@ import API_BASE_URL from "../lib/constants/baseUrl";
 import { Ionicons } from "@expo/vector-icons";
 import useAuth from "../useAuth";
 import tw from "tailwind-rn";
+import Checkbox from "expo-checkbox";
 import Modal from "react-native-modal";
 import * as Clipboard from "expo-clipboard";
+import RNRestart from "react-native-restart";
+
 
 const ProfileScreen = () => {
   const [numberSheetURL, setNumberSheetURL] = useState(
     `${API_BASE_URL}/v1/account/paid`
   );
   const [exitModalVisible, setExitModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const bottomSheetRef = useRef(null);
@@ -47,6 +51,8 @@ const ProfileScreen = () => {
   const navigation = useNavigation();
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight = Dimensions.get("window").height;
+  const [isChecked, setIsChecked] = useState(false);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -64,6 +70,9 @@ const ProfileScreen = () => {
           <MenuOptions>
             <MenuOption onSelect={() => setExitModalVisible(true)}>
               <Text style={{ padding: 10 }}>Logout</Text>
+            </MenuOption>
+            <MenuOption onSelect={() => setDeleteModalVisible(true)}>
+              <Text style={{ padding: 10 }}>Delete account</Text>
             </MenuOption>
           </MenuOptions>
         </Menu>
@@ -124,6 +133,22 @@ const ProfileScreen = () => {
         console.log("downgrade error", err);
       });
   };
+  const deleteAcc = async () => {
+
+    const response =  await fetch(`${API_BASE_URL}/v1/account-management/delete`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + authState.userToken,
+      },
+      body: userData.phoneNumber,
+    });
+    const json = await response.json();
+    if (json.status === 0) {
+      setDeleteModalVisible(false)
+      RNRestart.Restart();
+    }
+  }
 
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
   const handleCloseSheet = () => bottomSheetRef?.current?.dismiss();
@@ -143,51 +168,49 @@ const ProfileScreen = () => {
               <Image
                 source={{
                   uri: userData?.imageURL
-                     ? userData?.imageURL?.startsWith("http://")
-                        ? userData?.imageURL?.replace("http://", "https://")
-                        : userData?.imageURL
-                     : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+                    ? userData?.imageURL?.startsWith("http://")
+                      ? userData?.imageURL?.replace("http://", "https://")
+                      : userData?.imageURL
+                    : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
                 }}
                 style={styles.profileImage}
               />
 
-                <View style={styles.editIconContainer}>
-                  <Ionicons name="pencil" size={20} padding={4} color="#fff" />
-                </View>
-              </TouchableOpacity>
-              <View style={styles.profileDetails}>
-                <Text style={styles.profileName}>{`${
-                   userData.firstName || ""
-                }`}</Text>
-                <Text style={styles.profileText}>{`${userData.age || ""}, ${
-                   userData.gender || ""
-                }`}</Text>
-                <Text
-                   style={styles.profileText}
-                >{`${userData.phoneNumber}`}</Text>
-
+              <View style={styles.editIconContainer}>
+                <Ionicons name="pencil" size={20} padding={4} color="#fff" />
               </View>
-            </View>
+            </TouchableOpacity>
+            <View style={styles.profileDetails}>
+              <Text style={styles.profileName}>{`${userData.firstName || ""
+                }`}</Text>
+              <Text style={styles.profileText}>{`${userData.age || ""}, ${userData.gender || ""
+                }`}</Text>
+              <Text
+                style={styles.profileText}
+              >{`${userData.phoneNumber}`}</Text>
 
-            {/*Tags Section */}
-
-            <View style={styles.profileTags}>
-              {userData?.accountTags && userData?.accountTags.length > 0 && (
-                 <View style={tw("p-4")}>
-                   <Text style={tw("text-lg font-bold mb-2")}>Tags:</Text>
-                   <View style={tw("flex-row flex-wrap")}>
-                     {userData.accountTags?.map((tag, index) => (
-                        <View
-                           key={index}
-                           style={tw("bg-blue-200 px-4 py-2 rounded-lg m-1")}
-                        >
-                          <Text style={tw("text-black font-bold")}>{tag.tag}</Text>
-                        </View>
-                     ))}
-                   </View>
-                 </View>
-              )}
             </View>
+          </View>
+
+          {/*Tags Section */}
+
+          <View style={styles.profileTags}>
+            {userData?.accountTags && userData?.accountTags.length > 0 && (
+              <View style={tw("p-4")}>
+                <Text style={tw("text-lg font-bold mb-2")}>Tags:</Text>
+                <View style={tw("flex-row flex-wrap")}>
+                  {userData.accountTags?.map((tag, index) => (
+                    <View
+                      key={index}
+                      style={tw("bg-blue-200 px-4 py-2 rounded-lg m-1")}
+                    >
+                      <Text style={tw("text-black font-bold")}>{tag.tag}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
 
 
           <FeatureSection
@@ -217,6 +240,81 @@ const ProfileScreen = () => {
               url={numberSheetURL}
             />
           </CustomBottomSheetModal>
+          <Modal
+            style={styles.modalContainer}
+            isVisible={deleteModalVisible}
+            hasBackdrop={true}
+            deviceWidth={deviceWidth}
+            deviceHeight={deviceHeight}
+            backdropColor={"#00000031"}
+          >
+            <View style={styles.modalBody}>
+              <Text style={styles.modalTextHeader}>Delete Account</Text>
+
+              <Text style={styles.modalText}>Deleting your account is permanent and cannot be undone.
+                This will erase all your data, including your profile, preferences, and history. </Text>
+
+              <View style={tw("flex-row justify-center items-center mt-2")}>
+                <Text style={styles.modalSubText}> Confirm by checking this. </Text>
+
+                <TouchableOpacity
+                  onPress={() => setIsChecked(!isChecked)}
+                  style={tw("flex-row justify-center p-4 mr-4")}
+                >
+                  <Checkbox
+                    value={isChecked}
+                    onValueChange={setIsChecked}
+                    style={[
+                      tw("mr-2"),
+                      {
+                        width: 20,
+                        height: 20,
+                      },
+                    ]}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={tw("flex-row justify-center items-center mb-4")}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setDeleteModalVisible(false);
+                  }}
+                  style={tw(
+                    "bg-indigo-600 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
+                  )}
+                >
+                  <Text
+                    onPress={() => {
+                      setDeleteModalVisible(false);
+                    }}
+                    style={tw("text-white py-2 px-2  font-medium")}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    //     close the app
+                    isChecked ?
+                      deleteAcc() : null
+                  }}
+                  style={[tw(
+                    "bg-red-500 mr-6 ml-6 w-1/3 items-center rounded-md mt-6"
+                  ),
+                  isChecked
+                    ? { backgroundColor: "#F2452A" }
+                    : { backgroundColor: "gray" },
+                  ]}
+                >
+                  <Text style={tw("text-white py-2 px-2 font-medium")}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
 
           <Modal
             style={styles.modalContainer}
@@ -320,49 +418,49 @@ const FeatureSection = ({
   setNumberSheetURL,
 }) => {
   return (
-     <View style={styles.actionContainer}>
-       <Text style={tw("text-lg font-bold mb-2")}>Actions:</Text>
-       <View style={styles.infoContainer}>
-         <TouchableOpacity
-            onPress={() => {
-              setNumberSheetURL(`${API_BASE_URL}/v1/account/paid`);
-              openNumberSheet();
-            }}
-         >
-           <FeatureCard
-              icon="flame"
-              title="Viewed"
-              subtitle={userData?.viewCount || 0}
-              color="#ef4444"
-           />
-         </TouchableOpacity>
+    <View style={styles.actionContainer}>
+      <Text style={tw("text-lg font-bold mb-2")}>Actions:</Text>
+      <View style={styles.infoContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setNumberSheetURL(`${API_BASE_URL}/v1/account/paid`);
+            openNumberSheet();
+          }}
+        >
+          <FeatureCard
+            icon="flame"
+            title="Viewed"
+            subtitle={userData?.viewCount || 0}
+            color="#ef4444"
+          />
+        </TouchableOpacity>
 
-         <TouchableOpacity
-            onPress={() => {
-              setNumberSheetURL(`${API_BASE_URL}/v1/account/likes`);
-              openNumberSheet();
-            }}
-         >
-           <FeatureCard
-              icon="heart"
-              title="Likes"
-              subtitle={userData?.likes || 0}
-              color="#ef4444"
-           />
-         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setNumberSheetURL(`${API_BASE_URL}/v1/account/likes`);
+            openNumberSheet();
+          }}
+        >
+          <FeatureCard
+            icon="heart"
+            title="Likes"
+            subtitle={userData?.likes || 0}
+            color="#ef4444"
+          />
+        </TouchableOpacity>
 
-         {userData && userData.role === "Marketer" && (
-            <TouchableOpacity onPress={() => handleOpenSheet()}>
-              <FeatureCard
-                 icon="cash-outline"
-                 title="Referrals"
-                 subtitle=""
-                 color="#ef4444"
-              />
-            </TouchableOpacity>
-         )}
-       </View>
-     </View>
+        {userData && userData.role === "Marketer" && (
+          <TouchableOpacity onPress={() => handleOpenSheet()}>
+            <FeatureCard
+              icon="cash-outline"
+              title="Referrals"
+              subtitle=""
+              color="#ef4444"
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
   );
 };
 
@@ -568,10 +666,10 @@ const NumberSheet = ({
         <Image
           source={{
             uri: item?.imageURL
-               ? item.imageURL.startsWith("http://")
-                  ? item.imageURL.replace("http://", "https://")
-                  : item.imageURL
-               : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+              ? item.imageURL.startsWith("http://")
+                ? item.imageURL.replace("http://", "https://")
+                : item.imageURL
+              : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
 
           }}
           style={styles.image}
@@ -669,7 +767,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  actionContainer : {
+  actionContainer: {
     backgroundColor: "#fff",
     borderRadius: 16,
     marginHorizontal: 12,
@@ -710,7 +808,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 12,
   },
-   feature: {
+  feature: {
     backgroundColor: "#fff",
     borderRadius: 16,
     marginHorizontal: 12,
@@ -791,10 +889,15 @@ const styles = StyleSheet.create({
   modalTextHeader: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    margin: 12,
   },
   modalText: {
     fontSize: 16,
+    margin: 12,
+    padding: 6,
+  },
+  modalSubText: {
+    fontSize: 14,
     marginBottom: 10,
   },
 });

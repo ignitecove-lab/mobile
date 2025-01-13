@@ -12,7 +12,6 @@
     "@d11/react-native-fast-image": "^8.9.0",
     "@expo/metro-runtime": "~3.2.3",
     "@gorhom/bottom-sheet": "^4.6.3",
-    "@notifee/react-native": "^9.1.1",
     "@react-native-firebase/app": "^20.3.0",
     "@react-native-firebase/messaging": "20.3.0",
     "@react-native-google-signin/google-signin": "^12.2.1",
