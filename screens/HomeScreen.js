@@ -422,6 +422,7 @@ const HomeScreen = ({ route }) => {
                         tw("absolute w-full px-6 py-2 bottom-0"),
                       ]}
                     >
+
                       <View style={[tw("flex-col justify-between")]}>
                         {/* like / dislike buttons */}
                         <View style={[tw("flex-row justify-between")]}>
@@ -537,7 +538,11 @@ const HomeScreen = ({ route }) => {
                         </View>
                         <View>
                           <Text style={tw("text-sm text-white mb-2")}>
-                            {card.location}
+                            {card.location}. {card.likedBack && card.liked ? (
+                              <Text>Matched 💕</Text>
+                          ) : card.likedBack && !card.liked ? (
+                              <Text>{card.firstName} liked you</Text>
+                          ) : null}
                           </Text>
                         </View>
 
