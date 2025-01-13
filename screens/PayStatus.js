@@ -4,6 +4,8 @@ import messaging from "@react-native-firebase/messaging";
 import tw from "tailwind-rn";
 import { AntDesign } from "@expo/vector-icons";
 import useAuth from "../useAuth";
+import TiktokPixel from 'tiktok-pixel';
+
 import React, {
    useEffect,
    useState
@@ -19,9 +21,17 @@ const PayStatus = ({ route}) => {
    const navigation = useNavigation();
    const [isLoading, setIsLoading] = useState(true);
    const {authState, authContext } = useAuth();
-   const { refreshScreen } = route.params;
+   const { refreshScreen, currency, amount } = route.params;
 
    useEffect(() => {
+      // const advancedMatching = {
+      //    user_id: authState.user.id,
+      // };
+      // const options = {
+      //    debug: true, // enable logs
+      // };
+      // TiktokPixel.init('', advancedMatching, options);
+
       let isCallSuccessful = false; // Flag to track success
 
       const makeApiCall = async () => {
@@ -47,6 +57,11 @@ const PayStatus = ({ route}) => {
             if (json.status === 0) {
                isCallSuccessful = true;
                setIsLoading(false);
+               // console.log(`Tittok amount: ${amount} currency ${currency}`)
+               // TiktokPixel.track('CompletePayment', {
+               //    currency: currency,
+               //    value: amount
+               // }, options);
             }
             else
                isCallSuccessful = false;

@@ -268,6 +268,8 @@ const PaywallScreen = ({ route }) => {
               navigation.navigate("PayStatus", {
                 phoneNumber: formattedValue,
                 refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
+                currency: gpCurrency ?? "",
+                amount: gpLocalizedPrice ?? ""
               });
             }
           }
@@ -287,6 +289,8 @@ const PaywallScreen = ({ route }) => {
             phoneNumber: formattedValue,
             haveLoader: false,
             refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
+            currency: gpCurrency ?? "",
+            amount: gpLocalizedPrice ?? ""
           });
         }
       });
@@ -390,7 +394,9 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       await navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
-        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false
+        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
+        currency: gpCurrency ?? "",
+        amount: gpLocalizedPrice ?? ""
       });
       setModalVisible(false);
       return json;
@@ -619,7 +625,9 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
-        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false
+        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
+        currency: gpCurrency ?? "",
+        amount: gpLocalizedPrice ?? ""
       });
     }
 
@@ -636,7 +644,9 @@ const PaywallScreen = ({ route }) => {
       bottomSheetRef.current.dismiss();
       navigation.navigate("PayStatus", {
         phoneNumber: formattedValue,
-        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false
+        refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
+        currency: gpCurrency ?? "",
+        amount: gpLocalizedPrice ?? ""
       });
     }
   };
