@@ -24,14 +24,15 @@ const PayStatus = ({ route}) => {
    const { refreshScreen, currency, amount } = route.params;
 
    useEffect(() => {
-      // const advancedMatching = {
-      //    user_id: authState.user.id,
-      // };
-      // const options = {
-      //    debug: true, // enable logs
-      // };
-      // TiktokPixel.init('', advancedMatching, options);
+       const advancedMatching = {
+          user_id: authState.user.id,
+       };
+       const options = {
+          debug: true, // enable logs
+       };
+       TiktokPixel.init('CU7V02JC77UDT30C5UC0', advancedMatching, options);
 
+      console.log(`tiktok advanced matching ${JSON.stringify(advancedMatching)}`);
       let isCallSuccessful = false; // Flag to track success
 
       const makeApiCall = async () => {
@@ -55,13 +56,14 @@ const PayStatus = ({ route}) => {
 
             const json = await response.json();
             if (json.status === 0) {
+                console.log(`Tiktok amount: ${amount} currency ${currency}`)
+                TiktokPixel.track('CompletePayment', {
+                   currency: currency,
+                   value: amount
+                }, options);
+                console.log("Track complete payment")
                isCallSuccessful = true;
                setIsLoading(false);
-               // console.log(`Tittok amount: ${amount} currency ${currency}`)
-               // TiktokPixel.track('CompletePayment', {
-               //    currency: currency,
-               //    value: amount
-               // }, options);
             }
             else
                isCallSuccessful = false;

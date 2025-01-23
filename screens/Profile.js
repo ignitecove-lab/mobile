@@ -146,6 +146,7 @@ const ProfileScreen = () => {
     const json = await response.json();
     if (json.status === 0) {
       setDeleteModalVisible(false)
+      logout();
       RNRestart.Restart();
     }
   }
