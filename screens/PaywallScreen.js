@@ -140,7 +140,7 @@ const PaywallScreen = ({ route }) => {
   const [value, setValue] = useState("");
   const [plans, setPlans] = useState([]);
   const [next, setNext] = useState(false);
-  const { isUpgrade, refreshScreen } = route.params;
+  const { isUpgrade, refreshScreen, firstTime } = route.params;
   const bottomSheetRef = useRef(null);
   const webViewRef = useRef(null);
   const [gpName, setGpName] = useState(null);
@@ -178,7 +178,7 @@ const PaywallScreen = ({ route }) => {
         if (isUpgrade) {
           const plans = data?.find((obj) => obj.name === "BRONZE");
           setPlans([plans]);
-        } else if (authState?.user.paywall) {
+        } else if ((authState?.user?.paywall ?? true)) {
           setPlans(data);
         } else if (!isVIP && !isUpgrade) {
           const plans = data?.find((obj) => obj.name === "SILVER");
@@ -269,7 +269,8 @@ const PaywallScreen = ({ route }) => {
                 phoneNumber: formattedValue,
                 refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
                 currency: gpCurrency ?? "",
-                amount: gpLocalizedPrice ?? ""
+                amount: gpLocalizedPrice ?? "",
+                firstTime: firstTime ?? false,
               });
             }
           }
@@ -290,7 +291,8 @@ const PaywallScreen = ({ route }) => {
             haveLoader: false,
             refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
             currency: gpCurrency ?? "",
-            amount: gpLocalizedPrice ?? ""
+            amount: gpLocalizedPrice ?? "",
+            firstTime: firstTime ?? false,
           });
         }
       });
@@ -396,7 +398,8 @@ const PaywallScreen = ({ route }) => {
         phoneNumber: formattedValue,
         refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
         currency: gpCurrency ?? "",
-        amount: gpLocalizedPrice ?? ""
+        amount: gpLocalizedPrice ?? "",
+        firstTime: firstTime ?? false,
       });
       setModalVisible(false);
       return json;
@@ -627,7 +630,8 @@ const PaywallScreen = ({ route }) => {
         phoneNumber: formattedValue,
         refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
         currency: gpCurrency ?? "",
-        amount: gpLocalizedPrice ?? ""
+        amount: gpLocalizedPrice ?? "",
+        firstTime: firstTime ?? false,
       });
     }
 
@@ -646,7 +650,8 @@ const PaywallScreen = ({ route }) => {
         phoneNumber: formattedValue,
         refreshHomeScreen: isUpgrade ? true : refreshScreen ?? false,
         currency: gpCurrency ?? "",
-        amount: gpLocalizedPrice ?? ""
+        amount: gpLocalizedPrice ?? "",
+        firstTime: firstTime ?? false,
       });
     }
   };

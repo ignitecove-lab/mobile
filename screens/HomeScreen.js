@@ -33,6 +33,7 @@ import VIPBadge from "../vip_badge.png";
 import noContentImage from '../assets/no-content.png'
 import { Linking } from "react-native";
 import FastImage from "@d11/react-native-fast-image";
+import RNRestart from "react-native-restart";
 
 import * as Location from "expo-location";
 import ReusableModal from "./ReusableModal";
@@ -70,6 +71,7 @@ const HomeScreen = ({ route }) => {
   const bottomSheetRef = useRef(null);
   const { sendLikeDislike } = authContext;
   const [refreshScreen, setRefreshScreen] = useState(true);
+  const [firstTimeLogin, setFirstTimeLogin] = useState(false);
   const [isImageLoading, setImageLoading] = useState(true);
 
   const handleOpenSheet = () => bottomSheetRef?.current?.present();
@@ -87,7 +89,7 @@ const HomeScreen = ({ route }) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setLocationError(
-         "Permission to access location was denied. You need to enable location access to for us to give you a better experience. Enable Location access now to continue"
+        "Permission to access location was denied. You need to enable location access to for us to give you a better experience. Enable Location access now to continue"
       );
     } else {
       let dev_location = await Location.getCurrentPositionAsync({});
@@ -103,7 +105,7 @@ const HomeScreen = ({ route }) => {
           latitude: dev_location?.coords?.latitude,
         }),
       });
-      if (refreshScreen){
+      if (refreshScreen) {
         listProfiles(minAge, maxAge, location);
         setRefreshScreen(false);
       }
@@ -112,7 +114,17 @@ const HomeScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (authState?.user?.paywall) {
+    if (route.params?.firstTime !== undefined) {
+      setFirstTimeLogin(route.params.firstTime ?? false)
+    }
+    if(firstTimeLogin) {
+      RNRestart.Restart();
+      setFirstTimeLogin(false)
+    }
+    if (!authState?.user?.firstName || !authState?.user?.gender || !authState?.user?.age) {
+      navigation.navigate("Modal");
+    }
+    else if ((authState?.user?.paywall ?? true)) {
       navigation.navigate("Ignitecove");
     } else {
       checkLocationPermissions();
@@ -129,9 +141,10 @@ const HomeScreen = ({ route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      if(route.params?.fetchProfile !== undefined){
+      if (route.params?.fetchProfile !== undefined) {
         setRefreshScreen(route.params.fetchProfile ?? true)
       }
+
       initializeSwiper();
     }, [showPhoneNumUi, liked])
   );
@@ -139,7 +152,7 @@ const HomeScreen = ({ route }) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      headerTitle: isVIP ? "Ignitecove Pro" : "Ignitecove",
+      headerTitle: "Ignitecove",
       headerStyle: {
         backgroundColor: "white",
       },
@@ -172,40 +185,14 @@ const HomeScreen = ({ route }) => {
     });
   }, []);
 
-  useEffect(() => {
-    const profileUpdate = AppState.addEventListener(
-      "change",
-      (nextAppState) => {
-        if (
-          appState.current.match(/inactive|background/) &&
-          nextAppState === "active"
-        ) {
-          if (!authState.isProfileComplete) {
-            navigation.navigate("Modal");
-          } else if (authState?.user?.paywall) {
-            navigation.navigate("Ignitecove");
-          } else {
-            console.log("Conditions not met for navigation");
-          }
-        }
-
-        appState.current = nextAppState;
-      }
-    );
-
-    return () => {
-      profileUpdate.remove();
-    };
-  }, []);
-
   const onImageLoadStart = () => {
     setImageLoading(true);
   };
-  
+
   const onImageLoadEnd = () => {
     setImageLoading(false);
   };
-  
+
 
   const listProfiles = useCallback(
     async (minAge = null, maxAge = null, location = null) => {
@@ -221,7 +208,7 @@ const HomeScreen = ({ route }) => {
         if (location) {
           url = url + `&radius=${location}`;
         }
-        if(deviceLocation){
+        if (deviceLocation) {
           url = url + `&longitude=${deviceLocation?.coords?.longitude}`
           url = url + `&latitude=${deviceLocation?.coords?.latitude}`
         }
@@ -376,25 +363,25 @@ const HomeScreen = ({ route }) => {
                   <View key={card.id} style={styles.homeCard}>
                     <View>
                       <FastImage
-                       fallback={true}
-                       onLoadEnd={onImageLoadEnd}
-                       onLoadStart={onImageLoadStart}
-                      style={styles.homeImage}
-                      source={{
-                        uri: card.imageURL,
-                        priority: FastImage.priority.high,
-                      }}
-                      resizeMode={FastImage.resizeMode.cover}
-                       defaultSource={require("../assets/no_profile.png")}
-                      {
+                        fallback={true}
+                        onLoadEnd={onImageLoadEnd}
+                        onLoadStart={onImageLoadStart}
+                        style={styles.homeImage}
+                        source={{
+                          uri: card.imageURL,
+                          priority: FastImage.priority.high,
+                        }}
+                        resizeMode={FastImage.resizeMode.cover}
+                        defaultSource={require("../assets/no_profile.png")}
+                        {
                         ...isImageLoading && (
                           <ActivityIndicator size="large" color="#7CDB8A" />
                         )
-                      }
-                    />
+                        }
+                      />
 
                     </View>
-                    
+
                     {card?.premium && (
                       <Image
                         source={VIPBadge}
@@ -540,9 +527,9 @@ const HomeScreen = ({ route }) => {
                           <Text style={tw("text-sm text-white mb-2")}>
                             {card.location}. {card.likedBack && card.liked ? (
                               <Text>Matched 💕</Text>
-                          ) : card.likedBack && !card.liked ? (
+                            ) : card.likedBack && !card.liked ? (
                               <Text>{card.firstName} liked you</Text>
-                          ) : null}
+                            ) : null}
                           </Text>
                         </View>
 
@@ -622,61 +609,77 @@ const HomeScreen = ({ route }) => {
               />
             </View>
           </>
-        ) : authState && !authState.isProfileComplete ? (
-          <View style={styles.premiumSection}>
-            <Text style={styles.premiumText}>Incomplete Profile</Text>
-            <Text style={styles.premiumDetails}>
-              Your profile is not complete. Please update your profile to see
-              potential matches that awaits you! 😊
-            </Text>
-
-            <TouchableOpacity
-              style={styles.upgradeButton}
-              onPress={() => navigation.navigate("Modal")}
-            >
-              <Text style={styles.upgradeButtonText}>Complete Profile</Text>
-            </TouchableOpacity>
-          </View>
         ) : (
           <>
-            {locationError ? (
-              <View style={tw("bg-white h-2/3 justify-center items-center")}>
-                <MaterialIcons name="place" size={40} color="orange" />
-                <Text style={styles.errorText}>{locationError}</Text>
-                <TouchableOpacity
-                  style={[styles.button, styles.applyButton]}
-                  onPress={() => Linking.openSettings()}
-                >
-                  <Text style={styles.settingsButtonText}>
-                    Enable Location Access
+            {
+              authState && !authState.isProfileComplete ? (
+                <View style={styles.premiumSection}>
+                  <Text style={styles.premiumText}>Incomplete Profile</Text>
+                  <Text style={styles.premiumDetails}>
+                    Your profile is not complete. Please update your profile to see
+                    potential matches that awaits you! 😊
                   </Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View
-                style={tw(
-                  "relative h-2/3 rounded-xl justify-center items-center"
+
+                  <TouchableOpacity
+                    style={styles.upgradeButton}
+                    onPress={() => navigation.navigate("Modal")}
+                  >
+                    <Text style={styles.upgradeButtonText}>Complete Profile</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : authState && (authState?.user?.paywall ?? true) ? (
+                <View style={styles.premiumSection}>
+                  <Text style={styles.premiumText}>Payment</Text>
+                  <Text style={styles.premiumDetails}>
+                    You have not made any payment. Make payment, potential matches that await you! 😊
+                  </Text>
+
+                  <TouchableOpacity
+                    style={styles.upgradeButton}
+                    onPress={() => navigation.navigate("Ignitecove")}
+                  >
+                    <Text style={styles.upgradeButtonText}>Pay</Text>
+                  </TouchableOpacity>
+                </View>
+              ) :
+                locationError ? (
+                  <View style={tw("bg-white h-2/3 justify-center items-center")}>
+                    <MaterialIcons name="place" size={40} color="orange" />
+                    <Text style={styles.errorText}>{locationError}</Text>
+                    <TouchableOpacity
+                      style={[styles.button, styles.applyButton]}
+                      onPress={() => Linking.openSettings()}
+                    >
+                      <Text style={styles.settingsButtonText}>
+                        Enable Location Access
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View
+                    style={tw(
+                      "relative h-2/3 rounded-xl justify-center items-center"
+                    )}
+                  >
+                    <Text style={tw("font-bold pb-5")}>Refresh and discover more</Text>
+                    <Image
+                      style={tw("h-full w-full")}
+                      height={100}
+                      width={100}
+                      source={noContentImage}
+                    />
+                    <TouchableOpacity
+                      style={tw("h-12 w-full bg-blue-500 p-2 mt-6  w-3/4 rounded-lg justify-center items-center")}
+                      onPress={() => {
+                        listProfiles()
+                      }}
+                    >
+                      <Text style={tw("text-white text-center")}>
+                        Refresh
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
-              >
-                <Text style={tw("font-bold pb-5")}>Refresh and discover more</Text>
-                <Image
-                  style={tw("h-full w-full")}
-                  height={100}
-                  width={100}
-                  source={noContentImage}
-                />
-                <TouchableOpacity
-                   style={tw("h-12 w-full bg-blue-500 p-2 mt-6  w-3/4 rounded-lg justify-center items-center")}
-                   onPress={() => {
-                     listProfiles()
-                   }}
-                >
-                  <Text style={tw("text-white text-center")}>
-                    Refresh
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </>
         )
       ) : (

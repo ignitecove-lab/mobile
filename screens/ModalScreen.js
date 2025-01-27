@@ -181,6 +181,7 @@ const ModalScreen = () => {
         throw new Error(text.message);
       })
       .then((data) => {
+        console.log(`user data:\n${JSON.stringify(data)}`)
         setFirstName(data.firstName);
         setImage(data.imageURL);
         setAge(data.age);
@@ -426,6 +427,15 @@ const ModalScreen = () => {
                 genderPreference
               ).then(() => {
                 RNRestart.Restart();
+                // if (!authState.isProfileComplete) {
+                //   navigation.navigate("Home");
+                // }
+                // else if ((authState?.user?.paywall ?? false) && authState?.isProfileComplete) {
+                //   navigation.navigate("Ignitecove");
+                // }
+                // else {
+                //   RNRestart.Restart();
+                // }
               });
             }
           }}

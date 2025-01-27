@@ -54,14 +54,6 @@ const StackNavigator = () => {
       {authState && authState?.tokenValid ? (
         <>
           <Stack.Group>
-            {authState?.user?.paywall && (
-              <Stack.Screen
-                options={{ headerShown: true }}
-                name="Paywall"
-                component={Unpaid}
-              />
-            )}
-
             <Stack.Screen
               name="Home"
               component={HomeScreen}

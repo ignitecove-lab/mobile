@@ -7,6 +7,7 @@ import {
   FlatList,
   Dimensions,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import useAuth from "../useAuth";
 import React, { useEffect, useState, useCallback } from "react";
@@ -29,6 +30,8 @@ const App = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const { authState, authContext } = useAuth();
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+
 
   const profiles = [
     { id: "1", src: require("../persons/1.jpg") },
@@ -66,62 +69,79 @@ const App = () => {
         }
       } else {
         console.log("go to Paywall")
-
-        await navigation.navigate("PayWall", { isUpgrade: false });
       }
     } catch (error) {
       setModalVisible(false);
       console.error("Paywall check failed:", error);
     }
   }, [authState.userToken, authContext, navigation]);
-
   useEffect(() => {
+    checkPaywall();
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    // Shuffle profiles and set them
     const shuffled = shuffleArray([...profiles]).slice(0, 6);
     setShuffledProfiles(shuffled);
 
-    checkPaywall()
+    // Add focus listener to refresh blur key
     const unsubscribe = navigation.addListener("focus", () => {
       setBlurKey((prevKey) => prevKey + 1);
     });
 
-    return unsubscribe;
+    // Cleanup on unmount
+    return () => {
+      clearTimeout(loadingTimer);
+      unsubscribe();
+    };
   }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={shuffledProfiles}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        renderItem={({ item }) => (
-          <View style={styles.profileContainer}>
-            <ImageBackground 
-            blurRadius={90}
-            source={item.src} style={styles.profileImage}>
-            
-            </ImageBackground>
-          </View>
-        )}
-      />
-      {
-        isModalVisible ? (<ReusableModal
-          isVisible={isModalVisible}
-          onBackdropPress={() => setModalVisible(false)}
-          headerText="Loading"
-          bodyText="We are processing your requst"
-          isLoading={true}
-        />) : (<></>)
-      }
+      {/* Show loading overlay if isLoading is true */}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#007bff" />
+        </View>
+      )}
 
-      <View style={styles.popup}>
-        <Text style={styles.popupText}>You're a total catch!</Text>
-        <Text style={styles.popupSubText}>
-          Let the right people find you with IgniteCove Premium. Join IgniteCove today!
-        </Text>
-        <TouchableOpacity style={styles.button} onPress={checkPaywall}>
-          <Text style={styles.buttonText}>Join IgniteCove</Text>
-        </TouchableOpacity>
-      </View>
+      {!isLoading && (
+        <>
+          <FlatList
+            data={shuffledProfiles}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            renderItem={({ item }) => (
+              <View style={styles.profileContainer}>
+                <ImageBackground
+                  blurRadius={90}
+                  source={item.src}
+                  style={styles.profileImage}
+                />
+              </View>
+            )}
+          />
+          {isModalVisible ? (
+            <ReusableModal
+              isVisible={isModalVisible}
+              onBackdropPress={() => setModalVisible(false)}
+              headerText="Loading"
+              bodyText="We are processing your request"
+              isLoading={true}
+            />
+          ) : null}
+
+          <View style={styles.popup}>
+            <Text style={styles.popupText}>You're a total catch!</Text>
+            <Text style={styles.popupSubText}>
+              Let the right people find you with IgniteCove Premium. Join IgniteCove today!
+            </Text>
+            <TouchableOpacity style={styles.button} onPress={ () => navigation.navigate("PayWall", { isUpgrade: false , firstTime: true})}>
+              <Text style={styles.buttonText}>Join IgniteCove</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };

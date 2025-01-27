@@ -4,8 +4,6 @@ import messaging from "@react-native-firebase/messaging";
 import tw from "tailwind-rn";
 import { AntDesign } from "@expo/vector-icons";
 import useAuth from "../useAuth";
-import TiktokPixel from 'tiktok-pixel';
-
 import React, {
    useEffect,
    useState
@@ -21,18 +19,9 @@ const PayStatus = ({ route}) => {
    const navigation = useNavigation();
    const [isLoading, setIsLoading] = useState(true);
    const {authState, authContext } = useAuth();
-   const { refreshScreen, currency, amount } = route.params;
+   const { refreshScreen, currency, amount, firstTime} = route.params;
 
    useEffect(() => {
-       const advancedMatching = {
-          user_id: authState.user.id,
-       };
-       const options = {
-          debug: true, // enable logs
-       };
-       TiktokPixel.init('CU7V02JC77UDT30C5UC0', advancedMatching, options);
-
-      console.log(`tiktok advanced matching ${JSON.stringify(advancedMatching)}`);
       let isCallSuccessful = false; // Flag to track success
 
       const makeApiCall = async () => {
@@ -56,13 +45,8 @@ const PayStatus = ({ route}) => {
 
             const json = await response.json();
             if (json.status === 0) {
-                console.log(`Tiktok amount: ${amount} currency ${currency}`)
-                TiktokPixel.track('CompletePayment', {
-                   currency: currency,
-                   value: amount
-                }, options);
-                console.log("Track complete payment")
                isCallSuccessful = true;
+               await authContext.updatePaywallState(false);
                setIsLoading(false);
             }
             else
@@ -89,7 +73,7 @@ const PayStatus = ({ route}) => {
             setIsLoading(false);
             navigation.goBack(); // Navigate back after the third call
          }
-      }, 30000); // After 30 seconds
+      }, 40000); // After 40 seconds
 
       // Notification handling
       const subscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
@@ -137,11 +121,8 @@ const PayStatus = ({ route}) => {
                </Text>
                <TouchableOpacity
                   onPress={() => {
-                     if (!authState?.user?.firstName || !authState?.user?.gender || !authState?.user?.age) {
-                        navigation.navigate("Modal");
-                     } else {
-                        navigation.navigate("Home", { fetchProfile: refreshScreen  ?? false});
-                     }
+                     console.log(`Should refresh screen ${refreshScreen} First Time login ${firstTime ?? false}`)
+                     navigation.navigate("Home", { fetchProfile: refreshScreen  ?? false, firstTime: firstTime ?? false});
                   }}
                   style={tw("bg-indigo-600 w-full py-2 items-center rounded-md mt-6")}
                >

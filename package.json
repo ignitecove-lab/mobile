@@ -56,7 +56,6 @@
     "react-native-webview": "13.8.6",
     "socket.io-client": "^4.8.0",
     "tailwind-rn": "^3.0.1",
-    "tiktok-pixel": "^2.0.3",
     "uuid": "^11.0.2"
   },
   "devDependencies": {
