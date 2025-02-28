@@ -66,6 +66,7 @@ const HomeScreen = ({ route }) => {
   const [deviceLocation, setDeviceLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [location, setLocation] = useState(null);
+  const [currentLocationName, setCurrentLocationName] = useState(null)
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
   const appState = useRef(AppState.currentState);
   const bottomSheetRef = useRef(null);
@@ -94,16 +95,29 @@ const HomeScreen = ({ route }) => {
     } else {
       let dev_location = await Location.getCurrentPositionAsync({});
       setDeviceLocation(dev_location);
+      let longitude = dev_location?.coords?.longitude;
+      let latitude = dev_location?.coords?.latitude;
+
+      let response = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude
+      });
+      let locationData = response[0];
+      let address = `${locationData.city}, ${locationData.region}, ${locationData.country}`;
+
+      let data = JSON.stringify({
+        longitude: longitude,
+        latitude: latitude,
+        location: address
+      });
+      console.log(data)
       await fetch(`${API_BASE_URL}/v1/account/location`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + authState.userToken,
         },
-        body: JSON.stringify({
-          longitude: dev_location?.coords?.longitude,
-          latitude: dev_location?.coords?.latitude,
-        }),
+        body: data,
       });
       if (refreshScreen) {
         listProfiles(minAge, maxAge, location);

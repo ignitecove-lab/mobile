@@ -12,11 +12,11 @@ import * as SecureStore from "expo-secure-store";
 import { initSocket, likeDislike, onNewMessage } from "./socket";
 import { Alert, Linking, AppState, Platform } from "react-native";
 import VersionCheck from "react-native-version-check";
-import notifee, {
-  AndroidStyle,
-  AndroidImportance,
-  EventType,
-} from "@notifee/react-native";
+// import notifee, {
+//   AndroidStyle,
+//   AndroidImportance,
+//   EventType,
+// } from "@notifee/react-native";
 
 const AuthContext = createContext();
 
@@ -30,140 +30,140 @@ export const AuthProvider = (props) => {
   const [socket, setSocket] = useState(null);
 
   const [state, dispatch] = React.useReducer(
-      (prevState, action) => {
-        switch (action.type) {
-          case "UPDATE_PROFILE_COMPLETE":
-            return {
-              ...prevState,
-              isProfileComplete: action.isProfileComplete,
-            };
-          case "RESTORE_TOKEN":
-            return {
-              ...prevState,
-              isLoading: false,
-              user: action.user,
-              userToken: action.token,
-              currency: action.currency,
-              tokenValid: action.tokenValid,
-              countryCode: action.countryCode,
-              isProfileComplete: action.isProfileComplete,
-            };
-          case "SIGN_IN":
-            return {
-              ...prevState,
-              isSignout: false,
-              user: action.user,
-              userToken: action.token,
-              currency: action.currency,
-              tokenValid: action.tokenValid,
-              countryCode: action.countryCode,
-              isProfileComplete: action.isProfileComplete,
-            };
-          case "SIGN_OUT":
-            return {
-              ...prevState,
-              user: null,
-              currency: null,
-              isSignout: true,
-              userToken: null,
-              tokenValid: false,
-              countryCode: null,
-              isProfileComplete: false,
-            };
-          case "UPDATE_PAYWALL_STATE":
-            return {
-              ...prevState,
-              user: {
-                ...prevState.user,
-                paywall: action.paywall,
-              },
-            };
-          default:
-            return prevState;
-        }
-      },
-      {
-        user: null,
-        isLoading: true,
-        isSignout: false,
-        userToken: null,
-        tokenValid: false,
-        isProfileComplete: true,
-        currency: null,
-        countryCode: null,
+    (prevState, action) => {
+      switch (action.type) {
+        case "UPDATE_PROFILE_COMPLETE":
+          return {
+            ...prevState,
+            isProfileComplete: action.isProfileComplete,
+          };
+        case "RESTORE_TOKEN":
+          return {
+            ...prevState,
+            isLoading: false,
+            user: action.user,
+            userToken: action.token,
+            currency: action.currency,
+            tokenValid: action.tokenValid,
+            countryCode: action.countryCode,
+            isProfileComplete: action.isProfileComplete,
+          };
+        case "SIGN_IN":
+          return {
+            ...prevState,
+            isSignout: false,
+            user: action.user,
+            userToken: action.token,
+            currency: action.currency,
+            tokenValid: action.tokenValid,
+            countryCode: action.countryCode,
+            isProfileComplete: action.isProfileComplete,
+          };
+        case "SIGN_OUT":
+          return {
+            ...prevState,
+            user: null,
+            currency: null,
+            isSignout: true,
+            userToken: null,
+            tokenValid: false,
+            countryCode: null,
+            isProfileComplete: false,
+          };
+        case "UPDATE_PAYWALL_STATE":
+          return {
+            ...prevState,
+            user: {
+              ...prevState.user,
+              paywall: action.paywall,
+            },
+          };
+        default:
+          return prevState;
       }
+    },
+    {
+      user: null,
+      isLoading: true,
+      isSignout: false,
+      userToken: null,
+      tokenValid: false,
+      isProfileComplete: true,
+      currency: null,
+      countryCode: null,
+    }
   );
 
   const authContext = React.useMemo(
-      () => ({
-        signIn: async (data) => {
-          dispatch({
-            type: "SIGN_IN",
-            token: data.token,
-            user: data.user,
+    () => ({
+      signIn: async (data) => {
+        dispatch({
+          type: "SIGN_IN",
+          token: data.token,
+          user: data.user,
+          currency: data.currency,
+          tokenValid: data.tokenValid,
+          countryCode: data.countryCode,
+          isProfileComplete: data.isProfileComplete,
+        });
+
+        await SecureStore.setItemAsync("userToken", data.token);
+        await SecureStore.setItemAsync(
+          "user",
+          JSON.stringify({
+            ...data.user,
             currency: data.currency,
-            tokenValid: data.tokenValid,
             countryCode: data.countryCode,
-            isProfileComplete: data.isProfileComplete,
-          });
+          })
+        );
+        setJustLoggedIn(true);
+      },
+      logout: async () => {
+        dispatch({ type: "SIGN_OUT" });
+        await SecureStore.deleteItemAsync("userToken");
+        await SecureStore.deleteItemAsync("user");
+      },
+      signUp: async (data) => {
+        dispatch({
+          type: "SIGN_IN",
+          token: data.token,
+          user: data.user,
+          currency: data.currency,
+          tokenValid: data.tokenValid,
+          countryCode: data.countryCode,
+          isProfileComplete: data.isProfileComplete,
+        });
 
-          await SecureStore.setItemAsync("userToken", data.token);
-          await SecureStore.setItemAsync(
-              "user",
-              JSON.stringify({
-                ...data.user,
-                currency: data.currency,
-                countryCode: data.countryCode,
-              })
-          );
-          setJustLoggedIn(true);
-        },
-        logout: async () => {
-          dispatch({ type: "SIGN_OUT" });
-          await SecureStore.deleteItemAsync("userToken");
-          await SecureStore.deleteItemAsync("user");
-        },
-        signUp: async (data) => {
-          dispatch({
-            type: "SIGN_IN",
-            token: data.token,
-            user: data.user,
-            currency: data.currency,
-            tokenValid: data.tokenValid,
-            countryCode: data.countryCode,
-            isProfileComplete: data.isProfileComplete,
-          });
+        await SecureStore.setItemAsync("userToken", data.token);
+        await SecureStore.setItemAsync("user", JSON.stringify(data.user));
+        setJustLoggedIn(true);
+      },
+      updatePaywallState: async (paywall) => {
+        dispatch({ type: "UPDATE_PAYWALL_STATE", paywall });
 
-          await SecureStore.setItemAsync("userToken", data.token);
-          await SecureStore.setItemAsync("user", JSON.stringify(data.user));
-          setJustLoggedIn(true);
-        },
-        updatePaywallState: async (paywall) => {
-          dispatch({ type: "UPDATE_PAYWALL_STATE", paywall });
+        try {
+          const userString = await SecureStore.getItemAsync("user");
+          if (userString) {
+            const user = JSON.parse(userString);
+            const updatedUser = {
+              ...user,
+              paywall: paywall,
+            };
 
-          try {
-            const userString = await SecureStore.getItemAsync("user");
-            if (userString) {
-              const user = JSON.parse(userString);
-              const updatedUser = {
-                ...user,
-                paywall: paywall,
-              };
-
-              await SecureStore.setItemAsync("user", JSON.stringify(updatedUser));
-            }
-          } catch (error) {
-            console.error("Error updating user in AsyncStorage:", error);
+            await SecureStore.setItemAsync("user", JSON.stringify(updatedUser));
           }
-        },
-        updateProfileComplete: async (isProfileComplete) => {
-          dispatch({ type: "UPDATE_PROFILE_COMPLETE", isProfileComplete });
-        },
-        sendLikeDislike: (user_id, phone_number, action) => {
-          likeDislike(user_id, phone_number, action);
-        },
-      }),
-      []
+        } catch (error) {
+          console.error("Error updating user in AsyncStorage:", error);
+        }
+      },
+      updateProfileComplete: async (isProfileComplete) => {
+        dispatch({ type: "UPDATE_PROFILE_COMPLETE", isProfileComplete });
+      },
+      sendLikeDislike: (user_id, phone_number, action) => {
+        likeDislike(user_id, phone_number, action);
+      },
+    }),
+    []
   );
 
   const sendSmsVerification = async (phoneNumber, countryCode) => {
@@ -182,9 +182,6 @@ export const AuthProvider = (props) => {
       });
 
       const json = await response.json();
-      if (json.status === 4555) {
-        Alert.alert("This account was deleted please contact system administrator")
-      }
       return json.success;
     } catch (error) {
       return false;
@@ -192,10 +189,10 @@ export const AuthProvider = (props) => {
   };
 
   const checkVerification = async (
-      phoneNumber,
-      countryCode,
-      code,
-      currency
+    phoneNumber,
+    countryCode,
+    code,
+    currency
   ) => {
     try {
       const data = JSON.stringify({
@@ -213,9 +210,6 @@ export const AuthProvider = (props) => {
       });
 
       const json = await response.json();
-      if (json.status === 4555) {
-        Alert.alert("This account was deleted please contact system administrator")
-      }
 
       if (!json.accessToken) {
         return false;
@@ -273,13 +267,13 @@ export const AuthProvider = (props) => {
   const validateToken = async (token) => {
     try {
       const response = await fetch(
-          `${API_BASE_URL}/v1/account/tokenStatus?token=${token}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+        `${API_BASE_URL}/v1/account/tokenStatus?token=${token}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       const json = await response.json();
@@ -295,7 +289,7 @@ export const AuthProvider = (props) => {
     // Check if the token is null, try fetching it from SecureStore
     if (!userToken) {
       console.log(
-          "User token is null, attempting to retrieve it from SecureStore..."
+        "User token is null, attempting to retrieve it from SecureStore..."
       );
       userToken = await SecureStore.getItemAsync("userToken");
 
@@ -328,25 +322,22 @@ export const AuthProvider = (props) => {
 
     try {
       const response = await fetch(
-          `${API_BASE_URL}/v1/account/get/${user_id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${userToken}`,
-            },
-          }
+        `${API_BASE_URL}/v1/account/get/${user_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to fetch user data");
       }
-      const json = await response.json();
-      if (json.status === 4555) {
-        Alert.alert("This account was deleted please contact system administrator")
-      }
-      return json;
+
+      return await response.json();
     } catch (error) {
       console.error("Error fetching user:", error.message);
       throw error; // Re-throw the error to handle it elsewhere if needed
@@ -356,12 +347,12 @@ export const AuthProvider = (props) => {
   const checkAppVersionFirstThenProceed = async () => {
     try {
       const latestVersion = await fetch(
-          `${API_BASE_URL}/v1/app-config/version-code`
+        `${API_BASE_URL}/v1/app-config/version-code`
       )
-          .then((r) => r.json())
-          .then((res) => {
-            return res;
-          });
+        .then((r) => r.json())
+        .then((res) => {
+          return res;
+        });
 
       // const latestVersion =
       //   Platform.OS === "ios"
@@ -383,25 +374,25 @@ export const AuthProvider = (props) => {
       if (latestVersion && latestVersion.mandatory) {
         if (Number(latestVersion.versionCode) > Number(currentVersion)) {
           Alert.alert(
-              "Update Required",
-              "A new version of the app is available. Please update to continue using the app.",
-              [
-                {
-                  text: "Update Now",
-                  onPress: async () => {
-                    Linking.openURL(
-                        Platform.OS === "ios"
-                            ? await VersionCheck.getAppStoreUrl({
-                              appID: "xxxxxxxxxx",
-                            })
-                            : await VersionCheck.getPlayStoreUrl({
-                              packageName: "host.exp.ignitecove",
-                            })
-                    );
-                  },
+            "Update Required",
+            "A new version of the app is available. Please update to continue using the app.",
+            [
+              {
+                text: "Update Now",
+                onPress: async () => {
+                  Linking.openURL(
+                    Platform.OS === "ios"
+                      ? await VersionCheck.getAppStoreUrl({
+                          appID: "xxxxxxxxxx",
+                        })
+                      : await VersionCheck.getPlayStoreUrl({
+                          packageName: "host.exp.ignitecove",
+                        })
+                  );
                 },
-              ],
-              { cancelable: false }
+              },
+            ],
+            { cancelable: false }
           );
         }
       }
@@ -414,7 +405,7 @@ export const AuthProvider = (props) => {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
       // request notifications permission on app load
-      await notifee.requestPermission();
+      // await notifee.requestPermission();
       let userToken, local_user;
 
       try {
@@ -447,58 +438,58 @@ export const AuthProvider = (props) => {
         });
 
         await fetch(
-            `${API_BASE_URL}/v1/account/premium-status/${local_user.id}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + userToken,
-              },
-            }
+          `${API_BASE_URL}/v1/account/premium-status/${local_user.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + userToken,
+            },
+          }
         )
-            .then(async (response) => {
-              if (response.ok) {
-                return response.json();
-              }
-              const text = await response.json();
-              throw new Error(text.error);
-            })
-            .then((data) => {
-              setIsVIP(data?.data?.premium ? true : false);
-            });
+          .then(async (response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            const text = await response.json();
+            throw new Error(text.error);
+          })
+          .then((data) => {
+            setIsVIP(data?.data?.premium ? true : false);
+          });
       }
     };
 
     // Call the function to get FCM token when the component mounts
     handleFCMToken().then((r) => console.log("token granted " + r));
     requestNotificationPermission().then((r) =>
-        console.log("permission granted")
+      console.log("permission granted")
     );
 
     // check if user gave permission to receive push notifications
     messaging()
-        .hasPermission()
-        .then((enabled) => {
-          if (!enabled) {
-            requestNotificationPermission().then((r) =>
-                console.log("permission granted")
-            );
-          }
-        });
+      .hasPermission()
+      .then((enabled) => {
+        if (!enabled) {
+          requestNotificationPermission().then((r) =>
+            console.log("permission granted")
+          );
+        }
+      });
 
     // check if app opened from a notification
     messaging()
-        .getInitialNotification()
-        .then((remoteMessage) => {
-          if (remoteMessage) {
-            console.log("FCM Message Data:", remoteMessage.data);
-            setNotification(remoteMessage.data);
-          }
-        });
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          console.log("FCM Message Data:", remoteMessage.data);
+          setNotification(remoteMessage.data);
+        }
+      });
 
     messaging()
-        .subscribeToTopic("all")
-        .then((r) => console.log("subscribed to topic all"));
+      .subscribeToTopic("all")
+      .then((r) => console.log("subscribed to topic all"));
     messaging().onMessage(async (message) => {
       setNotification(message.data);
     });
@@ -525,82 +516,82 @@ export const AuthProvider = (props) => {
   async function onMessageReceived(message) {
     console.log({ Nofifee: message });
     // Request permissions
-    await notifee.requestPermission();
+    // await notifee.requestPermission();
 
     // Create a channel (required for Android)
-    const channelId = await notifee.createChannel({
-      id: "default",
-      name: "Default Channel",
-      // sound: "hollow",
-      importance: AndroidImportance.HIGH,
-    });
+    // const channelId = await notifee.createChannel({
+    //   id: "default",
+    //   name: "Default Channel",
+    //   // sound: "hollow",
+    //   importance: AndroidImportance.HIGH,
+    // });
 
     // Display a notification
-    await notifee.displayNotification({
-      title: message?.notification?.title,
-      body: "",
-
-      android: {
-        channelId,
-        // pressAction is needed if you want the notification to open the app when pressed
-        pressAction: {
-          id: "default",
-          launchActivity: "default",
-        },
-        timestamp: Date.now(),
-        showTimestamp: true,
-        style: {
-          type: AndroidStyle.BIGPICTURE,
-          picture: message.notification.android?.imageUrl,
-        },
-      },
-      ios: {
-        timestamp: Date.now(),
-        showTimestamp: true,
-        attachments: [
-          {
-            url: message.notification.android?.imageUrl,
-          },
-        ],
-      },
-      data: {
-        deepLink: `host.exp.ignitecove://Profile_View?user_id=${parseInt(
-            message?.notification?.body
-        )}`,
-      },
-    });
+    // await notifee.displayNotification({
+    //   title: message?.notification?.title,
+    //   body: "",
+    //
+    //   android: {
+    //     channelId,
+    //     // pressAction is needed if you want the notification to open the app when pressed
+    //     pressAction: {
+    //       id: "default",
+    //       launchActivity: "default",
+    //     },
+    //     timestamp: Date.now(),
+    //     showTimestamp: true,
+    //     style: {
+    //       type: AndroidStyle.BIGPICTURE,
+    //       picture: message.notification.android?.imageUrl,
+    //     },
+    //   },
+    //   ios: {
+    //     timestamp: Date.now(),
+    //     showTimestamp: true,
+    //     attachments: [
+    //       {
+    //         url: message.notification.android?.imageUrl,
+    //       },
+    //     ],
+    //   },
+    //   data: {
+    //     deepLink: `host.exp.ignitecove://Profile_View?user_id=${parseInt(
+    //       message?.notification?.body
+    //     )}`,
+    //   },
+    // });
   }
 
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
 
-  notifee.onForegroundEvent(({ type, detail }) => {
-    if (type === EventType.PRESS) {
-      const deepLink = detail.notification.data.deepLink;
-      if (deepLink) {
-        // Handle the deep link (e.g., navigate to the specific screen)
-        Linking.openURL(deepLink);
-      }
-    }
-  });
+  // notifee.onForegroundEvent(({ type, detail }) => {
+  //   if (type === EventType.PRESS) {
+  //     const deepLink = detail.notification.data.deepLink;
+  //     if (deepLink) {
+  //       // Handle the deep link (e.g., navigate to the specific screen)
+  //       Linking.openURL(deepLink);
+  //     }
+  //   }
+  // });
 
-  notifee.onBackgroundEvent(({ type, detail }) => {
-    if (type === EventType.PRESS) {
-      const deepLink = detail.notification.data.deepLink;
-      if (deepLink) {
-        // Handle the deep link (e.g., navigate to the specific screen)
-        Linking.openURL(deepLink);
-      }
-    }
-  });
+  // notifee.onBackgroundEvent(({ type, detail }) => {
+  //   if (type === EventType.PRESS) {
+  //     const deepLink = detail.notification.data.deepLink;
+  //     if (deepLink) {
+  //       // Handle the deep link (e.g., navigate to the specific screen)
+  //       Linking.openURL(deepLink);
+  //     }
+  //   }
+  // });
 
   // console.log("state", state);
 
   useEffect(() => {
     const versionCheck = AppState.addEventListener("change", (nextAppState) => {
       if (
-          appState.current.match(/inactive|background/) &&
-          nextAppState === "active"
+        appState.current.match(/inactive|background/) &&
+        nextAppState === "active"
       ) {
         console.log("App has come to the foreground!");
         checkAppVersionFirstThenProceed();
@@ -615,25 +606,25 @@ export const AuthProvider = (props) => {
   }, []);
 
   return (
-      <AuthContext.Provider
-          value={{
-            authContext,
-            user: state.user,
-            authState: state,
-            sendSmsVerification,
-            checkVerification,
-            error,
-            fcmToken,
-            notificationData,
-            justLoggedIn,
-            setJustLoggedIn,
-            isVIP,
-            setIsVIP,
-            socket,
-          }}
-      >
-        {props.children}
-      </AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        authContext,
+        user: state.user,
+        authState: state,
+        sendSmsVerification,
+        checkVerification,
+        error,
+        fcmToken,
+        notificationData,
+        justLoggedIn,
+        setJustLoggedIn,
+        isVIP,
+        setIsVIP,
+        socket,
+      }}
+    >
+      {props.children}
+    </AuthContext.Provider>
   );
 };
 
