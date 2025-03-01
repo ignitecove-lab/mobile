@@ -418,6 +418,7 @@ const FeatureSection = ({
   userData,
   setNumberSheetURL,
 }) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.actionContainer}>
       <Text style={tw("text-lg font-bold mb-2")}>Actions:</Text>
@@ -449,7 +450,19 @@ const FeatureSection = ({
             color="#ef4444"
           />
         </TouchableOpacity>
-
+        <TouchableOpacity
+           onPress={() => {
+           //   navigate to GooglePlacesSearchScreen
+             navigation.navigate("GooglePlacesSearchScreen")
+           }}
+        >
+          <FeatureCard
+             icon="location"
+             title="Edit"
+             subtitle="Location"
+             color="#ef4444"
+          />
+        </TouchableOpacity>
         {userData && userData.role === "Marketer" && (
           <TouchableOpacity onPress={() => handleOpenSheet()}>
             <FeatureCard

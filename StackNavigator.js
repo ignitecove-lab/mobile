@@ -20,6 +20,7 @@ import Unpaid from "./screens/UnpaidScreen";
 import { Text, Image, View, TouchableOpacity } from "react-native";
 import Profile from "./screens/Profile";
 import { useNavigation } from "@react-navigation/native";
+import GooglePlacesSearchScreen from "./screens/GooglePlacesSearchScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -86,6 +87,7 @@ const StackNavigator = () => {
             <Stack.Screen name="SearchResult" component={SearchResult} />
             <Stack.Screen name="Search Result" component={SearchResult} />
             <Stack.Screen name="PayStatus" component={PayStatus} />
+             <Stack.Screen name="GooglePlacesSearchScreen" component={GooglePlacesSearchScreen} />
             <Stack.Screen
               name="MyProfile"
               component={Profile}
