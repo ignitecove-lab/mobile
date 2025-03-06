@@ -31,6 +31,7 @@ const ModalScreen = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [gender, setGender] = useState("");
+  const [character, setCharacter] = useState("Adventitious");
   const [genderPreference, setGenderPreference] = useState("");
   const [PreferenceDisiabled, setPreferenceDisabled] = useState(true);
   const [genderSelected, setGenderDis] = useState(true);
@@ -186,6 +187,7 @@ const ModalScreen = () => {
         setImage(data.imageURL);
         setAge(data.age);
         setGender(data.gender);
+        setCharacter(data.cautious ? "cautious" : "adventitious");
         setSelectedTags(data?.accountTags.map((tag) => tag.tagId));
         setGenderPreference(data?.genderPreference);
         setGenderPreferenceDis(!data?.genderPreference);
@@ -204,6 +206,9 @@ const ModalScreen = () => {
   const handleGenderChange = (itemValue) => {
     setGender(itemValue);
     setModalGenderVisible(true);
+  };
+  const handleCharacterChange = (itemValue) => {
+    setCharacter(itemValue);
   };
 
   const handleProceed = () => {
@@ -270,7 +275,40 @@ const ModalScreen = () => {
               />
             </View>
           )}
-
+          <View style={{ flex: 1 }}>
+            <Text style={styles.stepText}>Character</Text>
+            <View
+               style={{
+                 borderRadius: 10,
+                 overflow: "hidden",
+                 flex: 1,
+               }}
+            >
+            <Picker
+               style={{
+                 borderWidth: 1,
+                 borderRadius: 10,
+                 backgroundColor: "#e4e4e7",
+                 flex: 1,
+                 height: 50,
+               }}
+               selectedValue={character}
+               onValueChange={handleCharacterChange}
+            >
+              <Picker.Item label="Select your Character" value="" />
+              <Picker.Item
+                 label="Cautious"
+                 value="cautious"
+                 style={{ color: "#000000" }}
+              />
+              <Picker.Item
+                 label="Adventitious"
+                 value="adventitious"
+                 style={{ color: "000000" }}
+              />
+            </Picker>
+            </View>
+          </View>
           <View
             style={{
               flexDirection: "row",
@@ -420,6 +458,7 @@ const ModalScreen = () => {
                 image,
                 age,
                 gender,
+                 character,
                 user.phoneNumber,
                 selectedTags,
                 authContext,

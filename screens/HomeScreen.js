@@ -548,42 +548,46 @@ const HomeScreen = ({ route }) => {
                         </View>
 
                         <View style={tw("flex flex-row flex-wrap")}>
-                          {card.phoneNumberVisible ||
-                            (showPhoneNumUi.id === card.id &&
-                              showPhoneNumUi.visible) ? (
-                            <View style={tw("flex-1")}>
-                              <Text
-                                selectable={true}
+                          {card?.hideNumber ?? false ? (
+                             <Text
                                 style={tw("text-lg text-white")}
                                 numberOfLines={1}
                                 ellipsizeMode="tail"
-                              >
-                                {card.phoneNumber}
-                              </Text>
-                            </View>
+                             >
+                               Match to view Phone number
+                             </Text>
                           ) : (
-                            <View style={tw("flex-1")}>
-                              <TouchableOpacity
-                                style={tw("rounded-md bg-red-500 p-2")}
-                                onPress={() => {
-                                  setShowPhoneNumUi({});
-                                  checkSubscription(card.id).then((r) => {
-                                    if (r.status === 0) {
-                                      setShowPhoneNumUi({
-                                        id: card.id,
-                                        visible: true,
-                                      });
-                                    } else {
-                                      setShowPhoneNumUi({});
-                                    }
-                                  });
-                                }}
-                              >
-                                <Text style={tw("text-white text-center")}>
-                                  View Phone Number
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
+                             card?.phoneNumberVisible ||
+                             (showPhoneNumUi.id === card?.id && showPhoneNumUi.visible) ? (
+                                <View style={tw("flex-1")}>
+                                  <Text
+                                     selectable={true}
+                                     style={tw("text-lg text-white")}
+                                     numberOfLines={1}
+                                     ellipsizeMode="tail"
+                                  >
+                                    {card?.phoneNumber ?? "N/A"}
+                                  </Text>
+                                </View>
+                             ) : (
+                                <View style={tw("flex-1")}>
+                                  <TouchableOpacity
+                                     style={tw("rounded-md bg-red-500 p-2")}
+                                     onPress={() => {
+                                       setShowPhoneNumUi({});
+                                       checkSubscription(card?.id).then((r) => {
+                                         if (r?.status === 0) {
+                                           setShowPhoneNumUi({ id: card?.id, visible: true });
+                                         } else {
+                                           setShowPhoneNumUi({});
+                                         }
+                                       });
+                                     }}
+                                  >
+                                    <Text style={tw("text-white text-center")}>View Phone Number</Text>
+                                  </TouchableOpacity>
+                                </View>
+                             )
                           )}
                         </View>
                       </View>
