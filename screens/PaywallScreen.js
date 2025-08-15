@@ -42,7 +42,7 @@ const items = ["ignite_bronze_plan", "ignite_silver_plan"]
 let purchaseUpdateItem;
 let purchaseItemError;
 
-const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
+const PurchasePlansScreen = ({ plans, setPlanId, setNext, setSelectedPlan, gpCurrency }) => {
   const { authState } = useAuth();
 
   const renderPlan = ({ item }) => (
@@ -65,6 +65,7 @@ const PurchasePlansScreen = ({ plans, setPlanId, setNext }) => {
         style={styles.chooseButton}
         onPress={() => {
           setPlanId(item.id);
+          setSelectedPlan(item);
           setNext(true);
         }}
       >
@@ -137,6 +138,7 @@ const PaywallScreen = ({ route }) => {
   const [codeError, setCodeError] = useState(null);
   const [modalText, setModalText] = useState("");
   const [planId, setPlanId] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState({})
   const [value, setValue] = useState("");
   const [plans, setPlans] = useState([]);
   const [next, setNext] = useState(false);
@@ -374,14 +376,26 @@ const PaywallScreen = ({ route }) => {
 
     try {
       setModalText("Initiating payment ...");
+      const matchingPlan = selectedPlan.planDetails.find(
+        (plan) => plan.currency === gpCurrency
+      );
+
+      const amount = matchingPlan ? matchingPlan.price : null;
+
+      if(!amount){
+        setModalText("Failed to get currency, please contact support for help.");
+        return false;
+      }
+
       const data = JSON.stringify({
         planId: parseInt(planId),
-        Amount: "1",
+        Amount: amount,
         PhoneNumber: phoneNumber,
         FCMToken: fcmToken,
         AccountToSubscribe: null,
         referralCode,
       });
+
       const response = await fetch(`${API_BASE_URL}/v1/mps/lipa-na-mpesa`, {
         method: "POST",
         headers: {
@@ -715,6 +729,8 @@ const PaywallScreen = ({ route }) => {
           plans={plans}
           setPlanId={setPlanId}
           setNext={setNext}
+          setSelectedPlan={setSelectedPlan}
+          gpCurrency={gpCurrency}
         />
       )}
 
@@ -725,6 +741,7 @@ const PaywallScreen = ({ route }) => {
             onPress={() => {
               setNext(false);
               setPlanId(null);
+              setSelectedPlan(null);
               setPaymentMethod(null);
               handleClosePress();
             }}
