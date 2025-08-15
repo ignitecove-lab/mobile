@@ -12,7 +12,7 @@ Before starting, make sure you have:
   ```bash
   nvm install 18
   nvm use 18
-- **Expo** – [Install here](https://git-scm.com/)
+- **Expo** – [Install here](https://docs.expo.dev/)
 npm ≥ 9.x (comes with Node) or Yarn ≥ 1.22
 
 
