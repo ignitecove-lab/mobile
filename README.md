@@ -22,6 +22,10 @@ npx expo login (Provide "username" or "email" and "password")
 ```
 Android Studio (for Android builds)
 
+```bash
+Refer to the instructions in <code>SET_UP_ANDROID_STUDIO.md</code>
+```
+
 Xcode (for iOS builds – macOS only)
 
 CocoaPods (macOS/iOS only)
