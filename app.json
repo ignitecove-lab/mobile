@@ -2,7 +2,7 @@
   "expo": {
     "name": "igniteintcove",
     "scheme": "host.exp.ignitecove",
-    "slug": "ignite",
+    "slug": "igniteintcove",
     "version": "1.5.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -65,14 +65,14 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "charlesncn",
+    "owner": "uhuru-rawlings",
     "runtimeVersion": "1.2.8",
     "updates": {
       "url": "https://u.expo.dev/998a2585-4a51-404e-b384-42e709c6ce6c"
     },
     "extra": {
       "eas": {
-        "projectId": "c3606a8e-5b2f-4970-ba05-7bb5106697e9"
+        "projectId": "48016d90-fd62-4b4c-97f0-08278cd5d15b"
       }
     }
   }

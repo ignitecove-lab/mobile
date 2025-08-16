@@ -380,9 +380,15 @@ const HomeScreen = ({ route }) => {
                         fallback={true}
                         onLoadEnd={onImageLoadEnd}
                         onLoadStart={onImageLoadStart}
+                          onError={(e) => {
+                            console.log("❌ Image failed to load:", e.nativeEvent);
+                            console.log("Image URI:", card?.imageURL);
+                          }}
                         style={styles.homeImage}
                         source={{
                           uri: card.imageURL,
+                          // uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+                          // headers: {Authorization: `Bearer ${authState.userToken}`},
                           priority: FastImage.priority.high,
                         }}
                         resizeMode={FastImage.resizeMode.cover}

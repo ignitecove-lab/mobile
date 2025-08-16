@@ -371,9 +371,38 @@ const PaywallScreen = ({ route }) => {
     );
   };
 
+  const getCountryShortCodeFromPhone = (phoneNumber) => {
+    const digits = phoneNumber.replace(/\D/g, "");
+
+    // Dialing code mapping
+    const countryMap = {
+      "234": "NGN", // Nigeria
+      "233": "GHS", // Ghana
+      "27":  "ZAR", // South Africa
+      "256": "UGX", // Uganda
+      "255": "TZS", // Tanzania
+      "250": "RWF", // Rwanda
+      "1":   "USD", // USA
+      "254": "KES", // Kenya
+    };
+
+    // Sort codes by length (longest first)
+    const sortedCodes = Object.keys(countryMap).sort((a, b) => b.length - a.length);
+
+    for (const code of sortedCodes) {
+      if (digits.startsWith(code)) {
+        return countryMap[code];
+      }
+    }
+
+    return null; // No match found
+  }
+
   const initiatePayment = async (phoneNumber, fcmToken) => {
     setModalVisible(true);
-
+    if(!gpCurrency){
+      setGpCurrency(getCountryShortCodeFromPhone(phoneNumber))
+    }
     try {
       setModalText("Initiating payment ...");
       const matchingPlan = selectedPlan.planDetails.find(
@@ -437,8 +466,8 @@ const PaywallScreen = ({ route }) => {
     "UGX",
     "TZS",
     "RWF",
-    // "USD",
-    // "KES",
+    "USD",
+    "KES",
   ];
 
   let radioData = [];
@@ -517,8 +546,7 @@ const PaywallScreen = ({ route }) => {
   //        ),
   //        value: "pay_by_card",
   //      },
-
-  start_button_currencies.includes(authState?.currency) &&
+  authState?.currency !== "KES" && start_button_currencies.includes(authState?.currency) &&
     plans.length > 0 &&
     radioData.push({
       label: (
@@ -538,7 +566,6 @@ const PaywallScreen = ({ route }) => {
                 (detail) => detail.currency === targetCurrency
               );
               if (!planDetail) return "Price not available";
-
               return `Pay Now ${new Intl.NumberFormat("en-US", {
                 style: "currency",
                 currency: targetCurrency,
