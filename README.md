@@ -60,3 +60,17 @@ run
 ```bash
 eas build -p android --profile preview
 ```
+
+## Generating profile for production
+
+run:
+
+For ABB
+```bash
+eas submit -p android --profile production
+```
+
+For APK
+```bash
+eas build -p android --profile production
+```
